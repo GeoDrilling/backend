@@ -1,5 +1,7 @@
 #include "ru_nsu_fit_geodrilling_services_lib_NativeLibrary.h"
-#include "./FakePicasso/PicassoLWD.FastSimulation.Native.h"
+#include "./GroupProject/PicassoLWD.FastSimulation.Native.h"
+#include <iostream>
+#include <cmath>
 
 JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary_startModelSimpleHorizontalModel6Param1_15D_1ByRo
   (JNIEnv *env, jobject obj, jint nprobes, jintArray num_probe,
@@ -9,7 +11,6 @@ JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary
   jdouble ro_up, jdouble kanisotropy_up, jdouble ro_down, jdouble kanisotropy_down) {
     jdoubleArray synt_ro_by_phasesJ = env->NewDoubleArray(nprobes * npoints);
     jdoubleArray synt_ro_by_amplJ = env->NewDoubleArray(nprobes * npoints);
-    
     uint32_t* num_probeC = (uint32_t*) env->GetIntArrayElements(num_probe, NULL);
     jdouble* mdC = env->GetDoubleArrayElements(md, NULL);
     jdouble* tvdC = env->GetDoubleArrayElements(tvd, NULL);
@@ -17,14 +18,14 @@ JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary
     jdouble* zeniC = env->GetDoubleArrayElements(zeni, NULL);
     jdouble* ro_by_phasesC = env->GetDoubleArrayElements(ro_by_phases, NULL);
     jdouble* ro_by_amplC = env->GetDoubleArrayElements(ro_by_ampl, NULL);
-    jdouble min_ro_up = 0;
-    jdouble max_ro_up = 0;
-    jdouble min_kanisotropy_up = 0;
-    jdouble max_kanisotropy_up = 0;
-    jdouble min_ro_down = 0;
-    jdouble max_ro_down = 0;
-    jdouble min_kanisotropy_down = 0;
-    jdouble max_kanisotropy_down = 0;
+    jdouble min_ro_up = NAN;
+    jdouble max_ro_up = NAN;
+    jdouble min_kanisotropy_up = NAN;
+    jdouble max_kanisotropy_up = NAN;
+    jdouble min_ro_down = NAN;
+    jdouble max_ro_down = NAN;
+    jdouble min_kanisotropy_down = NAN;
+    jdouble max_kanisotropy_down = NAN;
     jdouble* synt_ro_by_phases = env->GetDoubleArrayElements(synt_ro_by_phasesJ, NULL);
     jdouble* synt_ro_by_ampl = env->GetDoubleArrayElements(synt_ro_by_amplJ, NULL);
     jdouble misfit = 0;
@@ -76,19 +77,31 @@ JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary
     jdouble* zeniC = env->GetDoubleArrayElements(zeni, NULL);
     jdouble* ro_by_phasesC = env->GetDoubleArrayElements(ro_by_phases, NULL);
     jdouble* ro_by_amplC = env->GetDoubleArrayElements(ro_by_ampl, NULL);
-    jdouble min_ro_up = 0;
-    jdouble max_ro_up = 0;
-    jdouble min_kanisotropy_up = 0;
-    jdouble max_kanisotropy_up = 0;
-    jdouble min_ro_down = 0;
-    jdouble max_ro_down = 0;
-    jdouble min_kanisotropy_down = 0;
-    jdouble max_kanisotropy_down = 0;
+    jdouble min_ro_up = NAN;
+    jdouble max_ro_up = NAN;
+    jdouble min_kanisotropy_up = NAN;
+    jdouble max_kanisotropy_up = NAN;
+    jdouble min_ro_down = NAN;
+    jdouble max_ro_down = NAN;
+    jdouble min_kanisotropy_down = NAN;
+    jdouble max_kanisotropy_down = NAN;
     jdouble* synt_ro_by_phases = env->GetDoubleArrayElements(synt_ro_by_phasesJ, NULL);
     jdouble* synt_ro_by_ampl = env->GetDoubleArrayElements(synt_ro_by_amplJ, NULL);
     jdouble misfit = 0;
+/*
+    jint status = SolverHorizontalModel6Param1_5DByRoResRo(
+		nprobes, num_probeC, npoints, tvdC, tvdC, xC, zeniC,
+		ro_by_phasesC, ro_by_amplsC,
+		tvdstart, NAN, NAN,
+		alpha, NAN, NAN,
+		ro_up, NAN, NAN,
+		kanisotropy_up, NAN, NAN,
+		ro_down, NAN, NAN,
+		kanisotrypy_down, NAN, NAN,
+		synt_ro_by_phase, synt_ro_by_ampls, misfit
+	);*/
 
-    jint status = SolverHorizontalModel6Param1_5DByRo(nprobes, num_probeC, npoints, mdC, tvdC, xC, zeniC, ro_by_phasesC, ro_by_amplC,
+    jint status = SolverHorizontalModel6Param1_5DByRoResRo(nprobes, num_probeC, npoints, mdC, tvdC, xC, zeniC, ro_by_phasesC, ro_by_amplC,
   		tvd_start, min_tvd_start, max_tvd_start,
   		alpha, min_alpha, max_alpha,
   		ro_up, min_ro_up, max_ro_up,
@@ -125,7 +138,6 @@ JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary
   jint npoints, jdoubleArray tvd, jdoubleArray x, jdoubleArray zeni, 
   jdouble tvd_start, jdouble alpha, jdouble ro_up, jdouble kanisotropy_up, 
   jdouble ro_down, jdouble kanisotropy_down) {
-
     jdoubleArray synt_ro_by_phasesJ = env->NewDoubleArray(nprobes * npoints);
     jdoubleArray synt_ro_by_amplJ = env->NewDoubleArray(nprobes * npoints);
     
@@ -165,8 +177,7 @@ JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary
   jint n_kanisotropy_up, jdoubleArray kanisotropy_up, 
   jint n_ro_down, jdoubleArray ro_down, 
   jint n_kanisotropy_down, jdoubleArray kanisotropy_down, jdoubleArray phases, jdoubleArray ampls) {
-
-    jdoubleArray target_functionJ = env->NewDoubleArray(nprobes * npoints);
+    jdoubleArray target_functionJ = env->NewDoubleArray(n_tvd_start * n_alpha * n_ro_up * n_ro_down * n_kanisotropy_up * n_kanisotropy_down);
   
 
     jdouble* target_function = env->GetDoubleArrayElements(target_functionJ, NULL);
@@ -182,15 +193,13 @@ JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary
     jdouble* kanisotropy_downC = env->GetDoubleArrayElements(kanisotropy_down, NULL);
     jdouble* phasesC = env->GetDoubleArrayElements(phases, NULL);
     jdouble* amplsC = env->GetDoubleArrayElements(ampls, NULL);
-
-    jint status = TargetFunctions(
+    jint status = TargetFunctions_ByRo(
       nprobes, num_probeC, npoints, tvdC, xC, zeniC,
-      n_tvd_start, tvd_startC[0], n_alpha, alphaC[0], n_ro_up, ro_upC[0],
-      n_kanisotropy_up, kanisotropy_upC[0], n_ro_down, ro_downC[0],
-      n_kanisotropy_down, kanisotropy_downC[0], phasesC, amplsC,
+      n_tvd_start, tvd_startC, n_alpha, alphaC, n_ro_up, ro_upC,
+      n_kanisotropy_up, kanisotropy_upC, n_ro_down, ro_downC,
+      n_kanisotropy_down, kanisotropy_downC, phasesC, amplsC,
       target_function
     );
-
     env->ReleaseIntArrayElements(num_probe, (jint*) num_probeC, JNI_ABORT);
     env->ReleaseDoubleArrayElements(tvd, tvdC, JNI_ABORT);
     env->ReleaseDoubleArrayElements(x, xC, JNI_ABORT);
@@ -198,8 +207,8 @@ JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary
     env->ReleaseDoubleArrayElements(tvd_start, tvd_startC, JNI_ABORT);
     env->ReleaseDoubleArrayElements(alpha, alphaC, JNI_ABORT);
     env->ReleaseDoubleArrayElements(ro_up, ro_upC, JNI_ABORT);
-    env->ReleaseDoubleArrayElements(x, xC, JNI_ABORT);
-    env->ReleaseDoubleArrayElements(zeni, zeniC, JNI_ABORT);
+    env->ReleaseDoubleArrayElements(kanisotropy_up, kanisotropy_upC, JNI_ABORT);
+    env->ReleaseDoubleArrayElements(ro_down, ro_downC, JNI_ABORT);
     env->ReleaseDoubleArrayElements(kanisotropy_down, kanisotropy_downC, JNI_ABORT);
     env->ReleaseDoubleArrayElements(phases, phasesC, JNI_ABORT);
     env->ReleaseDoubleArrayElements(ampls, amplsC, JNI_ABORT);
@@ -207,7 +216,6 @@ JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary
 
     jclass AreasEquivalenceClass = env->FindClass("ru/nsu/fit/geodrilling/model/AreasEquivalence");
     jmethodID constructorAreasEquivalence = env->GetMethodID(AreasEquivalenceClass, "<init>", "([DI)V");
-
     jobject AreasEquivalence = env->NewObject(AreasEquivalenceClass, constructorAreasEquivalence, target_functionJ, status);
 
     return AreasEquivalence;

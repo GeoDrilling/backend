@@ -1,8 +1,8 @@
 package ru.nsu.fit.geodrilling.model;
 
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class ModelSignal {
   private final double roDown;
   private final double kanisotropyDown;

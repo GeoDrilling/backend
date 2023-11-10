@@ -1,6 +1,5 @@
 package ru.nsu.fit.geodrilling.services.lib;
 
-import org.springframework.stereotype.Component;
 import ru.nsu.fit.geodrilling.dto.InputAreasEquivalence;
 import ru.nsu.fit.geodrilling.dto.InputBuildModel;
 import ru.nsu.fit.geodrilling.dto.InputModelSignal;
@@ -8,12 +7,12 @@ import ru.nsu.fit.geodrilling.model.AreasEquivalence;
 import ru.nsu.fit.geodrilling.model.ModelSignal;
 import ru.nsu.fit.geodrilling.model.OutputModel;
 
-@Component
+
 public class NativeLibrary {
   static {
     System.loadLibrary("native");
   }
-  private native OutputModel startModelSimpleHorizontalModel6Param1_5D_ByRo(
+  public native OutputModel startModelSimpleHorizontalModel6Param1_5D_ByRo(
       int nprobes, int[] num_probe,
       int npoints, double[] md, double[] tvd, double[] x, double[] zeni,
       double[] ro_by_phases, double[] ro_by_ampl,
@@ -34,7 +33,7 @@ public class NativeLibrary {
         );
   }
 
-  private native OutputModel SolverHorizontalModel6Param1_5DByRo(
+  public native OutputModel SolverHorizontalModel6Param1_5DByRo(
       int nprobes, int[] num_probe,
       int npoints, double[] md, double[] tvd, double[] x, double[] zeni,
       double[] ro_by_phases, double[] ro_by_ampl,
@@ -55,7 +54,7 @@ public class NativeLibrary {
     );
   }
 
-  private native ModelSignal LoggingHorizontalModel6Param1_5DRo(
+  public native ModelSignal LoggingHorizontalModel6Param1_5DRo(
       int nprobes, int[] num_probe,
       int npoints, double[] tvd, double[] x, double[] zeni,
       double tvd_start, double alpha, double ro_up, double kanisotropy_up,

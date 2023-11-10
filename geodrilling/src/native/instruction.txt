@@ -1,4 +1,7 @@
 1. Установить компилятор g++. Вот тут всё по шагам расписано https://www.freecodecamp.org/news/how-to-install-c-and-cpp-compiler-on-windows/
 2. Если установлена переменная среды JAVA_HOME, то делать ничего не надо.
 Иначе в run.bat поменять %JAVA_HOME% на путь, где лежит jdk. У меня он выглядит так: C:\Program Files\Java\jdk-11.0.16.1
-3. Запустить run.bat. Если всё нормально отработало, то в корне (папка geodrilling) появится 2 файла: native.dll, PicassoLWD.FastSimulation.Native.dll
+3. Нужно скачать библиотеку и распаковать её в папку native.
+В итоге файл .\GroupProject\PicassoLWD.FastSimulation.Native.dll должен существовать
+Вот ссылка https://drive.google.com/file/d/1RW0lMKNz9ChFLYQWTlnIXa90GaY6_x_S/view?usp=sharing
+4. Запустить run.bat. Если всё нормально отработало, то в корне (папка geodrilling) появится 2 файла: native.dll, PicassoLWD.FastSimulation.Native.dll

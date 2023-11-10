@@ -1,8 +1,8 @@
 package ru.nsu.fit.geodrilling.model;
 
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class AreasEquivalence {
   private final double[] targetFunction;
   private final int status;
