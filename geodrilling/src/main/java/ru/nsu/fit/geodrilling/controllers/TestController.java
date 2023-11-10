@@ -1,6 +1,7 @@
 package ru.nsu.fit.geodrilling.controllers;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,7 +12,7 @@ import ru.nsu.fit.geodrilling.dto.UserDTO;
 import ru.nsu.fit.geodrilling.model.Constant;
 import ru.nsu.fit.geodrilling.model.OutputModel;
 import ru.nsu.fit.geodrilling.services.lib.NativeLibrary;
-
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class TestController {
@@ -19,7 +20,9 @@ public class TestController {
   private final NativeLibrary nativeLibrary;
   @GetMapping("/demo")
   public UserDTO demo() {
+    log.info("in demo");
     UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+
     return modelMapper.map((token.getPrincipal()), UserDTO.class);
   }
 

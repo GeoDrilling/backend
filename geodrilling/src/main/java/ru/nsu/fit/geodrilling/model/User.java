@@ -28,10 +28,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class User implements UserDetails {
   @Id
   @GeneratedValue
-  private Integer id;
+  private Long id;
   @Email
   private String email;
   private String password;
+  private String name;
   @Enumerated(EnumType.STRING)
   private Role role;
 

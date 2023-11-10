@@ -31,6 +31,7 @@ class GeodrillingApplicationTests {
 		double rosf = 0;
 		double kf = 0;
 		double ksf = 0;
+		long start = System.nanoTime();
 		int[] num_probe = { Constant.LWD_LOOCH_VIKPB_ROL, Constant.LWD_LOOCH_VIKPB_ROH };
 		OutputModel model = lib.startModel(new InputBuildModel(2, num_probe, size_indata, md, tvd, x, zeni, phases, ampl,
 				tvdstart, -1, -1,
@@ -39,6 +40,7 @@ class GeodrillingApplicationTests {
 				kf,
 				rosf,
 				ksf));
+		System.out.println(System.nanoTime() - start);
 		System.out.println(model.getStatus());
 	}
 	private void fill(double[] arr, int size, double value) {

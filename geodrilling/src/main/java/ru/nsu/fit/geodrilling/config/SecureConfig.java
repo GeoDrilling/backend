@@ -2,6 +2,7 @@
 package ru.nsu.fit.geodrilling.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import ru.nsu.fit.geodrilling.filters.JwtFilter;
 
 
@@ -26,6 +30,8 @@ import ru.nsu.fit.geodrilling.filters.JwtFilter;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecureConfig {
+  @Value("${application.security.allowed-origin}")
+  private String allowedOrigin;
   private final UserDetailsService userDetailsService;
   private final JwtFilter jwtFilter;
   private final LogoutHandler logoutHandler;
@@ -44,7 +50,22 @@ public class SecureConfig {
             .addLogoutHandler(logoutHandler)
             .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
     );
+    http.cors();
     return http.build();
+  }
+
+  @Bean
+  public WebMvcConfigurer cors() {
+    return new WebMvcConfigurer() {
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry
+                .addMapping("/**")
+                .allowedOrigins(allowedOrigin)
+                .allowedMethods(CorsConfiguration.ALL)
+                .allowCredentials(true);
+      }
+    };
   }
 
   @Bean
