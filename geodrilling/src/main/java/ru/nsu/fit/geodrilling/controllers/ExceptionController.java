@@ -2,6 +2,7 @@ package ru.nsu.fit.geodrilling.controllers;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
@@ -19,8 +20,14 @@ import ru.nsu.fit.geodrilling.model.ExceptionMessage;
 public class ExceptionController {
 
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ExceptionHandler({UsernameNotFoundException.class, LoginException.class, AuthenticationException.class, InvalidJWT.class})
+  @ExceptionHandler({UsernameNotFoundException.class, LoginException.class, AuthenticationException.class})
   public ExceptionMessage handleSimpleExceptions(RuntimeException ex) {
+    return new ExceptionMessage(ex.getMessage());
+  }
+
+  @ResponseStatus(HttpStatus.NOT_ACCEPTABLE) //406
+  @ExceptionHandler({InvalidJWT.class})
+  public ExceptionMessage handleInvalidJwtExceptions(RuntimeException ex) {
     return new ExceptionMessage(ex.getMessage());
   }
 

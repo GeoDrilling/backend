@@ -33,6 +33,6 @@ public class Token {
   private boolean active;
 
   @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 }

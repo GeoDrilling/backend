@@ -1,6 +1,7 @@
 package ru.nsu.fit.geodrilling.services.auth;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -33,7 +34,11 @@ public class JwtService {
         .getBody();
   }
   private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-    return claimsResolver.apply(extractAllClaims(token));
+    try {
+      return claimsResolver.apply(extractAllClaims(token));
+    } catch (ExpiredJwtException ignored) {
+      return null;
+    }
   }
 
   public String generateAccessToken(UserDetails userDetails) {
