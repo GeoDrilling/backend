@@ -1,5 +1,6 @@
 package ru.nsu.fit.geodrilling.services.lib;
 
+import org.springframework.stereotype.Component;
 import ru.nsu.fit.geodrilling.dto.InputAreasEquivalence;
 import ru.nsu.fit.geodrilling.dto.InputBuildModel;
 import ru.nsu.fit.geodrilling.dto.InputModelSignal;
@@ -7,7 +8,7 @@ import ru.nsu.fit.geodrilling.model.AreasEquivalence;
 import ru.nsu.fit.geodrilling.model.ModelSignal;
 import ru.nsu.fit.geodrilling.model.OutputModel;
 
-
+@Component
 public class NativeLibrary {
   static {
     System.loadLibrary("native");
