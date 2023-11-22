@@ -7,4 +7,6 @@ import ru.nsu.fit.geodrilling.model.User;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
   Optional<User> findByEmail(String email);
+
+  Long getIdByEmail(String email);
 }
