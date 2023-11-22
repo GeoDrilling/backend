@@ -21,27 +21,35 @@ import java.util.List;
 @AllArgsConstructor
 public class ProjectController {
 
-    private final ProjectService projectService;
+    private final ProjectService userService;
+    private final UserRepository userRepository;
     private final ModelMapper modelMapper;
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<ProjectEntity> createProject() {
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        ProjectEntity createdProject = projectService.createProjectForUser(modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());
+        ProjectEntity createdProject = userService.createProjectForUser(modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());
         return ResponseEntity.ok(createdProject);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProjectEntity> getProjectById(@PathVariable Long id) {
+        ProjectEntity project = userService.getProjectById(id);
+        if (project == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(project);
+    }
+
+    @GetMapping("/userAll")
+    public ResponseEntity<List<ProjectEntity>> getProjectsByUser() {
+        UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        List<ProjectEntity> projects = userService.getProjectsByUserId(modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());
+        return ResponseEntity.ok(projects);
     }
 
     @DeleteMapping("/{projectId}")
     public ResponseEntity<?> deleteProject(@PathVariable Long projectId) {
-        projectService.deleteProject(projectId);
+        userService.deleteProject(projectId);
         return ResponseEntity.ok().build();
-    }
-    @GetMapping
-    public List<ProjectEntity> getProjects() {
-        UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        return projectService.getProjects((User) token.getPrincipal());
-    }
-    @GetMapping("/{projectId}")
-    public ProjectEntity getProject(@PathVariable Long projectId) {
-        return projectService.getProject(projectId);
     }
 }

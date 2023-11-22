@@ -26,6 +26,14 @@ public class ProjectService {
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")));
         return projectRepository.save(project);
     }
+    public ProjectEntity getProjectById(Long id) {
+        return projectRepository.findById(id).orElse(null);
+    }
+
+    public List<ProjectEntity> getProjectsByUserId(String email) {
+        return projectRepository.findAllByUserId(userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")).getId());
+    }
 
     @Transactional
     public void deleteProject(Long projectId) {
