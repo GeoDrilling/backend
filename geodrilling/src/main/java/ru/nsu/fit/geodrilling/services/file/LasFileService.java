@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
+import grillid9.laslib.exceptions.VersionException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,8 @@ public class LasFileService {
             throw new IOException("Can't read file");
         } catch (NoSuchElementException o) {
             throw new NoSuchElementException("There is no project with id: " + projectId);
+        } catch (VersionException v) {
+            throw new VersionException(v.getMessage());
         }
         return LasFileUploadResponse.builder()
                 .curvesNames(curvesNames)

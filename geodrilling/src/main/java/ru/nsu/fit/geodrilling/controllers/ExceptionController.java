@@ -3,6 +3,9 @@ package ru.nsu.fit.geodrilling.controllers;
 import java.util.HashMap;
 import java.util.Map;
 
+import grillid9.laslib.exceptions.LogsReadingException;
+import grillid9.laslib.exceptions.ReadWrapException;
+import grillid9.laslib.exceptions.VersionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
@@ -51,4 +54,9 @@ public class ExceptionController {
     return new ExceptionMessage("Required request body is missing");
   }
 
+  @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+  @ExceptionHandler({VersionException.class, ReadWrapException.class, LogsReadingException.class})
+  public ExceptionMessage handleVersionException(RuntimeException ex) {
+    return new ExceptionMessage(ex.getMessage());
+  }
 }
