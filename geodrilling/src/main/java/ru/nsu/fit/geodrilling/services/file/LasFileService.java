@@ -37,10 +37,11 @@ public class LasFileService {
     public LasFileUploadResponse upload(MultipartFile file, Long projectId) throws IOException {
         try {
             ProjectEntity project = projectRepository.findById(projectId).orElseThrow();
-            File fileDest = new File(pathToTempFolder + file.getOriginalFilename());
-            file.transferTo(fileDest);
-            LasReader lasReader = new LasReader(fileDest.getAbsolutePath());
+            File tempFile = new File(pathToTempFolder + file.getOriginalFilename());
+            file.transferTo(tempFile);
+            LasReader lasReader = new LasReader(tempFile.getAbsolutePath());
             lasReader.read();
+            tempFile.delete();
             File folder = new File(pathToProjectsFolder + "\\project" + project.getId()
                     + "\\" + file.getOriginalFilename());
             folder.mkdirs();
