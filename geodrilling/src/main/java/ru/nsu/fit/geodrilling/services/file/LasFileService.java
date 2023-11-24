@@ -3,16 +3,19 @@ package ru.nsu.fit.geodrilling.services.file;
 import com.google.gson.Gson;
 import grillid9.laslib.Curve;
 import grillid9.laslib.LasReader;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 import grillid9.laslib.exceptions.VersionException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.nsu.fit.geodrilling.dto.CurveDataDownloadResponse;
 import ru.nsu.fit.geodrilling.dto.LasFileUploadResponse;
 import ru.nsu.fit.geodrilling.entity.LasEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
@@ -24,46 +27,79 @@ public class LasFileService {
 
     private final ProjectRepository projectRepository;
 
+    @Value("${lasfile.temp-path}")
+    private String pathToTempFolder;
+
+    @Value("${projects.folder-path}")
+    private String pathToProjectsFolder;
+
     @Transactional
     public LasFileUploadResponse upload(MultipartFile file, Long projectId) throws IOException {
-        String curvesNames;
         try {
             ProjectEntity project = projectRepository.findById(projectId).orElseThrow();
-            File fileDest = new File("C:\\GeoDrillingData\\temp\\" + file.getOriginalFilename());
+            File fileDest = new File(pathToTempFolder + file.getOriginalFilename());
             file.transferTo(fileDest);
             LasReader lasReader = new LasReader(fileDest.getAbsolutePath());
             lasReader.read();
-            File folder = new File("C:\\GeoDrillingData\\project" + project.getId()
+            File folder = new File(pathToProjectsFolder + "\\project" + project.getId()
                     + "\\" + file.getOriginalFilename());
             folder.mkdirs();
             saveCurvesDataAsJsonFiles(lasReader.getCurves(), folder.getAbsolutePath());
-            LasEntity lasEntity = new LasEntity();
-            curvesNames = getCurvesNamesAsJson(lasReader.getCurves());
-            lasEntity.setCurvesNames(curvesNames);
-            project.getLas().add(lasEntity);
+            Gson gson = new Gson();
+            Set<String> curvesNames = getCurvesNames(lasReader.getCurves());
+            LasEntity lasEntity = LasEntity.builder()
+                    .name(file.getOriginalFilename())
+                    .curvesNames(curvesNames)
+                    .curvesNamesInJson(gson.toJson(curvesNames))
+                    .project(project)
+                    .build();
+            project.getLas().put(lasEntity.getName(), lasEntity);
             projectRepository.save(project);
+            return LasFileUploadResponse.builder()
+                    .curvesNames(lasEntity.getCurvesNamesInJson())
+                    .build();
         } catch (IOException | IllegalStateException i) {
             throw new IOException("Can't read file");
         } catch (NoSuchElementException o) {
-            throw new NoSuchElementException("There is no project with id: " + projectId);
+            throw new NoSuchElementException("Проект с id " + projectId + " не существует");
         } catch (VersionException v) {
             throw new VersionException(v.getMessage());
         }
-        return LasFileUploadResponse.builder()
-                .curvesNames(curvesNames)
+    }
+
+    public CurveDataDownloadResponse download(Long projectId, String fileName, String curveName) {
+        ProjectEntity project = projectRepository.findById(projectId).orElseThrow(()
+                -> new NoSuchElementException("Проект c id " + projectId + " не существует"));
+        Map<String, LasEntity> lasEntities = project.getLas();
+        LasEntity lasFile = lasEntities.get(fileName);
+        if (lasFile == null) {
+            throw new NoSuchElementException("Файл " + fileName + " не найден");
+        }
+        if (!lasFile.getCurvesNames().contains(curveName)) {
+            throw new NoSuchElementException("Информация о Кривой " + curveName + " не найдена");
+        }
+        File curveFile = new File(pathToProjectsFolder + "\\project" + projectId
+                + "\\" + fileName + "\\" + curveName);
+        String curveDataInJson;
+        try {
+            curveDataInJson = new String(Files.readAllBytes(Paths.get(curveFile.getAbsolutePath())));
+        } catch (IOException e) {
+            throw new RuntimeException("Невозможно считать данные кривой");
+        }
+        return CurveDataDownloadResponse.builder()
+                .curveDataInJson(curveDataInJson)
                 .build();
     }
 
-    public String getCurvesNamesAsJson(List<Curve> curves) {
-        Gson gson = new Gson();
-        List<String> curvesNames = new ArrayList<>();
+    private Set<String> getCurvesNames(List<Curve> curves) {
+        Set<String> curvesNames = new HashSet<>();
         for (Curve curve : curves) {
             curvesNames.add(curve.getName());
         }
-        return gson.toJson(curvesNames);
+        return curvesNames;
     }
 
-    public void saveCurvesDataAsJsonFiles(List<Curve> curves, String folderPath) throws IOException {
+    private void saveCurvesDataAsJsonFiles(List<Curve> curves, String folderPath) throws IOException {
         Gson gson = new Gson();
         for (Curve curve : curves) {
             File curveData = new File(folderPath + "\\" + curve.getName());
