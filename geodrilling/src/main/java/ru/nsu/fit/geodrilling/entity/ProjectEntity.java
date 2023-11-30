@@ -8,8 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.nsu.fit.geodrilling.model.User;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "_projects")
@@ -29,8 +28,7 @@ public class ProjectEntity {
     private User user;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LasEntity> las = new ArrayList<>();
+    private List<CurveEntity> curves = new ArrayList<>();
 
-
-
+    private Boolean readOnly = false;
 }
