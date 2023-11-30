@@ -5,8 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.nsu.fit.geodrilling.dto.CurveDataDownloadResponse;
-import ru.nsu.fit.geodrilling.dto.LasFileUploadResponse;
+import ru.nsu.fit.geodrilling.dto.curves.CurveDataDownloadResponse;
+import ru.nsu.fit.geodrilling.dto.curves.GetCurvesNamesResponse;
+import ru.nsu.fit.geodrilling.dto.curves.LasFileUploadResponse;
 import ru.nsu.fit.geodrilling.services.file.LasFileService;
 
 @RestController
@@ -24,8 +25,13 @@ public class LasFileController {
     @GetMapping("/download/curve")
     public ResponseEntity<CurveDataDownloadResponse> downloadByCurveName(
             @RequestParam("project_id") Long projectId,
-            @RequestParam("file_name") String fileName,
             @RequestParam("curve_name") String curveName) {
-        return ResponseEntity.ok((lasFileService.download(projectId, fileName, curveName)));
+        return ResponseEntity.ok(lasFileService.download(projectId, curveName));
+    }
+
+    @GetMapping("/curves")
+    public ResponseEntity<GetCurvesNamesResponse> getCurvesNames(
+            @RequestParam("project_id") Long projectId) {
+        return ResponseEntity.ok(lasFileService.getCurvesNames(projectId));
     }
 }

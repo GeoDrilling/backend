@@ -1,15 +1,17 @@
-package ru.nsu.fit.geodrilling.dto;
+package ru.nsu.fit.geodrilling.dto.curves;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CurveDataDownloadResponse {
+public class LasFileUploadResponse {
 
-    private String curveDataInJson;
+    List<String> curvesNames;
 }

@@ -1,4 +1,4 @@
-package ru.nsu.fit.geodrilling.dto;
+package ru.nsu.fit.geodrilling.dto.curves;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LasFileUploadResponse {
+public class CurveDataDownloadResponse {
 
-    String curvesNames;
+    private String curveDataInJson;
 }

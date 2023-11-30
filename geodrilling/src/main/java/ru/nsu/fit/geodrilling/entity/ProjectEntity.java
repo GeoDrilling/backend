@@ -7,8 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.nsu.fit.geodrilling.model.User;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
 
 @Entity
 @Table(name = "_projects")
@@ -28,8 +28,7 @@ public class ProjectEntity {
     private User user;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Map<String, LasEntity> las = new HashMap<>();
+    private List<CurveEntity> curves = new ArrayList<>();
 
-
-
+    private Boolean readOnly = false;
 }
