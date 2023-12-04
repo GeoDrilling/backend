@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.nsu.fit.geodrilling.dto.UserDTO;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
-import ru.nsu.fit.geodrilling.repositories.UserRepository;
 import ru.nsu.fit.geodrilling.services.ProjectService;
 
 @RestController
@@ -19,7 +18,7 @@ public class ProjectController {
 
     private final ProjectService userService;
     private final ModelMapper modelMapper;
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<ProjectEntity> createProject() {
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         ProjectEntity createdProject = userService.createProjectForUser(modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());
