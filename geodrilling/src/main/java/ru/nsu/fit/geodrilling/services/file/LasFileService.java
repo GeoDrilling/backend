@@ -7,7 +7,6 @@ import grillid9.laslib.LasReader;
 import java.io.*;
 import java.util.*;
 
-import grillid9.laslib.exceptions.VersionException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,8 +54,8 @@ public class LasFileService {
             throw new IOException("Can't read file");
         } catch (NoSuchElementException o) {
             throw new NoSuchElementException("Проект с id " + projectId + " не существует");
-        } catch (VersionException v) {
-            throw new VersionException(v.getMessage());
+        } catch (RuntimeException v) {
+            throw new RuntimeException(v.getMessage());
         }
     }
 
