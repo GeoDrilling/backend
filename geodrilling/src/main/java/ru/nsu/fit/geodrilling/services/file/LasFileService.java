@@ -25,6 +25,7 @@ import ru.nsu.fit.geodrilling.utils.FileUtil;
 public class LasFileService {
 
     private final ProjectRepository projectRepository;
+    private final CurvesService curvesService;
     private final FileUtil fileUtil;
 
     @Value("${lasfile.temp-path}")
@@ -33,8 +34,19 @@ public class LasFileService {
     @Value("${projects.folder-path}")
     private String pathToProjectsFolder;
 
-    @Transactional
     public LasFileUploadResponse upload(MultipartFile file, Long projectId) throws IOException {
+        ProjectEntity project = projectRepository.findById(projectId).orElseThrow(()
+                -> new NoSuchElementException("Проект с id " + projectId + " не существует"));
+        if (project.getCurves().isEmpty()) {
+            return uploadFirstTime(file, projectId);
+        } else {
+            return curvesService.addNewCurves(file, projectId);
+        }
+    }
+
+
+    @Transactional
+    private LasFileUploadResponse uploadFirstTime(MultipartFile file, Long projectId) throws IOException {
         try {
             ProjectEntity project = projectRepository.findById(projectId).orElseThrow(()
                 -> new NoSuchElementException("Проект с id " + projectId + " не существует"));
