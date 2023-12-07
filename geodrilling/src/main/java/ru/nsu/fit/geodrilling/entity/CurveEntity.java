@@ -1,5 +1,6 @@
 package ru.nsu.fit.geodrilling.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,8 +19,10 @@ public class CurveEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private Long id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="project_id")
     private ProjectEntity project;
@@ -28,5 +31,6 @@ public class CurveEntity {
 
     private File dataFile;
 
+    @Builder.Default
     private String dirInProject = ".";
 }
