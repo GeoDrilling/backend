@@ -57,7 +57,19 @@ public class CurvesService {
                 .build();
     }
 
-
+    @Transactional
+    public LasFileUploadResponse dataSupplementation(MultipartFile file, Long projectId) throws IOException {
+        ProjectEntity project = projectRepository.findById(projectId).orElseThrow(()
+            -> new NoSuchElementException("Проект с id " + projectId + " не найден"));
+        if (project.getCurves().isEmpty()) {
+            throw new NoSuchElementException("Кривые в проекте не найдены");
+        }
+        File tempFile = fileUtil.createTempFile(file);
+        LasReader lasReader = new LasReader(tempFile.getAbsolutePath());
+        lasReader.read();
+        tempFile.delete();
+        return null; // TODO
+    }
 
 
 
@@ -99,6 +111,13 @@ public class CurvesService {
         throw new NoSuchElementException("Кривой " + curveName
                 + " не существует");
     }
+    private List<String> getCurvesEntitiesNames(List<CurveEntity> curves) {
+        List<String> curvesNames = new ArrayList<>();
+        for (CurveEntity curve : curves) {
+            curvesNames.add(curve.getName());
+        }
+        return curvesNames;
+    }
 
     private List<String> getCurvesNames(List<CurveEntity> curves) {
         List<String> curvesNames = new ArrayList<>();
@@ -107,10 +126,6 @@ public class CurvesService {
         }
         return curvesNames;
     }
-
-
-
-
 
 }
 
