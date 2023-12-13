@@ -47,7 +47,7 @@ public class CurvesService {
         Curve newDepthCurve = findCurveByName("DEPT", lasReader.getCurves());
         String depthInProjectData = fileUtil.getCurveData(depthInProjectCurve.getDataFile());
         if (!depthInProjectData.equals(gson.toJson(newDepthCurve.getData()))) {
-            throw new NewCurvesAddingException("Кривая DEPT не соответствует уже добалвенной кривой");
+            throw new RuntimeException("Кривая DEPT не соответствует уже добалвенной кривой");
         }
         lasReader.getCurves().remove(newDepthCurve);
         File projectDataFolderPath = new File(projectsFolderPath + "\\project" + projectId + "\\data");

@@ -1,10 +1,12 @@
 package ru.nsu.fit.geodrilling.services.file;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import grillid9.laslib.Curve;
 import grillid9.laslib.LasReader;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.util.*;
 
 import jakarta.transaction.Transactional;
@@ -82,6 +84,14 @@ public class LasFileService {
         return CurveDataDownloadResponse.builder()
                 .curveDataInJson(curveDataInJson)
                 .build();
+    }
+
+    public List<Double> getCurveDataByName(ProjectEntity project, String curveName) {
+        CurveEntity curve = findCurveByName(project.getCurves(), curveName);
+        String dataInJson = fileUtil.getCurveData(curve.getDataFile());
+        Gson gson = new Gson();
+        TypeToken<List<Double>> listTypeToken = new TypeToken<List<Double>>(){};
+        return gson.fromJson(dataInJson, listTypeToken);
     }
 
     public GetCurvesNamesResponse getCurvesNames(Long projectId) {
