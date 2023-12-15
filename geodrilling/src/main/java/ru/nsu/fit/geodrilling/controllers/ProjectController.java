@@ -8,10 +8,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import ru.nsu.fit.geodrilling.dto.ProjectDTO;
 import ru.nsu.fit.geodrilling.dto.UserDTO;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.model.User;
 import ru.nsu.fit.geodrilling.services.ProjectService;
+import ru.nsu.fit.geodrilling.services.UserService;
 
 import java.util.List;
 
@@ -21,19 +23,20 @@ import java.util.List;
 @AllArgsConstructor
 public class ProjectController {
 
-    private final ProjectService userService;
-    private final UserRepository userRepository;
+    private final ProjectService projectService;
     private final ModelMapper modelMapper;
-    @PostMapping("/")
-    public ResponseEntity<ProjectEntity> createProject() {
+
+    @PostMapping("/{name}")
+    public ResponseEntity<ProjectDTO> createProject(@PathVariable String name) {
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        ProjectEntity createdProject = userService.createProjectForUser(modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());
+        String email = modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail();
+        ProjectDTO createdProject = projectService.createProjectForUser(email, name);
         return ResponseEntity.ok(createdProject);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectEntity> getProjectById(@PathVariable Long id) {
-        ProjectEntity project = userService.getProjectById(id);
+    public ResponseEntity<ProjectDTO> getProjectById(@PathVariable Long id) {
+        ProjectDTO project = projectService.getProjectById(id);
         if (project == null) {
             return ResponseEntity.notFound().build();
         }
@@ -41,15 +44,15 @@ public class ProjectController {
     }
 
     @GetMapping("/userAll")
-    public ResponseEntity<List<ProjectEntity>> getProjectsByUser() {
+    public ResponseEntity<List<ProjectDTO>> getProjectsByUser() {
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        List<ProjectEntity> projects = userService.getProjectsByUserId(modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());
+        List<ProjectDTO> projects = projectService.getProjectsByUserId(modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());
         return ResponseEntity.ok(projects);
     }
 
     @DeleteMapping("/{projectId}")
     public ResponseEntity<?> deleteProject(@PathVariable Long projectId) {
-        userService.deleteProject(projectId);
+        projectService.deleteProject(projectId);
         return ResponseEntity.ok().build();
     }
 }

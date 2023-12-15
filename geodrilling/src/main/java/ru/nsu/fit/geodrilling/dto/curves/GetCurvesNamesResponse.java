@@ -1,9 +1,6 @@
 package ru.nsu.fit.geodrilling.dto.curves;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -11,6 +8,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class GetCurvesNamesResponse {
     private List<String> curvesNames;
 }
