@@ -6,7 +6,6 @@ import grillid9.laslib.Curve;
 import grillid9.laslib.LasReader;
 
 import java.io.*;
-import java.lang.reflect.Type;
 import java.util.*;
 
 import jakarta.transaction.Transactional;

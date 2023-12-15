@@ -1,8 +1,12 @@
 package ru.nsu.fit.geodrilling.model;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
+@Getter
+@Setter
 public class OutputModel {
   private final double minKanisotropyDown;
   private final double maxKanisotropyDown;
