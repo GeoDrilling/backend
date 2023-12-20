@@ -76,7 +76,6 @@ public class CurvesService {
     private void saveCurves(List<Curve> curves, ProjectEntity project, File dir) throws IOException {
         Gson gson = new Gson();
         List<CurveEntity> curvesEntities = project.getCurves();
-        List<String> curvesNames;
         for (Curve curve : curves) {
             File dataFile = new File(dir + "\\" + curve.getName());
             if (dataFile.exists()) continue;
@@ -90,6 +89,7 @@ public class CurvesService {
                             .project(project)
                             .build());
         }
+        projectRepository.save(project);
     }
 
     private CurveEntity findCurveEntityByName(String curveName, List<CurveEntity> curves) {
