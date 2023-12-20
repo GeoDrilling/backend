@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static ru.nsu.fit.geodrilling.model.Constant.NAN;
+
 
 @Service
 @AllArgsConstructor
@@ -56,16 +58,16 @@ public class ModelService {
         boolean bolAHE = false;
         int nprobes = 0;
         int[] num_probe = new int[6];
-        double tvd_start = 0;
-        double min_tvd_start = 0;
-        double max_tvd_start = 0;
-        double alpha = 0;
-        double min_alpha = 0;
-        double max_alpha = 0;
-        double ro_up = 0;
-        double kanisotropy_up = 0;
-        double ro_down = 0;
-        double kanisotropy_down = 0;
+        double tvd_start = NAN;
+        double min_tvd_start = NAN;
+        double max_tvd_start = NAN;
+        double alpha = NAN;
+        double min_alpha = NAN;
+        double max_alpha = NAN;
+        double ro_up = NAN;
+        double kanisotropy_up = NAN;
+        double ro_down = NAN;
+        double kanisotropy_down = NAN;
         double[] arrPL = null;
         double[] arrPLD = null;
         double[] arrPLE = null;
@@ -280,6 +282,17 @@ public class ModelService {
         OutputModel outputModel = nativeLibrary.startModel(new InputBuildModel(nprobes, num_probe, npoints, md, tvd, x, zeni,
                 ro_by_phases, ro_by_ampl, tvd_start, min_tvd_start, max_tvd_start, alpha,
                 min_alpha, max_alpha, ro_up, kanisotropy_up, ro_down, kanisotropy_down));
+        System.out.println(outputModel.getMisfit());
+        System.out.println(outputModel.getTvdStart());
+        System.out.println(outputModel.getRoUp());
+        System.out.println(outputModel.getKanisotropyUp());
+        System.out.println(outputModel.getRoDown());
+        System.out.println(outputModel.getKanisotropyDown());
+        alpha = 0;
+        outputModel = nativeLibrary.solverModel(new InputBuildModel(nprobes, num_probe, npoints, md, tvd, x, zeni,
+                ro_by_phases, ro_by_ampl, outputModel.getTvdStart(), min_tvd_start, max_tvd_start, alpha,
+                min_alpha, max_alpha, outputModel.getRoUp(), outputModel.getKanisotropyUp(),
+                outputModel.getRoDown(), outputModel.getKanisotropyDown()));
         ModelEntity modelEntity = new ModelEntity();
         modelEntity.setName(name);
         modelEntity.setMinKanisotropyDown(outputModel.getMinKanisotropyDown());
