@@ -81,8 +81,10 @@ public class LasFileService {
             throw new NoSuchElementException("Информация о Кривой " + curveName + " не найдена");
         }
         String curveDataInJson = fileUtil.getCurveData(findCurveByName(curves, curveName).getDataFile());
+        Gson gson = new Gson();
+        TypeToken<List<Double>> listTypeToken = new TypeToken<List<Double>>(){};
         return CurveDataDownloadResponse.builder()
-                .curveDataInJson(curveDataInJson)
+                .curveData(gson.fromJson(curveDataInJson, listTypeToken))
                 .build();
     }
 
