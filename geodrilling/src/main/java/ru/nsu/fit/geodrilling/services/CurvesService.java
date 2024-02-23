@@ -56,10 +56,14 @@ public class CurvesService {
         }
         File projectDataFolder = initProjectDataFolder(projectId);
         for (Curve curve : lasReader.getCurves()) {
-            File curveData = new File(projectDataFolder.getAbsolutePath() + "\\" + curve.getName());
-            curveData.createNewFile();
-            saveCurveDataTo(curveData, curve, project);
+            if (project.getCurves().stream().filter(x -> x.getName().equals(curve.getName())).findAny().isEmpty()) {
+                File curveData = new File(
+                    projectDataFolder.getAbsolutePath() + "\\" + curve.getName());
+                curveData.createNewFile();
+                saveCurveDataTo(curveData, curve, project);
+            }
         }
+        projectRepository.save(project);
         return SaveCurveDataResponse.builder()
                 .curvesNames(project.getCurves().stream().map(CurveEntity::getName).collect(Collectors.toList()))
                 .build();
@@ -97,6 +101,7 @@ public class CurvesService {
                     + projectId + "\\data\\" + curve.getName()),
                 curve, project);
         }
+        projectRepository.save(project);
         log.info("Проект " + project.getId() + ": дополненные кривые добавлены");
         return CurveSupplementationResponse.builder()
             .curvesNames(getCurvesNames(lasReader.getCurves()))
