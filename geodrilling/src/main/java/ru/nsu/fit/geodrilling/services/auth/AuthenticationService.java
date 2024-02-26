@@ -6,9 +6,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import ru.nsu.fit.geodrilling.dto.AuthenticationResponse;
 import ru.nsu.fit.geodrilling.dto.RegisterRequest;
 import ru.nsu.fit.geodrilling.dto.UserDTO;
 import ru.nsu.fit.geodrilling.exceptions.InvalidJWT;
+import ru.nsu.fit.geodrilling.exceptions.LoginException;
 import ru.nsu.fit.geodrilling.model.Role;
 import ru.nsu.fit.geodrilling.model.Token;
 import ru.nsu.fit.geodrilling.model.User;
@@ -24,7 +27,6 @@ import ru.nsu.fit.geodrilling.repositories.TokenRepository;
 import ru.nsu.fit.geodrilling.repositories.UserRepository;
 import ru.nsu.fit.geodrilling.services.verification.DataVerification;
 
-import java.util.Arrays;
 
 @Slf4j
 @Service
@@ -37,6 +39,9 @@ public class AuthenticationService {
   private final AuthenticationManager authenticationManager;
   private final DataVerification dataVerification;
   private final TokenRepository tokenRepository;
+
+  @Value("${application.security.jwt.refresh-token.expiration}")
+  private int refreshExpiration;
   public AuthenticationResponse register(RegisterRequest userDetailsDTO, HttpServletResponse response) {
     userDetailsDTO.setPassword(passwordEncoder.encode(userDetailsDTO.getPassword()));
     User user = mapper.map(userDetailsDTO, User.class);
@@ -47,12 +52,17 @@ public class AuthenticationService {
     return generateTokensAndAuthenticate(user, response);
   }
   public AuthenticationResponse authenticate(AuthenticationRequest userDetailsDTO, HttpServletResponse response) {
-    authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(
-            userDetailsDTO.getEmail(),
-            userDetailsDTO.getPassword()
-        )
-    );
+    try {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        userDetailsDTO.getEmail(),
+                        userDetailsDTO.getPassword()
+                )
+        );
+    } catch (AuthenticationException ignored) {
+        throw new LoginException("Incorrect login or password");
+    }
+
     User user = userRepository.findByEmail(userDetailsDTO.getEmail())
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     return generateTokensAndAuthenticate(user, response);
@@ -69,6 +79,7 @@ public class AuthenticationService {
     response.setStatus(HttpServletResponse.SC_OK);
     Cookie cookie = new Cookie("refresh", refresh);
     cookie.setHttpOnly(true);
+    cookie.setMaxAge(refreshExpiration);
     response.addCookie(cookie);
   }
 
@@ -87,22 +98,14 @@ public class AuthenticationService {
 
   public AuthenticationResponse refreshToken(
       HttpServletRequest request,
-      HttpServletResponse response
+      String refreshToken
   ) {
     final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-    final String refreshToken;
     final String userEmail;
-    Cookie cookie = null;
-    if (request.getCookies() != null) {
-      cookie = Arrays.stream(request.getCookies()).filter(c -> c.getName().equals("refresh")).findFirst().orElse(null);
-    }
     if (authHeader != null && authHeader.startsWith("Bearer ")) {
       refreshToken = authHeader.substring(7);
-    } else {
-      if (cookie == null) {
-        throw new InvalidJWT("Missing JWT");
-      }
-      refreshToken = cookie.getValue();
+    } else if (refreshToken == null) {
+      throw new InvalidJWT("Missing JWT");
     }
     userEmail = jwtService.extractUsername(refreshToken);
     if (userEmail != null) {
