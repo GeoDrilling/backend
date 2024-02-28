@@ -40,9 +40,12 @@ public class ModelEntity {
     private double tvdStart;
     private int status;
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private ProjectEntity projectEntity;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "areas_id")
+    private AreasEntity areasEntity;
 
 }

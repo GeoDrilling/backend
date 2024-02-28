@@ -1,4 +1,3 @@
-/*
 package ru.nsu.fit.geodrilling.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -17,13 +16,14 @@ import lombok.Setter;
 public class AreasEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private double[] targetFunction;
     private int status;
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id")
-    private ProjectEntity projectEntity;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "model_id")
+    private ModelEntity modelEntity;
 
 
 }
-*/
