@@ -1,3 +1,4 @@
+/*
 package ru.nsu.fit.geodrilling.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,3 +26,4 @@ public class AreasEntity {
 
 
 }
+*/
