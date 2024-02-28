@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.nsu.fit.geodrilling.dto.curves.CurveDataDownloadResponse;
 import ru.nsu.fit.geodrilling.dto.curves.GetCurvesNamesResponse;
 import ru.nsu.fit.geodrilling.dto.curves.LasFileUploadResponse;
+import ru.nsu.fit.geodrilling.services.SootService;
 import ru.nsu.fit.geodrilling.services.file.CurvesService;
 import ru.nsu.fit.geodrilling.services.file.LasFileService;
 
@@ -18,11 +19,13 @@ public class LasFileController {
 
     private final LasFileService lasFileService;
     private final CurvesService curvesService;
-
+    private final SootService sootService;
     @PostMapping("/upload")
     public ResponseEntity<LasFileUploadResponse> upload(@RequestParam("file") MultipartFile file,
                                                         @RequestParam("project_id") Long projectId) throws IOException {
-        return ResponseEntity.ok((lasFileService.upload(file, projectId)));
+        LasFileUploadResponse lasFileUploadResponse = (lasFileService.upload(file, projectId));
+        sootService.sootOffer(lasFileUploadResponse, projectId);
+        return ResponseEntity.ok(lasFileUploadResponse);
     }
 
     @GetMapping("/download/curve")

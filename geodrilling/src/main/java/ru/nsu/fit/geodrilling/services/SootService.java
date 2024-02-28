@@ -5,11 +5,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.nsu.fit.geodrilling.dto.SootinDTO;
 import ru.nsu.fit.geodrilling.dto.SootoutDTO;
+import ru.nsu.fit.geodrilling.dto.curves.LasFileUploadResponse;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.entity.SootEntity;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 import ru.nsu.fit.geodrilling.repositories.SootRepository;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -127,5 +129,78 @@ public class SootService {
         sootoutDTO.setXp(sootEntity.getXp());
         sootoutDTO.setZenip(sootEntity.getZenip());
         return sootoutDTO;
+    }
+
+    public void sootOffer(LasFileUploadResponse lasFileUploadResponse, Long idProject) {
+        SootEntity sootEntity = projectRepository.findById(idProject).
+                orElseThrow(() -> new EntityNotFoundException("Проект не найден по указанному id: " + idProject)).
+                getSootEntity();
+        List<String> curves = lasFileUploadResponse.getCurvesNames();
+        if (curves.contains("ROPL") && sootEntity.getROPLp() != 1) {
+            sootEntity.setROPL("ROPL");
+            sootEntity.setROPLp(2);
+        }
+        if (curves.contains("ROAL") && sootEntity.getROALp() != 1) {
+            sootEntity.setROAL("ROAL");
+            sootEntity.setROALp(2);
+        }
+        if (curves.contains("ROPLD") && sootEntity.getROPLDp() != 1) {
+            sootEntity.setROPLD("ROPLD");
+            sootEntity.setROPLDp(2);
+        }
+        if (curves.contains("ROALD") && sootEntity.getROALDp() != 1) {
+            sootEntity.setROALD("ROALD");
+            sootEntity.setROALDp(2);
+        }
+        if (curves.contains("ROPLE") && sootEntity.getROPLEp() != 1) {
+            sootEntity.setROPLE("ROPLE");
+            sootEntity.setROPLEp(2);
+        }
+        if (curves.contains("ROALE") && sootEntity.getROALEp() != 1) {
+            sootEntity.setROALE("ROALE");
+            sootEntity.setROALEp(2);
+        }
+        if (curves.contains("ROPH") && sootEntity.getROPHp() != 1) {
+            sootEntity.setROPH("ROPH");
+            sootEntity.setROPHp(2);
+        }
+        if (curves.contains("ROAH") && sootEntity.getROAHp() != 1) {
+            sootEntity.setROAH("ROAH");
+            sootEntity.setROAHp(2);
+        }
+        if (curves.contains("ROPHD") && sootEntity.getROPHDp() != 1) {
+            sootEntity.setROPHD("ROPHD");
+            sootEntity.setROPHDp(2);
+        }
+        if (curves.contains("ROAHD") && sootEntity.getROAHDp() != 1) {
+            sootEntity.setROAHD("ROAHD");
+            sootEntity.setROAHDp(2);
+        }
+        if (curves.contains("ROPHE") && sootEntity.getROPHEp() != 1) {
+            sootEntity.setROPHE("ROPHE");
+            sootEntity.setROPHEp(2);
+        }
+        if (curves.contains("ROAHE") && sootEntity.getROAHEp() != 1) {
+            sootEntity.setROAHE("ROAHE");
+            sootEntity.setROAHEp(2);
+        }
+        if (curves.contains("DEPT") && sootEntity.getMdp() != 1) {
+            sootEntity.setMd("DEPT");
+            sootEntity.setMdp(2);
+        }
+        if (curves.contains("TVD") && sootEntity.getTvdp() != 1) {
+            sootEntity.setTvd("TVD");
+            sootEntity.setTvdp(2);
+        }
+        if (curves.contains("X") && sootEntity.getXp() != 1) {
+            sootEntity.setX("X");
+            sootEntity.setXp(2);
+        }
+        if (curves.contains("zeni") && sootEntity.getZenip() != 1) {
+            sootEntity.setZeni("zeni");
+            sootEntity.setZenip(2);
+        }
+        sootRepository.save(sootEntity);
+
     }
 }

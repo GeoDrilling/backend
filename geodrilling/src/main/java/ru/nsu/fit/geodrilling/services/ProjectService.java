@@ -25,6 +25,22 @@ public class ProjectService {
     public ProjectDTO createProjectForUser(String email, String name) {
         ProjectEntity project = new ProjectEntity();
         SootEntity sootEntity = new SootEntity();
+        sootEntity.setROPLp(0);
+        sootEntity.setROALp(0);
+        sootEntity.setROPLDp(0);
+        sootEntity.setROALDp(0);
+        sootEntity.setROPLEp(0);
+        sootEntity.setROALEp(0);
+        sootEntity.setROPHp(0);
+        sootEntity.setROAHp(0);
+        sootEntity.setROAHDp(0);
+        sootEntity.setROPHDp(0);
+        sootEntity.setROPHEp(0);
+        sootEntity.setROAHEp(0);
+        sootEntity.setMdp(0);
+        sootEntity.setTvdp(0);
+        sootEntity.setXp(0);
+        sootEntity.setZenip(0);
         sootRepository.save(sootEntity);
         project.setName(name);
         project.setSootEntity(sootEntity);
