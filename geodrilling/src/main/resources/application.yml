@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/geo_drilling
+    username: postgres
+    password: qwerty
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+application:
+  security:
+    jwt:
+      secret-key: 643E3FF46B9AF8DE9F463AFAA5D936CB1CDFB9AAF7A412DE422A52782D
+      expiration: 86400000 # a day
+      refresh-token:
+        expiration: 604800000 # 7 days
+    allowed-origin: http://localhost:5173
+server:
+  port: 20000
+lasfile:
+  temp-path: C:\Users\1\Desktop\GeoDrilling\backend\geodrilling\temp\
+projects:
+  folder-path: C:\Users\1\Desktop\GeoDrilling\backend\geodrilling\projects

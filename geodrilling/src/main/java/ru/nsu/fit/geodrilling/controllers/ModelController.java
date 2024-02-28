@@ -2,6 +2,7 @@ package ru.nsu.fit.geodrilling.controllers;
 
 import lombok.AllArgsConstructor;
 import org.hibernate.result.Output;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,14 +22,16 @@ import java.io.FileNotFoundException;
 @RequestMapping("/model")
 @AllArgsConstructor
 public class ModelController {
-    UserService userService;
-    ModelService modelService;
+    private final UserService userService;
+    private final ModelService modelService;
+    private final ModelMapper modelMapper;
+
     @PostMapping("/create")
     public ResponseEntity<ModelDTO> createModel(
             @RequestParam("project_id") Long idProject,
-            @RequestParam("name") String name){
-        /*UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        (modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());*/
-        return ResponseEntity.ok(modelService.createModel(idProject, name));
+            @RequestParam("name") String name) throws Exception {
+        UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        String email = (modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());
+        return ResponseEntity.ok(modelService.createModel(idProject, name, email));
     }
 }

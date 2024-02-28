@@ -6,7 +6,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.nsu.fit.geodrilling.dto.ProjectDTO;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
+import ru.nsu.fit.geodrilling.entity.SootEntity;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
+import ru.nsu.fit.geodrilling.repositories.SootRepository;
 import ru.nsu.fit.geodrilling.repositories.UserRepository;
 
 import java.util.ArrayList;
@@ -18,10 +20,14 @@ public class ProjectService {
 
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final SootRepository sootRepository;
     @Transactional
     public ProjectDTO createProjectForUser(String email, String name) {
         ProjectEntity project = new ProjectEntity();
+        SootEntity sootEntity = new SootEntity();
+        sootRepository.save(sootEntity);
         project.setName(name);
+        project.setSootEntity(sootEntity);
         project.setUser(userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")));
         projectRepository.save(project);

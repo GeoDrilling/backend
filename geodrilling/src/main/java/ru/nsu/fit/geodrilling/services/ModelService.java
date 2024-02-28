@@ -34,14 +34,18 @@ public class ModelService {
     private double[] ListDoubleInDoubleArray(List<Double> list) {
         return list.stream().mapToDouble(Double::doubleValue).toArray();
     }
-    public ModelDTO createModel(Long idProject, String name){
-        /*Boolean bol = true;
+    public ModelDTO createModel(Long idProject, String name, String email) throws Exception {
+        Boolean bol = true;
         for (ProjectEntity projectEntity : userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")).getProjects()) {
             if (Objects.equals(projectEntity.getId(), idProject)) {
                 bol = false;
             }
-        }*/
+        }
+
+        if (bol) {
+            throw new Exception("Пользователя нет в проекте");
+        }
 
         List<String> curves = new ArrayList<>(lasFileService.getCurvesNames(idProject).getCurvesNames());
         boolean bolPL = false;
@@ -82,81 +86,97 @@ public class ModelService {
         double[] arrAHE = null;
         ProjectEntity projectEntity = projectRepository.findById(idProject).
                 orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
+        String ROPL = projectEntity.getSootEntity().getROPL();
+        String ROPLD = projectEntity.getSootEntity().getROPLD();
+        String ROPLE = projectEntity.getSootEntity().getROPLE();
+        String ROPH = projectEntity.getSootEntity().getROPH();
+         String ROPHD = projectEntity.getSootEntity().getROPHD();
+         String ROPHE = projectEntity.getSootEntity().getROPHE();
+         String ROAL = projectEntity.getSootEntity().getROAL();
+         String ROALD = projectEntity.getSootEntity().getROALD();
+         String ROALE = projectEntity.getSootEntity().getROALE();
+         String ROAH = projectEntity.getSootEntity().getROAH();
+         String ROAHD = projectEntity.getSootEntity().getROAHD();
+         String ROAHE = projectEntity.getSootEntity().getROAHE();
+         String md = projectEntity.getSootEntity().getMd();
+         String tvd = projectEntity.getSootEntity().getTvd();
+         String x = projectEntity.getSootEntity().getX();
+         String zeni = projectEntity.getSootEntity().getZeni();
         int length = 0;
-        if (curves.contains("ROPL") || curves.contains("ROAL")) {
-            if (curves.contains("ROPL")) {
+        if (curves.contains(ROPL) || curves.contains(ROAL)) {
+            if (curves.contains(ROPL)) {
                 arrPL = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, "ROPL"));
+                        getCurveDataByName(projectEntity, ROPL));
                 bolPL = true;
                 length = arrPL.length;
             }
-            if (curves.contains("ROAL")) {
+            if (curves.contains(ROAL)) {
                 arrAL = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, "ROAL"));
+                        getCurveDataByName(projectEntity, ROAL));
                 bolAL = true;
                 length = arrAL.length;
             }
             num_probe[nprobes] = 1039;
             nprobes += 1;
         }
-        /*if (curves.contains("ROPLD") || curves.contains("ROALD")) {
-            if (curves.contains("ROPLD")) {
+        /*if (curves.contains(ROPLD) || curves.contains(ROALD)) {
+            if (curves.contains(ROPLD)) {
                 arrPLD = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, "ROPLD"));
+                        getCurveDataByName(projectEntity, ROPLD));
                 bolPLD = true;
                 length = arrPLD.length;
             }
-            if (curves.contains("ROALD")) {
+            if (curves.contains(ROALD)) {
                 arrALD = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, "ROALD"));
+                        getCurveDataByName(projectEntity, ROALD));
                 bolALD = true;
                 length = arrALD.length;
             }
             num_probe[nprobes] = 1040;
             nprobes += 1;
         }
-        if (curves.contains("ROPLE") || curves.contains("ROALE")) {
-            if (curves.contains("ROPLE")) {
+        if (curves.contains(ROPLE) || curves.contains(ROALE)) {
+            if (curves.contains(ROPLE)) {
                 arrPLE = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, "ROPLE"));
+                        getCurveDataByName(projectEntity, ROPLE));
                 bolPLE = true;
                 length = arrPLE.length;
             }
-            if (curves.contains("ROALE")) {
+            if (curves.contains(ROALE)) {
                 arrALE = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, "ROALE"));
+                        getCurveDataByName(projectEntity, ROALE));
                 bolALE = true;
                 length = arrALE.length;
             }
             num_probe[nprobes] = 1041;
             nprobes += 1;
         }*/
-        if (curves.contains("ROPH") || curves.contains("ROAH")) {
-            if (curves.contains("ROPH")) {
+        if (curves.contains(ROPH) || curves.contains(ROAH)) {
+            if (curves.contains(ROPH)) {
                 arrPH = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, "ROPH"));
+                        getCurveDataByName(projectEntity, ROPH));
                 bolPH = true;
                 length = arrPH.length;
             }
-            if (curves.contains("ROAH")) {
+            if (curves.contains(ROAH)) {
                 arrAH = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, "ROAH"));
+                        getCurveDataByName(projectEntity, ROAH));
                 bolAH = true;
                 length = arrAH.length;
             }
             num_probe[nprobes] = 1042;
             nprobes += 1;
         }
-        /*if (curves.contains("ROPHD") || curves.contains("ROAHD")) {
-            if (curves.contains("ROPHD")) {
+        /*if (curves.contains(ROPHD) || curves.contains(ROAHD)) {
+            if (curves.contains(ROPHD)) {
                 arrPHD = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, "ROPHD"));
+                        getCurveDataByName(projectEntity, ROPHD));
                 bolPHD = true;
                 length = arrPHD.length;
             }
-            if (curves.contains("ROAHD")) {
+            if (curves.contains(ROAHD)) {
                 arrAHD = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, "ROAHD"));
+                        getCurveDataByName(projectEntity, ROAHD));
                 bolAHD = true;
                 length = arrAHD.length;
             }
@@ -164,41 +184,41 @@ public class ModelService {
             nprobes += 1;
 
         }
-        if (curves.contains("ROPHE") || curves.contains("ROAHE")) {
-            if (curves.contains("ROPHE")) {
+        if (curves.contains(ROPHE) || curves.contains(ROAHE)) {
+            if (curves.contains(ROPHE)) {
                 arrPHE = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, "ROPHE"));
+                        getCurveDataByName(projectEntity, ROPHE));
                 bolPHE = true;
                 length = arrPHE.length;
             }
-            if (curves.contains("ROAHE")) {
+            if (curves.contains(ROAHE)) {
                 arrAHE = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, "ROAHE"));
+                        getCurveDataByName(projectEntity, ROAHE));
                 bolAHE = true;
                 length = arrAHE.length;
             }
             num_probe[nprobes] = 1044;
             nprobes += 1;
         }*/
-        double[] md = null;
-        double[] tvd = null;
-        double[] x = null;
-        double[] zeni = null;
+        double[] md2 = null;
+        double[] tvd2 = null;
+        double[] x2 = null;
+        double[] zeni2 = null;
         double[] ro_by_phases = new double[nprobes * length];
         double[] ro_by_ampl = new double[nprobes * length];
-        md = ListDoubleInDoubleArray(lasFileService.
+        md2 = ListDoubleInDoubleArray(lasFileService.
                 getCurveDataByName(projectRepository.findById(idProject).
-                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), "DEPT"));
-        tvd = ListDoubleInDoubleArray(lasFileService.
+                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), md));
+        tvd2 = ListDoubleInDoubleArray(lasFileService.
                 getCurveDataByName(projectRepository.findById(idProject).
-                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), "TVD"));
-        x = ListDoubleInDoubleArray(lasFileService.
+                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), tvd));
+        x2 = ListDoubleInDoubleArray(lasFileService.
                 getCurveDataByName(projectRepository.findById(idProject).
-                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), "X"));
-        zeni = ListDoubleInDoubleArray(lasFileService.
+                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), x));
+        zeni2 = ListDoubleInDoubleArray(lasFileService.
                 getCurveDataByName(projectRepository.findById(idProject).
-                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), "zeni"));
-        int npoints = md.length;
+                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), zeni));
+        int npoints = md2.length;
         for (int i = 0, j = 0; i < length; i++) {
             if (bolPL || bolAL) {
                 if (bolPL) {
@@ -279,7 +299,7 @@ public class ModelService {
             }
             j = 0;
         }
-        OutputModel outputModel = nativeLibrary.startModel(new InputBuildModel(nprobes, num_probe, npoints, md, tvd, x, zeni,
+        OutputModel outputModel = nativeLibrary.startModel(new InputBuildModel(nprobes, num_probe, npoints, md2, tvd2, x2, zeni2,
                 ro_by_phases, ro_by_ampl, tvd_start, min_tvd_start, max_tvd_start, alpha,
                 min_alpha, max_alpha, ro_up, kanisotropy_up, ro_down, kanisotropy_down));
         System.out.println(outputModel.getMisfit());
@@ -289,7 +309,7 @@ public class ModelService {
         System.out.println(outputModel.getRoDown());
         System.out.println(outputModel.getKanisotropyDown());
         alpha = 0;
-        outputModel = nativeLibrary.solverModel(new InputBuildModel(nprobes, num_probe, npoints, md, tvd, x, zeni,
+        outputModel = nativeLibrary.solverModel(new InputBuildModel(nprobes, num_probe, npoints, md2, tvd2, x2, zeni2,
                 ro_by_phases, ro_by_ampl, outputModel.getTvdStart(), min_tvd_start, max_tvd_start, alpha,
                 min_alpha, max_alpha, outputModel.getRoUp(), outputModel.getKanisotropyUp(),
                 outputModel.getRoDown(), outputModel.getKanisotropyDown()));
