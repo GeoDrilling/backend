@@ -31,4 +31,6 @@ public class ProjectEntity {
     private List<CurveEntity> curves = new ArrayList<>();
 
     private Boolean readOnly = false;
+
+    private Long supplementedProjectId = null;
 }
