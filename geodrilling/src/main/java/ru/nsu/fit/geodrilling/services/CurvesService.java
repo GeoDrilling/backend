@@ -94,15 +94,18 @@ public class CurvesService {
         if (!isCurvesMatch(project, lasReader.getCurves())) {
             throw new CurveSupplementationException("Кривые дополняющего файла не соответствуют уже добавленным кривым");
         }
-        deleteAllCurves(project);
-        log.info("Проект " + project.getId() + ": кривые проекта удалены");
+        project.setReadOnly(true);
+        log.info("Проект {} заморожен", project.getId());
+        ProjectEntity newProject = projectRepository.save(new ProjectEntity()); // проверить
+        File newProjectDataFolder = initProjectDataFolder(newProject.getId());
         for (Curve curve : lasReader.getCurves()) {
-            saveCurveDataTo(new File(projectsFolderPath + "\\project"
-                    + projectId + "\\data\\" + curve.getName()),
-                curve, project);
+            saveCurveDataTo(new File(newProjectDataFolder + "\\" + curve.getName()),
+                curve, newProject);
         }
+        log.info("Дополненные кривые сохранены в новый проект с id {}", newProject.getId());
+        project.setSupplementedProjectId(newProject.getId());
         projectRepository.save(project);
-        log.info("Проект " + project.getId() + ": дополненные кривые добавлены");
+        projectRepository.save(newProject);
         return CurveSupplementationResponse.builder()
             .curvesNames(getCurvesNames(lasReader.getCurves()))
             .build();
@@ -142,18 +145,6 @@ public class CurvesService {
             return true;
         } else {
             return false;
-        }
-    }
-
-    private void deleteAllCurves(ProjectEntity project) {
-        String curvesDataDir = projectsFolderPath + "\\" + "project"
-            + project.getId() + "\\data\\";
-        List<String> curvesNames = getCurveEntitiesNames(project.getCurves());
-        project.getCurves().clear();
-        projectRepository.save(project);
-        for (String name : curvesNames) {
-            File curveDataFile = new File(curvesDataDir + name);
-            curveDataFile.delete();
         }
     }
 
@@ -199,6 +190,7 @@ public class CurvesService {
         File projectDataFolder = new File(projectsFolderPath + "\\project" + projectId
                 + "\\data");
         projectDataFolder.mkdirs();
+        log.info("Директория: {} создана", projectDataFolder);
         return projectDataFolder;
     }
 
