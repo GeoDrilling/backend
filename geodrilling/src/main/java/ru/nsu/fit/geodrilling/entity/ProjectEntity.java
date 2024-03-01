@@ -21,7 +21,7 @@ public class ProjectEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private String name;
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -31,6 +31,14 @@ public class ProjectEntity {
     private List<CurveEntity> curves = new ArrayList<>();
 
     private Boolean readOnly = false;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "soot_id")
+    private SootEntity sootEntity;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "model_id")
+    private ModelEntity modelEntity;
 
     private Long supplementedProjectId = null;
 }
