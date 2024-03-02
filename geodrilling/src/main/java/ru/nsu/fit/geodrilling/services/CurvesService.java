@@ -1,6 +1,7 @@
 package ru.nsu.fit.geodrilling.services;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import grillid9.laslib.Curve;
 import grillid9.laslib.LasReader;
 import jakarta.transaction.Transactional;
@@ -80,8 +81,9 @@ public class CurvesService {
     public CurveDataDownloadResponse getCurveDataByName(String curveName, Long projectId) {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(()
                 -> new NoSuchElementException("Проект c id " + projectId + " не существует"));
+        TypeToken<List<Double>> floatListTypeToken = new TypeToken<>(){};
         return CurveDataDownloadResponse.builder()
-                .curveDataInJson(getCurveDataByName(curveName, project))
+                .curveData(gson.fromJson(getCurveDataByName(curveName, project), floatListTypeToken))
                 .build();
     }
 
