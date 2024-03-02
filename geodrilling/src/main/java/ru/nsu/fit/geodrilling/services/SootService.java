@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.nsu.fit.geodrilling.dto.SootinDTO;
 import ru.nsu.fit.geodrilling.dto.SootoutDTO;
 import ru.nsu.fit.geodrilling.dto.curves.LasFileUploadResponse;
+import ru.nsu.fit.geodrilling.dto.curves.SaveCurveDataResponse;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.entity.SootEntity;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
@@ -131,7 +132,7 @@ public class SootService {
         return sootoutDTO;
     }
 
-    public void sootOffer(LasFileUploadResponse lasFileUploadResponse, Long idProject) {
+    public void sootOffer(SaveCurveDataResponse lasFileUploadResponse, Long idProject) {
         SootEntity sootEntity = projectRepository.findById(idProject).
                 orElseThrow(() -> new EntityNotFoundException("Проект не найден по указанному id: " + idProject)).
                 getSootEntity();

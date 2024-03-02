@@ -12,7 +12,6 @@ import ru.nsu.fit.geodrilling.model.AreasEquivalence;
 import ru.nsu.fit.geodrilling.repositories.ModelRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 import ru.nsu.fit.geodrilling.repositories.UserRepository;
-import ru.nsu.fit.geodrilling.services.file.LasFileService;
 import ru.nsu.fit.geodrilling.services.lib.NativeLibrary;
 
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ public class AreasService {
     private ModelRepository modelRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
-    private final LasFileService lasFileService;
+    private final CurvesService lasFileService;
     private final NativeLibrary nativeLibrary;
     private double[] ListDoubleInDoubleArray(List<Double> list) {
         return list.stream().mapToDouble(Double::doubleValue).toArray();
@@ -98,13 +97,13 @@ public class AreasService {
         if (curves.contains(ROPL) || curves.contains(ROAL)) {
             if (curves.contains(ROPL)) {
                 arrPL = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, ROPL));
+                        getCurveDataByName(ROPL, idProject).getCurveData());
                 bolPL = true;
                 length = arrPL.length;
             }
             if (curves.contains(ROAL)) {
                 arrAL = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, ROAL));
+                        getCurveDataByName(ROAL, idProject).getCurveData());
                 bolAL = true;
                 length = arrAL.length;
             }
@@ -146,13 +145,13 @@ public class AreasService {
         if (curves.contains(ROPH) || curves.contains(ROAH)) {
             if (curves.contains(ROPH)) {
                 arrPH = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, ROPH));
+                        getCurveDataByName(ROPH, idProject).getCurveData());
                 bolPH = true;
                 length = arrPH.length;
             }
             if (curves.contains(ROAH)) {
                 arrAH = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, ROAH));
+                        getCurveDataByName(ROAH, idProject).getCurveData());
                 bolAH = true;
                 length = arrAH.length;
             }
@@ -198,18 +197,10 @@ public class AreasService {
         double[] zeni2 = null;
         double[] ro_by_phases = new double[nprobes * length];
         double[] ro_by_ampl = new double[nprobes * length];
-        md2 = ListDoubleInDoubleArray(lasFileService.
-                getCurveDataByName(projectRepository.findById(idProject).
-                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), md));
-        tvd2 = ListDoubleInDoubleArray(lasFileService.
-                getCurveDataByName(projectRepository.findById(idProject).
-                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), tvd));
-        x2 = ListDoubleInDoubleArray(lasFileService.
-                getCurveDataByName(projectRepository.findById(idProject).
-                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), x));
-        zeni2 = ListDoubleInDoubleArray(lasFileService.
-                getCurveDataByName(projectRepository.findById(idProject).
-                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), zeni));
+        md2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(md, idProject).getCurveData());
+        tvd2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(tvd, idProject).getCurveData());
+        x2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(x, idProject).getCurveData());
+        zeni2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(zeni, idProject).getCurveData());
         int npoints = md2.length;
         for (int i = 0, j = 0; i < length; i++) {
             if (bolPL || bolAL) {

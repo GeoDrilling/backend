@@ -11,7 +11,6 @@ import ru.nsu.fit.geodrilling.model.OutputModel;
 import ru.nsu.fit.geodrilling.repositories.ModelRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 import ru.nsu.fit.geodrilling.repositories.UserRepository;
-import ru.nsu.fit.geodrilling.services.file.LasFileService;
 import ru.nsu.fit.geodrilling.services.lib.NativeLibrary;
 
 import java.io.FileNotFoundException;
@@ -28,7 +27,7 @@ import static ru.nsu.fit.geodrilling.model.Constant.NAN;
 public class ModelService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
-    private final LasFileService lasFileService;
+    private final CurvesService lasFileService;
     private final NativeLibrary nativeLibrary;
     private final ModelRepository modelRepository;
     private double[] ListDoubleInDoubleArray(List<Double> list) {
@@ -84,35 +83,35 @@ public class ModelService {
         double[] arrAH = null;
         double[] arrAHD = null;
         double[] arrAHE = null;
-        ProjectEntity projectEntity = projectRepository.findById(idProject).
-                orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
+        ProjectEntity projectEntity = projectRepository.findById(idProject)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
         String ROPL = projectEntity.getSootEntity().getROPL();
         String ROPLD = projectEntity.getSootEntity().getROPLD();
         String ROPLE = projectEntity.getSootEntity().getROPLE();
         String ROPH = projectEntity.getSootEntity().getROPH();
-         String ROPHD = projectEntity.getSootEntity().getROPHD();
-         String ROPHE = projectEntity.getSootEntity().getROPHE();
-         String ROAL = projectEntity.getSootEntity().getROAL();
-         String ROALD = projectEntity.getSootEntity().getROALD();
-         String ROALE = projectEntity.getSootEntity().getROALE();
-         String ROAH = projectEntity.getSootEntity().getROAH();
-         String ROAHD = projectEntity.getSootEntity().getROAHD();
-         String ROAHE = projectEntity.getSootEntity().getROAHE();
-         String md = projectEntity.getSootEntity().getMd();
-         String tvd = projectEntity.getSootEntity().getTvd();
-         String x = projectEntity.getSootEntity().getX();
-         String zeni = projectEntity.getSootEntity().getZeni();
+        String ROPHD = projectEntity.getSootEntity().getROPHD();
+        String ROPHE = projectEntity.getSootEntity().getROPHE();
+        String ROAL = projectEntity.getSootEntity().getROAL();
+        String ROALD = projectEntity.getSootEntity().getROALD();
+        String ROALE = projectEntity.getSootEntity().getROALE();
+        String ROAH = projectEntity.getSootEntity().getROAH();
+        String ROAHD = projectEntity.getSootEntity().getROAHD();
+        String ROAHE = projectEntity.getSootEntity().getROAHE();
+        String md = projectEntity.getSootEntity().getMd();
+        String tvd = projectEntity.getSootEntity().getTvd();
+        String x = projectEntity.getSootEntity().getX();
+        String zeni = projectEntity.getSootEntity().getZeni();
         int length = 0;
         if (curves.contains(ROPL) || curves.contains(ROAL)) {
             if (curves.contains(ROPL)) {
                 arrPL = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, ROPL));
+                        getCurveDataByName(ROPL, idProject).getCurveData());
                 bolPL = true;
                 length = arrPL.length;
             }
             if (curves.contains(ROAL)) {
                 arrAL = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, ROAL));
+                        getCurveDataByName(ROAL, idProject).getCurveData());
                 bolAL = true;
                 length = arrAL.length;
             }
@@ -154,13 +153,13 @@ public class ModelService {
         if (curves.contains(ROPH) || curves.contains(ROAH)) {
             if (curves.contains(ROPH)) {
                 arrPH = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, ROPH));
+                        getCurveDataByName(ROPH, idProject).getCurveData());
                 bolPH = true;
                 length = arrPH.length;
             }
             if (curves.contains(ROAH)) {
                 arrAH = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(projectEntity, ROAH));
+                        getCurveDataByName(ROAH, idProject).getCurveData());
                 bolAH = true;
                 length = arrAH.length;
             }
@@ -206,18 +205,10 @@ public class ModelService {
         double[] zeni2 = null;
         double[] ro_by_phases = new double[nprobes * length];
         double[] ro_by_ampl = new double[nprobes * length];
-        md2 = ListDoubleInDoubleArray(lasFileService.
-                getCurveDataByName(projectRepository.findById(idProject).
-                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), md));
-        tvd2 = ListDoubleInDoubleArray(lasFileService.
-                getCurveDataByName(projectRepository.findById(idProject).
-                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), tvd));
-        x2 = ListDoubleInDoubleArray(lasFileService.
-                getCurveDataByName(projectRepository.findById(idProject).
-                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), x));
-        zeni2 = ListDoubleInDoubleArray(lasFileService.
-                getCurveDataByName(projectRepository.findById(idProject).
-                        orElseThrow(() -> new EntityNotFoundException("Проект не найден")), zeni));
+        md2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(md, idProject).getCurveData());
+        tvd2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(tvd, idProject).getCurveData());
+        x2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(x, idProject).getCurveData());
+        zeni2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(zeni, idProject).getCurveData());
         int npoints = md2.length;
         for (int i = 0, j = 0; i < length; i++) {
             if (bolPL || bolAL) {

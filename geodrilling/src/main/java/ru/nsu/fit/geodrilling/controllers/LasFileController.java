@@ -11,21 +11,20 @@ import ru.nsu.fit.geodrilling.dto.curves.CurveDataDownloadResponse;
 import ru.nsu.fit.geodrilling.dto.curves.GetCurvesNamesResponse;
 import ru.nsu.fit.geodrilling.dto.curves.LasFileUploadResponse;
 import ru.nsu.fit.geodrilling.services.SootService;
-import ru.nsu.fit.geodrilling.services.file.CurvesService;
-import ru.nsu.fit.geodrilling.services.file.LasFileService;
 
 @RestController
 @RequestMapping("/lasfile")
 @RequiredArgsConstructor
 public class LasFileController {
 
-    private final LasFileService lasFileService;
     private final CurvesService curvesService;
     private final SootService sootService;
     @PostMapping("/upload")
     public ResponseEntity<SaveCurveDataResponse> upload(@RequestParam("file") MultipartFile file,
                                                         @RequestParam("project_id") Long projectId) throws IOException {
-        return ResponseEntity.ok((curvesService.saveCurves(file, projectId)));
+        SaveCurveDataResponse saveCurveDataResponse = (curvesService.saveCurves(file, projectId));
+        sootService.sootOffer(saveCurveDataResponse, projectId);
+        return ResponseEntity.ok(saveCurveDataResponse);
     }
 
     @GetMapping("/download/curve")
