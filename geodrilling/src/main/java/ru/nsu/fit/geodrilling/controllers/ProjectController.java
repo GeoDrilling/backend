@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.nsu.fit.geodrilling.dto.ProjectDTO;
 import ru.nsu.fit.geodrilling.dto.UserDTO;
+import ru.nsu.fit.geodrilling.dto.project.ProjectStateRequest;
+import ru.nsu.fit.geodrilling.dto.project.ProjectStateResponse;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.model.User;
 import ru.nsu.fit.geodrilling.services.ProjectService;
@@ -54,5 +56,10 @@ public class ProjectController {
     public ResponseEntity<?> deleteProject(@PathVariable Long projectId) {
         projectService.deleteProject(projectId);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/state")
+    public ResponseEntity<Boolean> postState(@RequestBody ProjectStateRequest request) {
+        return ResponseEntity.ok(projectService.saveState(request));
     }
 }

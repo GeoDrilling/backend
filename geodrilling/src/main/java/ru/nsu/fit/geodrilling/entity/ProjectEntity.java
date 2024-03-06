@@ -40,5 +40,9 @@ public class ProjectEntity {
     @JoinColumn(name = "model_id")
     private ModelEntity modelEntity;
 
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "state_id")
+    private ProjectStateEntity projectStateEntity;
+
     private Long supplementedProjectId = null;
 }

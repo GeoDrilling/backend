@@ -3,19 +3,30 @@ package ru.nsu.fit.geodrilling.services;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.nsu.fit.geodrilling.dto.ProjectDTO;
+import ru.nsu.fit.geodrilling.dto.project.CurveDTO;
+import ru.nsu.fit.geodrilling.dto.project.ProjectStateRequest;
+import ru.nsu.fit.geodrilling.dto.project.ProjectStateResponse;
+import ru.nsu.fit.geodrilling.dto.project.TrackDTO;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
+import ru.nsu.fit.geodrilling.entity.ProjectStateEntity;
 import ru.nsu.fit.geodrilling.entity.SootEntity;
+import ru.nsu.fit.geodrilling.entity.TrackEntity;
+import ru.nsu.fit.geodrilling.entity.state.CurveStateEntity;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 import ru.nsu.fit.geodrilling.repositories.SootRepository;
 import ru.nsu.fit.geodrilling.repositories.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ProjectService {
 
     private final UserRepository userRepository;
@@ -82,5 +93,22 @@ public class ProjectService {
     @Transactional
     public void deleteProject(Long projectId) {
         projectRepository.deleteById(projectId);
+    }
+
+    public Boolean saveState(ProjectStateRequest request) {
+        ProjectEntity project = projectRepository.findById(request.getProjectId()).orElseThrow(
+                () -> new NoSuchElementException("Проект c id " + request.getProjectId() + " не найден"));
+        ProjectStateEntity newState = new ProjectStateEntity(0L, new ArrayList<>());
+        for (TrackDTO track : request.getTracks()) {
+            TrackEntity trackEntity  = new TrackEntity();
+            List<CurveStateEntity> curves = track.getCurves().stream()
+                .map(x -> new CurveStateEntity(0L, x.getColor(), x.getName(), trackEntity))
+                .collect(Collectors.toList());
+            trackEntity.setCurvesStates(curves);
+            newState.getTracks().add(trackEntity);
+        }
+        project.setProjectStateEntity(newState);
+        projectRepository.save(project);
+        return Boolean.TRUE;
     }
 }
