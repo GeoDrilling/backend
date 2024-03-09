@@ -31,6 +31,5 @@ public class CurveEntity {
 
     private File dataFile;
 
-    @Builder.Default
-    private String dirInProject = ".";
+    private String dirInProject;
 }

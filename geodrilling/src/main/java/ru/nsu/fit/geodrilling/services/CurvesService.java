@@ -118,6 +118,7 @@ public class CurvesService {
             .dataFile(curveData)
             .name(curve.getName())
             .project(project)
+            .dirInProject(curve.getName())
             .build();
         project.getCurves().add(curveEntity);
         try (FileWriter writer = new FileWriter(curveData)) {

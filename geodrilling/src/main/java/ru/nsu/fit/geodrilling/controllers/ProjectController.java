@@ -12,10 +12,12 @@ import ru.nsu.fit.geodrilling.dto.ProjectDTO;
 import ru.nsu.fit.geodrilling.dto.UserDTO;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.model.User;
+import ru.nsu.fit.geodrilling.services.CurvesService;
 import ru.nsu.fit.geodrilling.services.ProjectService;
 import ru.nsu.fit.geodrilling.services.UserService;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -54,5 +56,16 @@ public class ProjectController {
     public ResponseEntity<?> deleteProject(@PathVariable Long projectId) {
         projectService.deleteProject(projectId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{projectId}/structure")
+    public ResponseEntity<?> getProjectStructure(@PathVariable Long projectId) {
+        return ResponseEntity.ok(projectService.getProjectStructure(projectId));
+    }
+
+    @PostMapping("/{projectId}/structure")
+    public void postProjectStructure(@PathVariable Long projectId,
+            @RequestBody Map<String, String> curveDir) {
+        projectService.postProjectStructure(projectId, curveDir);
     }
 }

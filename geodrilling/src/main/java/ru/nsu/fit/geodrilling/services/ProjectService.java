@@ -5,14 +5,15 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.nsu.fit.geodrilling.dto.ProjectDTO;
+import ru.nsu.fit.geodrilling.entity.CurveEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.entity.SootEntity;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 import ru.nsu.fit.geodrilling.repositories.SootRepository;
 import ru.nsu.fit.geodrilling.repositories.UserRepository;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -21,6 +22,7 @@ public class ProjectService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final SootRepository sootRepository;
+    private final CurvesService curvesService;
     @Transactional
     public ProjectDTO createProjectForUser(String email, String name) {
         ProjectEntity project = new ProjectEntity();
@@ -82,5 +84,23 @@ public class ProjectService {
     @Transactional
     public void deleteProject(Long projectId) {
         projectRepository.deleteById(projectId);
+    }
+
+    public Map<String, String> getProjectStructure(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(
+            () -> new NoSuchElementException("Проект с id=" + projectId + " не найден"))
+                .getCurves()
+                .stream()
+                .collect(Collectors.toMap(CurveEntity::getName, CurveEntity::getDirInProject));
+    }
+
+    public void postProjectStructure(Long projectId, Map<String, String> curveDir) {
+        ProjectEntity project = projectRepository.findById(projectId).orElseThrow(
+            () -> new NoSuchElementException("Проект с id=" + projectId + " не найден"));
+        for (CurveEntity curve : project.getCurves()) {
+            curve.setDirInProject(curveDir.get(curve.getName()));
+        }
+        projectRepository.save(project);
     }
 }
