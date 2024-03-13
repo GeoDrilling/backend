@@ -119,6 +119,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
+            .user(mapper.map(user, UserDTO.class))
             .build();
       }
     }
