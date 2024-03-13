@@ -59,7 +59,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}/structure")
-    public ResponseEntity<?> getProjectStructure(@PathVariable Long projectId) {
+    public ResponseEntity<List<String>> getProjectStructure(@PathVariable Long projectId) {
         return ResponseEntity.ok(projectService.getProjectStructure(projectId));
     }
 

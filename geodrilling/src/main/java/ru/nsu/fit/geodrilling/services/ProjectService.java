@@ -86,13 +86,14 @@ public class ProjectService {
         projectRepository.deleteById(projectId);
     }
 
-    public Map<String, String> getProjectStructure(Long projectId) {
+    public List<String> getProjectStructure(Long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(
             () -> new NoSuchElementException("Проект с id=" + projectId + " не найден"))
                 .getCurves()
                 .stream()
-                .collect(Collectors.toMap(CurveEntity::getName, CurveEntity::getDirInProject));
+                .map(CurveEntity::getDirInProject)
+                .collect(Collectors.toList());
     }
 
     public void postProjectStructure(Long projectId, Map<String, String> curveDir) {
