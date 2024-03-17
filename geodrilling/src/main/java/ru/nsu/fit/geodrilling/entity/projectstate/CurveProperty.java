@@ -9,5 +9,6 @@ import java.util.List;
 @Setter
 @ToString
 public class CurveProperty {
-    List<GroupProperties> properties;
+    private String name;
+    private List<GroupProperties> properties;
 }
