@@ -1,20 +1,56 @@
 package ru.nsu.fit.geodrilling;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import ru.nsu.fit.geodrilling.entity.ProjectState;
+import ru.nsu.fit.geodrilling.entity.projectstate.CurveProperty;
+import ru.nsu.fit.geodrilling.entity.projectstate.GroupProperties;
+import ru.nsu.fit.geodrilling.entity.projectstate.TrackProperty;
+import ru.nsu.fit.geodrilling.entity.projectstate.enums.EnumType;
+import ru.nsu.fit.geodrilling.entity.projectstate.property.EnumProperty;
+import ru.nsu.fit.geodrilling.entity.projectstate.property.NumberProperty;
+import ru.nsu.fit.geodrilling.entity.projectstate.TabletProperties;
+import ru.nsu.fit.geodrilling.entity.projectstate.enums.PropertyType;
+import ru.nsu.fit.geodrilling.entity.projectstate.property.StringProperty;
 import ru.nsu.fit.geodrilling.model.*;
+import ru.nsu.fit.geodrilling.repositories.ProjectStateRepository;
 import ru.nsu.fit.geodrilling.services.lib.NativeLibrary;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static ru.nsu.fit.geodrilling.model.Constant.NAN;
 
 
-//@SpringBootTest
+@SpringBootTest
 class GeodrillingApplicationTests {
     final int npoints = 3;
     final int nprobes = 2;
     final int[] num_probe = {Constant.LWD_LOOCH_VIKPB_ROL, Constant.LWD_LOOCH_VIKPB_ROH};
+    @Autowired
+    private ProjectStateRepository projectStateRepository;
+    /*@Test
+    void testSaveState(){
+        ProjectState projectState = new ProjectState();
+        TabletProperties tabletProperties = new TabletProperties();
+        tabletProperties.setProperties(List.of(new GroupProperties("name", List.of(new NumberProperty("numbP", 10.0)))));
+
+        TrackProperty trackProperty = new TrackProperty();
+        trackProperty.setProperties(List.of(new GroupProperties("name", List.of(new StringProperty("strP", "10.0")))));
+
+        CurveProperty curveProperty = new CurveProperty();
+        curveProperty.setProperties(List.of(new GroupProperties("name", List.of(new EnumProperty("enumP", "v", EnumType.ORIENTATION)))));
+
+        projectState.setTabletProperties(tabletProperties);
+        trackProperty.setCurves(List.of(curveProperty));
+        projectState.setTrackProperties(List.of(trackProperty, trackProperty));
+        projectStateRepository.save(projectState);
+    }*/
+//    @Test
+//    void testLoadState() {
+//        ProjectState projectState = projectStateRepository.findById(752L).orElse(null);
+//        System.out.println(projectState);
+//    }
     @Test
     void testLoggingHorizontal() {
 

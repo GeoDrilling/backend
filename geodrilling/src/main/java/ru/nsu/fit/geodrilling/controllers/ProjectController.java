@@ -9,12 +9,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.nsu.fit.geodrilling.dto.ProjectDTO;
+import ru.nsu.fit.geodrilling.dto.ProjectStateDTO;
+import ru.nsu.fit.geodrilling.dto.SaveProjectStateDTO;
 import ru.nsu.fit.geodrilling.dto.UserDTO;
-import ru.nsu.fit.geodrilling.entity.ProjectEntity;
-import ru.nsu.fit.geodrilling.model.User;
-import ru.nsu.fit.geodrilling.services.CurvesService;
 import ru.nsu.fit.geodrilling.services.ProjectService;
-import ru.nsu.fit.geodrilling.services.UserService;
 
 import java.util.List;
 import java.util.Map;
@@ -29,10 +27,10 @@ public class ProjectController {
     private final ModelMapper modelMapper;
 
     @PostMapping("/{name}")
-    public ResponseEntity<ProjectDTO> createProject(@PathVariable String name) {
+    public ResponseEntity<ProjectStateDTO> createProject(@PathVariable String name) {
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         String email = modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail();
-        ProjectDTO createdProject = projectService.createProjectForUser(email, name);
+        ProjectStateDTO createdProject = projectService.createProjectForUser(email, name);
         return ResponseEntity.ok(createdProject);
     }
 
@@ -67,5 +65,14 @@ public class ProjectController {
     public void postProjectStructure(@PathVariable Long projectId,
             @RequestBody Map<String, String> curveDir) {
         projectService.postProjectStructure(projectId, curveDir);
+    }
+    @GetMapping("/state/{projectId}")
+    public ProjectStateDTO getProjectState(@PathVariable Long projectId) {
+        return projectService.getProjectState(projectId);
+    }
+    @PutMapping("/state/{projectId}")
+    public void setProjectState(@PathVariable Long projectId,
+                                @RequestBody SaveProjectStateDTO state) {
+        projectService.saveProjectState(projectId, state);
     }
 }

@@ -41,4 +41,7 @@ public class ProjectEntity {
     private ModelEntity modelEntity;
 
     private Long supplementedProjectId = null;
+    @OneToOne
+    @PrimaryKeyJoinColumn
+    private ProjectState state;
 }
