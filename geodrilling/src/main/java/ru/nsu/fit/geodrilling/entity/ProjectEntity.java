@@ -40,7 +40,10 @@ public class ProjectEntity {
     @JoinColumn(name = "model_id")
     private ModelEntity modelEntity;
 
-    private Long supplementedProjectId = null;
+    @OneToOne
+    @JoinColumn(name = "supplementing_project_id")
+    private ProjectEntity supplementingProject;
+
     @OneToOne
     @PrimaryKeyJoinColumn
     private ProjectState state;

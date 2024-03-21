@@ -5,6 +5,8 @@ import com.google.gson.reflect.TypeToken;
 import grillid9.laslib.Curve;
 import grillid9.laslib.LasReader;
 import jakarta.transaction.Transactional;
+
+import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +21,11 @@ import ru.nsu.fit.geodrilling.exceptions.CurveSupplementationException;
 import ru.nsu.fit.geodrilling.exceptions.NewCurvesAddingException;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -105,12 +105,39 @@ public class CurvesService {
                 curve, newProject);
         }
         log.info("Дополненные кривые сохранены в новый проект с id {}", newProject.getId());
-        project.setSupplementedProjectId(newProject.getId());
+        project.setSupplementingProject(newProject);
         projectRepository.save(project);
         projectRepository.save(newProject);
         return CurveSupplementationResponse.builder()
             .curvesNames(getCurvesNames(lasReader.getCurves()))
             .build();
+    }
+
+    public void changeRange(ProjectEntity project, String curveName , Double fromDepth, List<Double> data) {
+        List<Double> deptData = getCurveDataByName("DEPT", project.getId()).getCurveData();
+        int fromDepthIdx = deptData.indexOf(fromDepth);
+        List<Double> curveData = getCurveDataByName(curveName, project.getId()).getCurveData();
+        for (int i = fromDepthIdx, j = 0; i < fromDepthIdx + data.size(); i++, j++) {
+            curveData.set(i, data.get(j));
+        }
+        CurveEntity curveEntity = project.getCurves()
+                .stream()
+                .filter(curve -> curve.getName().equals(curveName))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("Кривой " + curveName + " не существует"));
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(curveEntity.getDataFile()))) {
+            writer.write(gson.toJson(curveData));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public List<Double> getRange(ProjectEntity project, String curveName, Double fromDepth, Double toDepth) {
+        List<Double> deptData = getCurveDataByName("DEPT", project.getId()).getCurveData();
+        int fromDepthIdx = deptData.indexOf(fromDepth);
+        int toDepthIdx = deptData.indexOf(toDepth);
+        List<Double> curveData = getCurveDataByName(curveName, project.getId()).getCurveData();
+        return curveData.subList(fromDepthIdx, toDepthIdx);
     }
 
     private void saveCurveDataTo(File curveData, Curve curve, ProjectEntity project) throws IOException {
@@ -165,15 +192,11 @@ public class CurvesService {
      * @throws IOException если не получилось создать временный файл
      */
     private File createTempFile(MultipartFile file) throws IOException {
-        try {
-            Random random = new Random();
-            File tempFile = new File(tempFolderPath + "\\" + random.nextLong());
-            tempFile.mkdirs();
-            file.transferTo(tempFile);
-            return tempFile;
-        } catch (IOException | SecurityException e) {
-            throw new IOException("Невозможно создать временный файл");
-        }
+        Random random = new Random();
+        Files.createDirectories(Paths.get(tempFolderPath));
+        File tempFile = new File(tempFolderPath + "\\" + random.nextLong());
+        file.transferTo(tempFile);
+        return tempFile;
     }
 
     /**
