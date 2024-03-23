@@ -115,7 +115,11 @@ public class CurvesService {
 
     public void changeRange(ProjectEntity project, String curveName , Double fromDepth, List<Double> data) {
         List<Double> deptData = getCurveDataByName("DEPT", project.getId()).getCurveData();
-        int fromDepthIdx = deptData.indexOf(fromDepth);
+        int fromDepthIdx = Arrays.binarySearch(deptData.toArray(), fromDepth);
+        if (fromDepthIdx == deptData.size()) {
+            log.error("Отрезок данных выходит за пределы кривой");
+            throw new RuntimeException("Отрезок данных выходит за пределы кривой");
+        }
         List<Double> curveData = getCurveDataByName(curveName, project.getId()).getCurveData();
         for (int i = fromDepthIdx, j = 0; i < fromDepthIdx + data.size(); i++, j++) {
             curveData.set(i, data.get(j));
@@ -134,8 +138,12 @@ public class CurvesService {
 
     public List<Double> getRange(ProjectEntity project, String curveName, Double fromDepth, Double toDepth) {
         List<Double> deptData = getCurveDataByName("DEPT", project.getId()).getCurveData();
-        int fromDepthIdx = deptData.indexOf(fromDepth);
-        int toDepthIdx = deptData.indexOf(toDepth);
+        int fromDepthIdx = Arrays.binarySearch(deptData.toArray(), fromDepth);
+        int toDepthIdx = Arrays.binarySearch(deptData.toArray(), toDepth);
+        if (fromDepthIdx == deptData.size() || toDepthIdx == deptData.size()) {
+            log.error("Отрезок данных выходит за пределы кривой");
+            throw new RuntimeException("Отрезок данных выходит за пределы кривой");
+        }
         List<Double> curveData = getCurveDataByName(curveName, project.getId()).getCurveData();
         return curveData.subList(fromDepthIdx, toDepthIdx);
     }
