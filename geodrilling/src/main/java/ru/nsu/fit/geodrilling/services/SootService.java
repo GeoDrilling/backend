@@ -35,59 +35,59 @@ public class SootService {
       sootEntity.setROAL(sootinDTO.getRoal());
       sootEntity.setROALp(1);
     }
-    if (sootinDTO.getRopld() != "--") {
+    if (!Objects.equals(sootinDTO.getRopld(), "--")) {
       sootEntity.setROPLD(sootinDTO.getRopld());
       sootEntity.setROPLDp(1);
     }
-    if (sootinDTO.getRoald() != "--") {
+    if (!Objects.equals(sootinDTO.getRoald(), "--")) {
       sootEntity.setROALD(sootinDTO.getRoald());
       sootEntity.setROALDp(1);
     }
-    if (sootinDTO.getRople() != "--") {
+    if (!Objects.equals(sootinDTO.getRople(), "--")) {
       sootEntity.setROPLE(sootinDTO.getRople());
       sootEntity.setROPLEp(1);
     }
-    if (sootinDTO.getRoale() != "--") {
+    if (!Objects.equals(sootinDTO.getRoale(), "--")) {
       sootEntity.setROALE(sootinDTO.getRoale());
       sootEntity.setROALEp(1);
     }
-    if (sootinDTO.getRoph() != "--") {
+    if (!Objects.equals(sootinDTO.getRoph(), "--")) {
       sootEntity.setROPH(sootinDTO.getRoph());
       sootEntity.setROPHp(1);
     }
-    if (sootinDTO.getRoah() != "--") {
+    if (!Objects.equals(sootinDTO.getRoah(), "--")) {
       sootEntity.setROAH(sootinDTO.getRoah());
       sootEntity.setROAHp(1);
     }
-    if (sootinDTO.getRophd() != "--") {
+    if (!Objects.equals(sootinDTO.getRophd(), "--")) {
       sootEntity.setROPHD(sootinDTO.getRophd());
       sootEntity.setROPHDp(1);
     }
-    if (sootinDTO.getRoahd() != "--") {
+    if (!Objects.equals(sootinDTO.getRoahd(), "--")) {
       sootEntity.setROAHD(sootinDTO.getRoahd());
       sootEntity.setROAHDp(1);
     }
-    if (sootinDTO.getRophe() != "--") {
+    if (!Objects.equals(sootinDTO.getRophe(), "--")) {
       sootEntity.setROPHE(sootinDTO.getRophe());
       sootEntity.setROPHEp(1);
     }
-    if (sootinDTO.getRoahe() != "--") {
+    if (!Objects.equals(sootinDTO.getRoahe(), "--")) {
       sootEntity.setROAHE(sootinDTO.getRoahe());
       sootEntity.setROAHEp(1);
     }
-    if (sootinDTO.getMd() != "--") {
+    if (!Objects.equals(sootinDTO.getMd(), "--")) {
       sootEntity.setMd(sootinDTO.getMd());
       sootEntity.setMdp(1);
     }
-    if (sootinDTO.getTvd() != "--") {
+    if (!Objects.equals(sootinDTO.getTvd(), "--")) {
       sootEntity.setTvd(sootinDTO.getTvd());
       sootEntity.setTvdp(1);
     }
-    if (sootinDTO.getX() != "--") {
+    if (!Objects.equals(sootinDTO.getX(), "--")) {
       sootEntity.setX(sootinDTO.getX());
       sootEntity.setXp(1);
     }
-    if (sootinDTO.getZeni() != "--") {
+    if (!Objects.equals(sootinDTO.getZeni(), "--")) {
       sootEntity.setZeni(sootinDTO.getZeni());
       sootEntity.setZenip(1);
     }
@@ -215,7 +215,7 @@ public class SootService {
         orElseThrow(
             () -> new EntityNotFoundException("Проект не найден по указанному id: " + projectId)).
         getSootEntity();
-    if (sootEntity.getZenip() != 1 || sootEntity.getXp() != 1 || sootEntity.getMdp() != 1) {
+    if (sootEntity.getZenip() != 1 || sootEntity.getXp() != 1 || sootEntity.getTvdp() != 1) {
       return false;
     }
     return sootEntity.getROPLp() == 1 ||
