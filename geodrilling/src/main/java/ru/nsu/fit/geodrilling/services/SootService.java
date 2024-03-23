@@ -7,6 +7,7 @@ import ru.nsu.fit.geodrilling.dto.SootinDTO;
 import ru.nsu.fit.geodrilling.dto.SootoutDTO;
 import ru.nsu.fit.geodrilling.dto.curves.LasFileUploadResponse;
 import ru.nsu.fit.geodrilling.dto.curves.SaveCurveDataResponse;
+import ru.nsu.fit.geodrilling.entity.CurveEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.entity.SootEntity;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
@@ -27,6 +28,7 @@ public class SootService {
         .orElseThrow(
             () -> new EntityNotFoundException("Проект не найден по указанному id: " + idProject));
     SootEntity sootEntity = project.getSootEntity();
+    sootEntity.setMd("DEPT");
     if (!Objects.equals(sootinDTO.getRopl(), "--")) {
       sootEntity.setROPL(sootinDTO.getRopl());
       sootEntity.setROPLp(1);
@@ -74,10 +76,6 @@ public class SootService {
     if (!Objects.equals(sootinDTO.getRoahe(), "--")) {
       sootEntity.setROAHE(sootinDTO.getRoahe());
       sootEntity.setROAHEp(1);
-    }
-    if (!Objects.equals(sootinDTO.getMd(), "--")) {
-      sootEntity.setMd(sootinDTO.getMd());
-      sootEntity.setMdp(1);
     }
     if (!Objects.equals(sootinDTO.getTvd(), "--")) {
       sootEntity.setTvd(sootinDTO.getTvd());
@@ -190,10 +188,6 @@ public class SootService {
       sootEntity.setROAHE("ROAHE");
       sootEntity.setROAHEp(2);
     }
-    if (curves.contains("DEPT") && sootEntity.getMdp() != 1) {
-      sootEntity.setMd("DEPT");
-      sootEntity.setMdp(2);
-    }
     if (curves.contains("TVD") && sootEntity.getTvdp() != 1) {
       sootEntity.setTvd("TVD");
       sootEntity.setTvdp(2);
@@ -211,13 +205,24 @@ public class SootService {
   }
 
   public Boolean checkCurves(Long projectId) {
-    SootEntity sootEntity = projectRepository.findById(projectId).
+    ProjectEntity projectEntity = projectRepository.findById(projectId).
         orElseThrow(
-            () -> new EntityNotFoundException("Проект не найден по указанному id: " + projectId)).
-        getSootEntity();
-    if (sootEntity.getZenip() != 1 || sootEntity.getXp() != 1 || sootEntity.getTvdp() != 1) {
+            () -> new EntityNotFoundException("Проект не найден по указанному id: " + projectId));
+    SootEntity sootEntity = projectEntity.getSootEntity();
+    if (sootEntity.getZenip() != 1 || sootEntity.getXp() != 1 || sootEntity.getTvdp() != 1 ) {
       return false;
     }
+
+    boolean log = true;
+    for (CurveEntity curveEntity : projectEntity.getCurves()){
+      if (Objects.equals(curveEntity.getName(), "DEPT")) {
+        log = false;
+        break;
+      }
+    }
+    if (log)
+      return false;
+
     return sootEntity.getROPLp() == 1 ||
         sootEntity.getROALp() == 1 ||
         sootEntity.getROPLDp() == 1 ||

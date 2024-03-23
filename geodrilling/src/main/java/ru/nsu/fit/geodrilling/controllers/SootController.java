@@ -27,7 +27,7 @@ public class SootController {
     }
 
     @GetMapping("/checkCurves")
-    public Boolean checkCurves(Long projectId){
+    public Boolean checkCurves(@RequestParam("project_id") Long projectId){
         return sootService.checkCurves(projectId);
     }
 }
