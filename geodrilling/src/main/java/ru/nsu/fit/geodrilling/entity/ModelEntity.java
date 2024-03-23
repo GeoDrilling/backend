@@ -20,25 +20,22 @@ public class ModelEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private double minKanisotropyDown;
-    private double maxKanisotropyDown;
-    private double[] syntRoByPhases;
-    private double[] syntRoByAmpl;
-    private double misfit;
+
     private double kanisotropyDown;
-    private double minRoDown;
-    private double maxRoDown;
+
     private double roDown;
+
     private double kanisotropyUp;
-    private double minKanisotropyUp;
-    private double maxKanisotropyUp;
+
     private double roUp;
-    private double minRoUp;
-    private double maxRoUp;
+
     private double alpha;
+
     private double tvdStart;
-    private int status;
+
+    private Double start;
+    private Double end;
+
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")

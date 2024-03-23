@@ -12,6 +12,12 @@ import ru.nsu.fit.geodrilling.model.OutputModel;
 @NoArgsConstructor
 public class ModelDTO {
     private Long idModel;
-    private String name;
-    private OutputModel outputModel;
+    private Double start;
+    private Double end;
+    private Double kanisotropyDown;
+    private Double roDown;
+    private Double kanisotropyUp;
+    private Double roUp;
+    private Double alpha;
+    private Double tvdStart;
 }
