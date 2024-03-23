@@ -1,5 +1,12 @@
 package ru.nsu.fit.geodrilling.dto;
 
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
 public class SaveModelResponse {
-  ModelDTO modelDTO;
+  List<ModelDTO> modelDTO;
+  List<CurveDto> curveDtoList;
 }

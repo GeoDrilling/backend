@@ -8,6 +8,7 @@ import ru.nsu.fit.geodrilling.dto.ProjectDTO;
 import ru.nsu.fit.geodrilling.dto.ProjectStateDTO;
 import ru.nsu.fit.geodrilling.dto.SaveProjectStateDTO;
 import ru.nsu.fit.geodrilling.entity.CurveEntity;
+import ru.nsu.fit.geodrilling.entity.ModelEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectState;
 import ru.nsu.fit.geodrilling.entity.SootEntity;
@@ -57,6 +58,7 @@ public class ProjectService {
         sootRepository.save(sootEntity);
         project.setName(name);
         project.setSootEntity(sootEntity);
+        project.setModelEntity(new ModelEntity());
         project.setUser(userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")));
         ProjectState state = new ProjectState();

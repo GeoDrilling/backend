@@ -36,7 +36,7 @@ public class ProjectEntity {
     @JoinColumn(name = "soot_id")
     private SootEntity sootEntity;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "model_id")
     private ModelEntity modelEntity;
 

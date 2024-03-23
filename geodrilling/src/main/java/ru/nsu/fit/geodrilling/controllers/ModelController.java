@@ -1,5 +1,6 @@
 package ru.nsu.fit.geodrilling.controllers;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.hibernate.result.Output;
 import org.modelmapper.ModelMapper;
@@ -58,5 +59,13 @@ public class ModelController {
   ) {
     String email = SecurityContextHolder.getContext().getAuthentication().getName();
     return ResponseEntity.ok(modelService.saveModel(modelDTO, idProject, Start, End));
+  }
+
+  @GetMapping("/getModel")
+  public ResponseEntity<List<ModelDTO>> getModel(
+      @RequestParam("project_id") Long idProject
+  ) {
+    String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    return ResponseEntity.ok(modelService.getModel(idProject));
   }
 }

@@ -33,11 +33,10 @@ public class ModelEntity {
 
     private double tvdStart;
 
-    private Double start;
-    private Double end;
+    private Double startX;
+    private Double endX;
 
-    @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "modelEntity")
     @JoinColumn(name = "project_id")
     private ProjectEntity projectEntity;
 
