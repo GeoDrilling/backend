@@ -10,7 +10,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.nsu.fit.geodrilling.dto.InputBuildModel;
 import ru.nsu.fit.geodrilling.dto.ModelDTO;
+import ru.nsu.fit.geodrilling.dto.SaveModelResponse;
 import ru.nsu.fit.geodrilling.dto.UserDTO;
+import ru.nsu.fit.geodrilling.dto.curves.CurveDataDownloadResponse;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.model.OutputModel;
 import ru.nsu.fit.geodrilling.services.ModelService;
@@ -22,16 +24,39 @@ import java.io.FileNotFoundException;
 @RequestMapping("/model")
 @AllArgsConstructor
 public class ModelController {
-    private final UserService userService;
-    private final ModelService modelService;
-    private final ModelMapper modelMapper;
 
-    @PostMapping("/create")
-    public ResponseEntity<ModelDTO> createModel(
-            @RequestParam("project_id") Long idProject,
-            @RequestParam("name") String name) throws Exception {
-        UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        String email = (modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());
-        return ResponseEntity.ok(modelService.createModel(idProject, name, email));
-    }
+  private final UserService userService;
+  private final ModelService modelService;
+  private final ModelMapper modelMapper;
+
+  @PostMapping("/create")
+  public ResponseEntity<ModelDTO> createModel(
+      @RequestBody ModelDTO modelDTO,
+      @RequestParam("project_id") Long idProject,
+      @RequestParam("start") Double Start, @RequestParam("end") Double End) {
+    UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
+        .getAuthentication();
+    String email = (modelMapper.map(((UserDetails) token.getPrincipal()), UserDTO.class)
+        .getEmail());
+    return ResponseEntity.ok(modelService.createModel(modelDTO, idProject, email));
+  }
+
+  @GetMapping("/createStartModel")
+  public ResponseEntity<ModelDTO> createStartModel(
+      @RequestParam("project_id") Long idProject, @RequestParam("start") Double Start,
+      @RequestParam("end") Double End
+  ) {
+    String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    return ResponseEntity.ok(modelService.createStartModel(idProject, Start, End));
+  }
+
+  @PostMapping("/saveModel")
+  public ResponseEntity<SaveModelResponse> saveModel(
+      @RequestBody ModelDTO modelDTO,
+      @RequestParam("project_id") Long idProject, @RequestParam("start") Double Start,
+      @RequestParam("end") Double End
+  ) {
+    String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    return ResponseEntity.ok(modelService.saveModel(modelDTO, idProject, Start, End));
+  }
 }

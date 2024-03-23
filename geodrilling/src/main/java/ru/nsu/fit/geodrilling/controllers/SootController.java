@@ -25,4 +25,9 @@ public class SootController {
             @RequestParam("project_id") Long idProject) throws Exception {
         return ResponseEntity.ok(sootService.sootOut(idProject));
     }
+
+    @GetMapping("/checkCurves")
+    public Boolean checkCurves(Long projectId){
+        return sootService.checkCurves(projectId);
+    }
 }
