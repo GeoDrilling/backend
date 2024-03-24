@@ -2,6 +2,7 @@ package ru.nsu.fit.geodrilling.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import ru.nsu.fit.geodrilling.dto.InputAreasEquivalence;
 import ru.nsu.fit.geodrilling.dto.InputParamAreasDTO;
@@ -12,10 +13,13 @@ import ru.nsu.fit.geodrilling.model.AreasEquivalence;
 import ru.nsu.fit.geodrilling.repositories.ModelRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 import ru.nsu.fit.geodrilling.repositories.UserRepository;
+import ru.nsu.fit.geodrilling.services.drawingAreasEquivalent.ColorMapBuilder;
+import ru.nsu.fit.geodrilling.services.drawingAreasEquivalent.PythonService;
 import ru.nsu.fit.geodrilling.services.lib.NativeLibrary;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static ru.nsu.fit.geodrilling.model.Constant.NAN;
 
@@ -29,11 +33,54 @@ public class AreasService {
     private final ProjectRepository projectRepository;
     private final CurvesService lasFileService;
     private final NativeLibrary nativeLibrary;
+    private final PythonService pythonService;
     private double[] ListDoubleInDoubleArray(List<Double> list) {
         return list.stream().mapToDouble(Double::doubleValue).toArray();
     }
 
-    public AreasEquivalence createAreas(Long idModel, InputParamAreasDTO inputParamAreasDTO) {
+    private static double findMax(double[] array) {
+        if (array == null || array.length == 0) {
+            throw new IllegalArgumentException("Массив не должен быть пустым");
+        }
+
+        double max = array[0];
+
+        for (int i = 1; i < array.length; i++) {
+            if (array[i] > max) {
+                max = array[i];
+            }
+        }
+
+        return max;
+    }
+
+    public static List<Float> convertToFloatList(double[] doubleArray) {
+        List<Float> floatList = new ArrayList<>();
+
+        for (double value : doubleArray) {
+            floatList.add((float) value);
+        }
+
+        return floatList;
+    }
+
+    private static double findMin(double[] array) {
+        if (array == null || array.length == 0) {
+            throw new IllegalArgumentException("Массив не должен быть пустым");
+        }
+
+        double min = array[0];
+
+        for (int i = 1; i < array.length; i++) {
+            if (array[i] < min) {
+                min = array[i];
+            }
+        }
+
+        return min;
+    }
+
+    public ByteArrayResource createAreas(Long idModel, InputParamAreasDTO inputParamAreasDTO) {
         AreasEntity areasEntity = new AreasEntity();
         ModelEntity modelEntity = modelRepository.findById(idModel).orElseThrow(() -> new EntityNotFoundException("Модель не найдена"));
         ProjectEntity projectEntity = modelEntity.getProjectEntity();
@@ -282,16 +329,145 @@ public class AreasService {
             }
             j = 0;
         }
+        int range = inputParamAreasDTO.range;
+        double[] tvd_startArr = new double[range];
+        double[] alphaArr = new double[range];
+        double[] ro_upArr = new double[range];
+        double[] kanisotropy_upArr = new double[range];
+        double[] ro_downArr = new double[range];
+        double[] kanisotropy_downArr = new double[range];
+        double[] param1 = new double[range];
+        double[] param2 = new double[range];
 
-        return nativeLibrary.createAreasEquivalence(new InputAreasEquivalence(nprobes, num_probe, npoints,
-                tvd2, x2, zeni2, inputParamAreasDTO.tvd_start.length, inputParamAreasDTO.tvd_start,
-                inputParamAreasDTO.alpha.length, inputParamAreasDTO.alpha, inputParamAreasDTO.ro_up.length,
-                inputParamAreasDTO.ro_up, inputParamAreasDTO.kanisotropy_up.length,
-                inputParamAreasDTO.kanisotropy_up, inputParamAreasDTO.ro_down.length,
-                inputParamAreasDTO.ro_down, inputParamAreasDTO.kanisotropy_down.length,
-                inputParamAreasDTO.kanisotropy_down, ro_by_phases, ro_by_ampl
-                ));
+        int tvd_startArrlength = 1;
+        int alphaArrlength = 1;
+        int ro_upArrlength = 1;
+        int kanisotropy_upArrlength = 1;
+        int ro_downArrlength = 1;
+        int kanisotropy_downArrlength = 1;
+        int param1length = 0;
+        int param2length = 0;
 
+        tvd_startArr[0] = modelEntity.getTvdStart();
+        alphaArr[0] = modelEntity.getAlpha();
+        ro_upArr[0] = modelEntity.getRoUp();
+        kanisotropy_upArr[0] = modelEntity.getKanisotropyUp();
+        ro_downArr[0] = modelEntity.getRoDown();
+        kanisotropy_downArr[0] = modelEntity.getKanisotropyDown();
 
+        if (Objects.equals(inputParamAreasDTO.param1, "tvd_start") ||
+                Objects.equals(inputParamAreasDTO.param2, "tvd_start")) {
+            for (int i = 0; i < range; i++) {
+                tvd_startArr[i] = Math.pow(10, -1 + i * ((double) 4.0 / range));
+            }
+            tvd_startArrlength = range;
+            if (param1length == 0) {
+                param1 = tvd_startArr;
+                param1length = range;
+            }
+            else {
+                param2 = tvd_startArr;
+            }
+        }
+        if (Objects.equals(inputParamAreasDTO.param1, "alpha") ||
+                Objects.equals(inputParamAreasDTO.param2, "alpha")) {
+            for (int i = 0; i < range; i++) {
+                alphaArr[i] = Math.pow(10, -1 + i * ((double) 4.0 / range));
+            }
+            alphaArrlength = range;
+            if (param1length == 0) {
+                param1 = alphaArr;
+                param1length = range;
+            }
+            else {
+                param2 = alphaArr;
+            }
+        }
+        if (Objects.equals(inputParamAreasDTO.param1, "ro_up") ||
+                Objects.equals(inputParamAreasDTO.param2, "ro_up")) {
+            for (int i = 0; i < range; i++) {
+                ro_upArr[i] = Math.pow(10, -1 + i * ((double) 4.0 / range));
+            }
+            ro_upArrlength = range;
+            if (param1length == 0) {
+                param1 = ro_upArr;
+                param1length = range;
+            }
+            else {
+                param2 = ro_upArr;
+            }
+        }
+        if (Objects.equals(inputParamAreasDTO.param1, "kanisotropy_up") ||
+                Objects.equals(inputParamAreasDTO.param2, "kanisotropy_up")) {
+            for (int i = 0; i < range; i++) {
+                kanisotropy_upArr[i] = Math.pow(10, -1 + i * ((double) 4.0 / range));
+            }
+            kanisotropy_upArrlength = range;
+            if (param1length == 0) {
+                param1 = kanisotropy_upArr;
+                param1length = range;
+            }
+            else {
+                param2 = kanisotropy_upArr;
+            }
+        }
+        if (Objects.equals(inputParamAreasDTO.param1, "ro_down") ||
+                Objects.equals(inputParamAreasDTO.param2, "ro_down")) {
+            for (int i = 0; i < range; i++) {
+                ro_downArr[i] = Math.pow(10, -1 + i * ((double) 4.0 / range));
+            }
+            ro_downArrlength = range;
+            if (param1length == 0) {
+                param1 = ro_downArr;
+                param1length = range;
+            }
+            else {
+                param2 = ro_downArr;
+            }
+        }
+        if (Objects.equals(inputParamAreasDTO.param1, "kanisotropy_down") ||
+                Objects.equals(inputParamAreasDTO.param2, "kanisotropy_down")) {
+            for (int i = 0; i < range; i++) {
+                kanisotropy_downArr[i] = Math.pow(10, -1 + i * ((double) 4.0 / range));
+            }
+            kanisotropy_downArrlength = range;
+            if (param1length == 0) {
+                param1 = kanisotropy_downArr;
+                param1length = range;
+            }
+            else {
+                param2 = kanisotropy_downArr;
+            }
+        }
+
+        InputAreasEquivalence inputAreasEquivalence = new InputAreasEquivalence(nprobes, num_probe, npoints,
+        tvd2, x2, zeni2, tvd_startArrlength, tvd_startArr,
+        alphaArrlength, alphaArr, ro_downArrlength,
+        ro_upArr, kanisotropy_upArrlength,
+        kanisotropy_upArr, ro_downArrlength,
+        ro_downArr, kanisotropy_downArrlength,
+        kanisotropy_downArr, ro_by_phases, ro_by_ampl);
+
+        AreasEquivalence areasEquivalence = nativeLibrary.createAreasEquivalence(inputAreasEquivalence);
+
+        ColorMapBuilder colorMapBuilder = new ColorMapBuilder();
+
+        /*double[][] intensityValues = new double[param1length][param1length];
+        for (int i = 0; i < param1length; i++) {
+            for (int j = 0; j < param1length; j++) {
+                intensityValues[i][j] = areasEquivalence.getTargetFunction()[i * param1length + j];
+            }
+        }
+
+        colorMapBuilder.saveColorMapToFile(colorMapBuilder.generateLogarithmicColorMap(
+                param1, param2, intensityValues, findMin(areasEquivalence.getTargetFunction()),
+                findMax(areasEquivalence.getTargetFunction())), "ColorMap");*/
+        System.out.println(convertToFloatList(ro_upArr));
+        System.out.println(convertToFloatList(ro_downArr));
+        System.out.println(convertToFloatList(areasEquivalence.getTargetFunction()));
+        pythonService.sendIntensityDataAndReceiveImage
+                (convertToFloatList(areasEquivalence.getTargetFunction()), range);
+        return pythonService.sendIntensityDataAndReceiveImage
+                (convertToFloatList(areasEquivalence.getTargetFunction()), range);
     }
 }

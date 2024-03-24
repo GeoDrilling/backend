@@ -1,12 +1,12 @@
 package ru.nsu.fit.geodrilling.controllers;
 
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.nsu.fit.geodrilling.dto.InputParamAreasDTO;
+import ru.nsu.fit.geodrilling.dto.SootinDTO;
 import ru.nsu.fit.geodrilling.model.AreasEquivalence;
 import ru.nsu.fit.geodrilling.services.AreasService;
 import ru.nsu.fit.geodrilling.services.ModelService;
@@ -16,12 +16,16 @@ import ru.nsu.fit.geodrilling.services.ModelService;
 @AllArgsConstructor
 public class AreasController {
     private final AreasService areasService;
-    @PostMapping("/create")
-    public ResponseEntity<AreasEquivalence> createAreas(
-            @RequestParam("model_id") Long idModel,
-            @RequestParam("name") InputParamAreasDTO idParamDTO) throws Exception {
+    @PostMapping("/create/{model_id}")
+    public ResponseEntity<ByteArrayResource> createAreas(
+            @PathVariable("model_id") Long idModel,
+            @RequestBody InputParamAreasDTO inputParamAreasDTO) throws Exception {
      /*   UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         String email = (modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());*/
-        return ResponseEntity.ok(areasService.createAreas(idModel, idParamDTO));
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(areasService.createAreas(idModel, inputParamAreasDTO));
     }
+
+
 }
