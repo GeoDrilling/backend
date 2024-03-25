@@ -13,7 +13,6 @@ import ru.nsu.fit.geodrilling.model.AreasEquivalence;
 import ru.nsu.fit.geodrilling.repositories.ModelRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 import ru.nsu.fit.geodrilling.repositories.UserRepository;
-import ru.nsu.fit.geodrilling.services.drawingAreasEquivalent.ColorMapBuilder;
 import ru.nsu.fit.geodrilling.services.drawingAreasEquivalent.PythonService;
 import ru.nsu.fit.geodrilling.services.lib.NativeLibrary;
 
@@ -449,8 +448,6 @@ public class AreasService {
         kanisotropy_downArr, ro_by_phases, ro_by_ampl);
 
         AreasEquivalence areasEquivalence = nativeLibrary.createAreasEquivalence(inputAreasEquivalence);
-
-        ColorMapBuilder colorMapBuilder = new ColorMapBuilder();
 
         /*double[][] intensityValues = new double[param1length][param1length];
         for (int i = 0; i < param1length; i++) {
