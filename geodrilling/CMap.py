@@ -9,24 +9,32 @@ from sentence_transformers import SentenceTransformer
 from flask import send_file
 app = Flask(__name__)
 
-def cMap(n, intensityValues):
-    xValues = np.logspace(-1, 3, n)
-    yValues = np.logspace(-1, 3, n)
-
+def cMap(n, intensityValues, param1, param2, param1Name, param2Name):
+    xValues = param1
+    yValues = param2
+    a = ''
+    b = ''
+    c = ''
+    d = ''
     # Создание сетки для интерполяции
     X, Y = np.meshgrid(xValues, yValues)
 
-    # Логарифмическое масштабирование координат
-    logX = np.log10(X)
-    logY = np.log10(Y)
+    if param1Name == 'ro_up' or param1Name == 'ro_down':
+        X = np.log10(X)
+        a = 'log('
+        b = ')'
+    if param2Name == 'ro_up' or param2Name == 'ro_down':
+        Y = np.log10(Y)
+        c = 'log('
+        d = ')'
 
     fig, ax = plt.subplots()
 
     # Создание цветовой карты
-    cmap = ax.pcolormesh(logX, logY, intensityValues, shading='auto', cmap='viridis', norm=colors.LogNorm())
+    cmap = ax.pcolormesh(X, Y, intensityValues, shading='auto', cmap='viridis', norm=colors.LogNorm())
 
     # Добавление изолиний
-    CS = ax.contour(logX, logY, intensityValues, colors='black')
+    CS = ax.contour(X, Y, intensityValues, colors='black')
 
     # Подписи к изолиниям
     ax.clabel(CS, inline=True, fontsize=8)
@@ -35,9 +43,8 @@ def cMap(n, intensityValues):
     fig.colorbar(cmap, ax=ax)
 
     # Настройка осей
-    ax.set_xlabel('Log(X)')
-    ax.set_ylabel('Log(Y)')
-    ax.set_title('Цветовая карта с изолиниями')
+    ax.set_xlabel(a + param1Name + b)
+    ax.set_ylabel(c + param2Name + d)
 
     # Вместо сохранения в файл, сохраняем в байтовый поток
     buf = io.BytesIO()
@@ -51,7 +58,12 @@ def save_color_map():
     data = request.get_json()
     n = data['n']
     intensities = np.array(data['intensities']).reshape((n, n))
-    img_buf = cMap(n, intensities)
+    param1 = data['param1']
+    param2 = data['param2']
+    param1Name = data['param1Name']
+    param2Name = data['param2Name']
+
+    img_buf = cMap(n, intensities, param1, param2, param1Name, param2Name)
 
     # Отправляем поток байтов как ответ
     return send_file(

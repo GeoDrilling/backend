@@ -357,7 +357,7 @@ public class AreasService {
         if (Objects.equals(inputParamAreasDTO.param1, "tvd_start") ||
                 Objects.equals(inputParamAreasDTO.param2, "tvd_start")) {
             for (int i = 0; i < range; i++) {
-                tvd_startArr[i] = Math.pow(10, -1 + i * ((double) 4.0 / range));
+                tvd_startArr[i] = modelEntity.getTvdStart() - 3 + 6 * ((double) i / (range - 1));
             }
             tvd_startArrlength = range;
             if (param1length == 0) {
@@ -371,7 +371,7 @@ public class AreasService {
         if (Objects.equals(inputParamAreasDTO.param1, "alpha") ||
                 Objects.equals(inputParamAreasDTO.param2, "alpha")) {
             for (int i = 0; i < range; i++) {
-                alphaArr[i] = Math.pow(10, -1 + i * ((double) 4.0 / range));
+                alphaArr[i] = modelEntity.getAlpha() - 10 + 20 * ((double) i / (range - 1));
             }
             alphaArrlength = range;
             if (param1length == 0) {
@@ -385,7 +385,7 @@ public class AreasService {
         if (Objects.equals(inputParamAreasDTO.param1, "ro_up") ||
                 Objects.equals(inputParamAreasDTO.param2, "ro_up")) {
             for (int i = 0; i < range; i++) {
-                ro_upArr[i] = Math.pow(10, -1 + i * ((double) 4.0 / range));
+                ro_upArr[i] = Math.pow(10, -1 + 4 * ((double) i / (range - 1)));
             }
             ro_upArrlength = range;
             if (param1length == 0) {
@@ -399,7 +399,7 @@ public class AreasService {
         if (Objects.equals(inputParamAreasDTO.param1, "kanisotropy_up") ||
                 Objects.equals(inputParamAreasDTO.param2, "kanisotropy_up")) {
             for (int i = 0; i < range; i++) {
-                kanisotropy_upArr[i] = Math.pow(10, -1 + i * ((double) 4.0 / range));
+                kanisotropy_upArr[i] = 1 + 9 * ((double) i / (range - 1));
             }
             kanisotropy_upArrlength = range;
             if (param1length == 0) {
@@ -413,7 +413,7 @@ public class AreasService {
         if (Objects.equals(inputParamAreasDTO.param1, "ro_down") ||
                 Objects.equals(inputParamAreasDTO.param2, "ro_down")) {
             for (int i = 0; i < range; i++) {
-                ro_downArr[i] = Math.pow(10, -1 + i * ((double) 4.0 / range));
+                ro_downArr[i] = Math.pow(10, -1 + 4 * ((double) i / (range - 1)));
             }
             ro_downArrlength = range;
             if (param1length == 0) {
@@ -427,7 +427,7 @@ public class AreasService {
         if (Objects.equals(inputParamAreasDTO.param1, "kanisotropy_down") ||
                 Objects.equals(inputParamAreasDTO.param2, "kanisotropy_down")) {
             for (int i = 0; i < range; i++) {
-                kanisotropy_downArr[i] = Math.pow(10, -1 + i * ((double) 4.0 / range));
+                kanisotropy_downArr[i] = 1 + 9 * ((double) i / (range - 1));
             }
             kanisotropy_downArrlength = range;
             if (param1length == 0) {
@@ -441,7 +441,7 @@ public class AreasService {
 
         InputAreasEquivalence inputAreasEquivalence = new InputAreasEquivalence(nprobes, num_probe, npoints,
         tvd2, x2, zeni2, tvd_startArrlength, tvd_startArr,
-        alphaArrlength, alphaArr, ro_downArrlength,
+        alphaArrlength, alphaArr, ro_upArrlength,
         ro_upArr, kanisotropy_upArrlength,
         kanisotropy_upArr, ro_downArrlength,
         ro_downArr, kanisotropy_downArrlength,
@@ -459,12 +459,10 @@ public class AreasService {
         colorMapBuilder.saveColorMapToFile(colorMapBuilder.generateLogarithmicColorMap(
                 param1, param2, intensityValues, findMin(areasEquivalence.getTargetFunction()),
                 findMax(areasEquivalence.getTargetFunction())), "ColorMap");*/
-        System.out.println(convertToFloatList(ro_upArr));
-        System.out.println(convertToFloatList(ro_downArr));
+        System.out.println(convertToFloatList(param1));
+        System.out.println(convertToFloatList(param2));
         System.out.println(convertToFloatList(areasEquivalence.getTargetFunction()));
-        pythonService.sendIntensityDataAndReceiveImage
-                (convertToFloatList(areasEquivalence.getTargetFunction()), range);
         return pythonService.sendIntensityDataAndReceiveImage
-                (convertToFloatList(areasEquivalence.getTargetFunction()), range);
+                (convertToFloatList(areasEquivalence.getTargetFunction()), range, param1, param2, inputParamAreasDTO.param1, inputParamAreasDTO.param2);
     }
 }
