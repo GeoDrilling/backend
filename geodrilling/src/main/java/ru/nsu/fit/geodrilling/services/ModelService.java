@@ -1,8 +1,10 @@
 package ru.nsu.fit.geodrilling.services;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.nsu.fit.geodrilling.dto.CurveDto;
 import ru.nsu.fit.geodrilling.dto.InputBuildModel;
 import ru.nsu.fit.geodrilling.dto.InputModelSignal;
 import ru.nsu.fit.geodrilling.dto.ModelDTO;
@@ -287,13 +289,11 @@ public class ModelService {
             ro_by_phases, ro_by_ampl, tvd_start, min_tvd_start, max_tvd_start, alpha,
             min_alpha, max_alpha, ro_up, kanisotropy_up, ro_down, kanisotropy_down);
     }
-    public ModelDTO createModel(ModelDTO modelDTO, Long idProject, String email){
-        Boolean bol = true;
-        for (ProjectEntity projectEntity : userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")).getProjects()) {
-            if (Objects.equals(projectEntity.getId(), idProject)) {
-                bol = false;
-            }
+    public ModelDTO createModel(String email, ModelDTO modelDTO, Long idProject){
+        ProjectEntity projectEntity = projectRepository.findById(idProject)
+            .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
+        if(!Objects.equals(projectEntity.getUser().getEmail(), email)){
+            throw new EntityNotFoundException("Проект не найден");
         }
 
 
@@ -304,6 +304,7 @@ public class ModelService {
         inputBuildModel.setKanisotropy_up(modelDTO.getKanisotropyUp());
         inputBuildModel.setRo_down(modelDTO.getRoDown());
         inputBuildModel.setKanisotropy_down(modelDTO.getKanisotropyDown());
+        inputBuildModel.setAlpha(modelDTO.getAlpha());
         OutputModel outputModel = nativeLibrary.solverModel(inputBuildModel);
         System.out.println(outputModel.getMisfit());
         System.out.println(outputModel.getTvdStart());
@@ -347,14 +348,18 @@ public class ModelService {
         modelEntity.setStatus(outputModel.getStatus());
         modelEntity.setProjectEntity(projectEntity);*/
        // modelRepository.save(modelEntity);
-        return new ModelDTO(0L, 0D, 0D, outputModel.getKanisotropyDown(), outputModel.getRoDown(), outputModel.getKanisotropyUp(), outputModel.getRoUp(),
+        return new ModelDTO(0L,"", 0D, 0D, outputModel.getKanisotropyDown(), outputModel.getRoDown(), outputModel.getKanisotropyUp(), outputModel.getRoUp(),
             outputModel.getAlpha(), outputModel.getTvdStart());
 
     }
 
-    public ModelDTO createStartModel(Long idProject, Double start, Double end){
+    public ModelDTO createStartModel(String email, Long idProject, Double start, Double end){
         ProjectEntity projectEntity = projectRepository.findById(idProject)
             .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
+        if(!Objects.equals(projectEntity.getUser().getEmail(), email)){
+            throw new EntityNotFoundException("Проект не найден");
+        }
+
         InputBuildModel inputBuildModel = createInputBuildModel(idProject, true);
         OutputModel outputModel = nativeLibrary.startModel(inputBuildModel);
         System.out.println(outputModel.getMisfit());
@@ -363,28 +368,61 @@ public class ModelService {
         System.out.println(outputModel.getKanisotropyUp());
         System.out.println(outputModel.getRoDown());
         System.out.println(outputModel.getKanisotropyDown());
-        return new ModelDTO(0L, 0D, 0D, outputModel.getKanisotropyDown(), outputModel.getRoDown(), outputModel.getKanisotropyUp(), outputModel.getRoUp(),
+        return new ModelDTO(0L, "start", 0D, 0D, outputModel.getKanisotropyDown(), outputModel.getRoDown(), outputModel.getKanisotropyUp(), outputModel.getRoUp(),
             outputModel.getAlpha(), outputModel.getTvdStart());
     }
 
-    public SaveModelResponse saveModel(ModelDTO modelDTO, Long idProject, Double start, Double end){
+    public SaveModelResponse saveModel(String email, ModelDTO modelDTO, Long idProject){
         ProjectEntity projectEntity = projectRepository.findById(idProject)
             .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
-//        InputBuildModel inputBuildModel = createInputBuildModel(idProject, false);
-//
-//        ModelSignal modelSignal = nativeLibrary.simulateModelSignal(new InputModelSignal(inputBuildModel.getNprobes(), inputBuildModel.getNum_probe(), inputBuildModel.getNpoints(), inputBuildModel.getTvd(),
-//            inputBuildModel.getX(), inputBuildModel.getZeni(), modelDTO.getTvdStart(), modelDTO.getAlpha(), modelDTO.getRoUp(), modelDTO.getKanisotropyUp(), modelDTO.getRoDown(), modelDTO.getKanisotropyDown()));
+        if(!Objects.equals(projectEntity.getUser().getEmail(), email)){
+            throw new EntityNotFoundException("Проект не найден");
+        }
+
+
+        InputBuildModel inputBuildModel = createInputBuildModel(idProject, false);
+
+        ModelSignal modelSignal = nativeLibrary.simulateModelSignal(new InputModelSignal(inputBuildModel.getNprobes(), inputBuildModel.getNum_probe(), inputBuildModel.getNpoints(), inputBuildModel.getTvd(),
+            inputBuildModel.getX(), inputBuildModel.getZeni(), modelDTO.getTvdStart(), modelDTO.getAlpha(), modelDTO.getRoUp(), modelDTO.getKanisotropyUp(), modelDTO.getRoDown(), modelDTO.getKanisotropyDown()));
+        int n = inputBuildModel.getNprobes();
+
+        int elementsPerPart = modelSignal.getSyntRoByAmpl().length / n;
+        int remainingElements = modelSignal.getSyntRoByAmpl().length % n;
+
+        int startIndex = 0;
+        List <CurveDto> curveDtoList = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            int elements = elementsPerPart + (i < remainingElements ? 1 : 0);
+            double[] partAmpl = Arrays.copyOfRange(modelSignal.getSyntRoByAmpl(), startIndex, startIndex + elements);
+            double[] partPhases = Arrays.copyOfRange(modelSignal.getSyntRoByPhases(), startIndex, startIndex + elements);
+            startIndex += elements;
+
+            curveDtoList.add(new CurveDto("", partPhases));
+            curveDtoList.add(new CurveDto("", partAmpl));
+            System.out.println("Часть " + (i + 1) + ":");
+            System.out.println(Arrays.toString(partAmpl));
+            System.out.println(Arrays.toString(partPhases));
+            System.out.println();
+        }
 
         ModelEntity modelEntity =  projectEntity.getModelEntity();
+        modelEntity.setStartX(modelDTO.getStart());
+        modelEntity.setEndX(modelDTO.getEnd());
         modelEntity.setKanisotropyDown(modelDTO.getKanisotropyDown());
         modelEntity.setRoDown(modelDTO.getRoDown());
         modelEntity.setKanisotropyUp(modelDTO.getKanisotropyUp());
         modelEntity.setRoUp(modelDTO.getRoUp());
         modelEntity.setAlpha(modelDTO.getAlpha());
         modelEntity.setTvdStart(modelDTO.getTvdStart());
-
+        if (modelDTO.getName()!=null) {
+            modelEntity.setName(modelDTO.getName());
+        }
+        else
+        {
+            modelEntity.setName(modelDTO.getStart().toString() + "-" + modelDTO.getEnd().toString());
+        }
         List<ModelDTO> modelDTOList = new ArrayList<>();
-        modelDTOList.add(new ModelDTO(modelEntity.getId(), modelEntity.getStartX(),
+        modelDTOList.add(new ModelDTO(modelEntity.getId(), modelEntity.getName(), modelEntity.getStartX(),
             modelEntity.getEndX(), modelEntity.getKanisotropyDown(), modelEntity.getRoDown(),
             modelEntity.getKanisotropyUp(), modelEntity.getRoUp(), modelEntity.getAlpha(), modelEntity.getTvdStart()));
         projectEntity.setModelEntity(modelEntity);
@@ -393,13 +431,16 @@ public class ModelService {
         return new SaveModelResponse(modelDTOList, null);
     }
 
-    public List<ModelDTO> getModel(Long idProject){
+    public List<ModelDTO> getModel(String email, Long idProject){
         ProjectEntity projectEntity = projectRepository.findById(idProject)
             .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
+        if(!Objects.equals(projectEntity.getUser().getEmail(), email)){
+            throw new EntityNotFoundException("Проект не найден");
+        }
 
         List<ModelDTO> modelDTOList = new ArrayList<>();
         ModelEntity modelEntity = projectEntity.getModelEntity();
-        modelDTOList.add(new ModelDTO(modelEntity.getId(), modelEntity.getStartX(),
+        modelDTOList.add(new ModelDTO(modelEntity.getId(), modelEntity.getName(), modelEntity.getStartX(),
             modelEntity.getEndX(), modelEntity.getKanisotropyDown(), modelEntity.getRoDown(),
             modelEntity.getKanisotropyUp(), modelEntity.getRoUp(), modelEntity.getAlpha(), modelEntity.getTvdStart()));
         return modelDTOList;
