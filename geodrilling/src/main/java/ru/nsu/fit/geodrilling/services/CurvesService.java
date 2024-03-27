@@ -7,8 +7,8 @@ import grillid9.laslib.LasReader;
 import jakarta.transaction.Transactional;
 
 import java.io.*;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
+import java.nio.file.*;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,8 +21,6 @@ import ru.nsu.fit.geodrilling.exceptions.CurveSupplementationException;
 import ru.nsu.fit.geodrilling.exceptions.NewCurvesAddingException;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -146,6 +144,17 @@ public class CurvesService {
         }
         List<Double> curveData = getCurveDataByName(curveName, project.getId()).getCurveData();
         return curveData.subList(fromDepthIdx, toDepthIdx);
+    }
+
+    public void saveSyntheticCurve(ProjectEntity project, String curveName, List<Double> data) {
+        Path syntheticCurvesPath = Path.of(projectsFolderPath + "\\project" + project.getId() + "\\data\\synthetic\\");
+        try {
+            Files.createDirectories(syntheticCurvesPath);
+            Files.writeString(Path.of(syntheticCurvesPath + "\\" + curveName), gson.toJson(data), StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            log.error("Невозможно создать файл {}", syntheticCurvesPath + curveName);
+            throw new UncheckedIOException(e);
+        }
     }
 
     private void saveCurveDataTo(File curveData, Curve curve, ProjectEntity project) throws IOException {
