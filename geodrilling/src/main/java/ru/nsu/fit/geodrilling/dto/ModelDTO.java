@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ModelDTO {
     private Long idModel;
+    private String name;
     private Double start;
     private Double end;
     private Double kanisotropyDown;

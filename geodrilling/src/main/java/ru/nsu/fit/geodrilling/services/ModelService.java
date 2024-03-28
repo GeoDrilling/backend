@@ -1,13 +1,20 @@
 package ru.nsu.fit.geodrilling.services;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.Arrays;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.nsu.fit.geodrilling.dto.CurveDto;
 import ru.nsu.fit.geodrilling.dto.InputBuildModel;
+import ru.nsu.fit.geodrilling.dto.InputModelSignal;
 import ru.nsu.fit.geodrilling.dto.ModelDTO;
 import ru.nsu.fit.geodrilling.dto.SaveModelResponse;
 import ru.nsu.fit.geodrilling.entity.ModelEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
+import ru.nsu.fit.geodrilling.entity.SootEntity;
+import ru.nsu.fit.geodrilling.model.ModelSignal;
 import ru.nsu.fit.geodrilling.model.OutputModel;
 import ru.nsu.fit.geodrilling.repositories.ModelRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
@@ -23,90 +30,102 @@ import static ru.nsu.fit.geodrilling.model.Constant.NAN;
 
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ModelService {
-    private final UserRepository userRepository;
-    private final ProjectRepository projectRepository;
-    private final CurvesService lasFileService;
-    private final NativeLibrary nativeLibrary;
-    private final ModelRepository modelRepository;
-    private double[] ListDoubleInDoubleArray(List<Double> list) {
-        return list.stream().mapToDouble(Double::doubleValue).toArray();
-    }
 
-    private InputBuildModel createInputBuildModel(Long idProject, boolean log){
-        List<String> curves = new ArrayList<>(lasFileService.getCurvesNames(idProject).getCurvesNames());
-        boolean bolPL = false;
-        boolean bolPLD = false;
-        boolean bolPLE = false;
-        boolean bolPH = false;
-        boolean bolPHD = false;
-        boolean bolPHE = false;
-        boolean bolAL = false;
-        boolean bolALD = false;
-        boolean bolALE = false;
-        boolean bolAH = false;
-        boolean bolAHD = false;
-        boolean bolAHE = false;
-        int nprobes = 0;
-        int[] num_probe = new int[6];
-        double tvd_start = NAN;
-        double min_tvd_start = NAN;
-        double max_tvd_start = NAN;
-        double alpha = NAN;
-        double min_alpha = NAN;
-        double max_alpha = NAN;
-        double ro_up = NAN;
-        double kanisotropy_up = NAN;
-        double ro_down = NAN;
-        double kanisotropy_down = NAN;
-        double[] arrPL = null;
-        double[] arrPLD = null;
-        double[] arrPLE = null;
-        double[] arrPH = null;
-        double[] arrPHD = null;
-        double[] arrPHE = null;
-        double[] arrAL = null;
-        double[] arrALD = null;
-        double[] arrALE = null;
-        double[] arrAH = null;
-        double[] arrAHD = null;
-        double[] arrAHE = null;
-        ProjectEntity projectEntity = projectRepository.findById(idProject)
-            .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
-        String ROPL = projectEntity.getSootEntity().getROPL();
-        String ROPLD = projectEntity.getSootEntity().getROPLD();
-        String ROPLE = projectEntity.getSootEntity().getROPLE();
-        String ROPH = projectEntity.getSootEntity().getROPH();
-        String ROPHD = projectEntity.getSootEntity().getROPHD();
-        String ROPHE = projectEntity.getSootEntity().getROPHE();
-        String ROAL = projectEntity.getSootEntity().getROAL();
-        String ROALD = projectEntity.getSootEntity().getROALD();
-        String ROALE = projectEntity.getSootEntity().getROALE();
-        String ROAH = projectEntity.getSootEntity().getROAH();
-        String ROAHD = projectEntity.getSootEntity().getROAHD();
-        String ROAHE = projectEntity.getSootEntity().getROAHE();
-        String md = projectEntity.getSootEntity().getMd();
-        String tvd = projectEntity.getSootEntity().getTvd();
-        String x = projectEntity.getSootEntity().getX();
-        String zeni = projectEntity.getSootEntity().getZeni();
-        int length = 0;
-        if (curves.contains(ROPL) || curves.contains(ROAL)) {
-            if (curves.contains(ROPL)) {
-                arrPL = ListDoubleInDoubleArray(lasFileService.
-                    getCurveDataByName(ROPL, idProject).getCurveData());
-                bolPL = true;
-                length = arrPL.length;
-            }
-            if (curves.contains(ROAL)) {
-                arrAL = ListDoubleInDoubleArray(lasFileService.
-                    getCurveDataByName(ROAL, idProject).getCurveData());
-                bolAL = true;
-                length = arrAL.length;
-            }
-            num_probe[nprobes] = 1039;
-            nprobes += 1;
-        }
+  @Value("${lasfile.temp-path}")
+  private String tempFolderPath;
+
+  @Value("${projects.folder-path}")
+  private String projectsFolderPath;
+
+  private final UserRepository userRepository;
+  private final ProjectRepository projectRepository;
+  private final CurvesService lasFileService;
+  private final NativeLibrary nativeLibrary;
+  private final ModelRepository modelRepository;
+  private final CurvesService curvesService;
+//  @Value("${projects.folder-path}")
+//  private String projectsFolderPath;
+
+  private double[] ListDoubleInDoubleArray(List<Double> list) {
+    return list.stream().mapToDouble(Double::doubleValue).toArray();
+  }
+
+  private InputBuildModel createInputBuildModel(Long idProject, boolean log) {
+    List<String> curves = new ArrayList<>(
+        lasFileService.getCurvesNames(idProject).getCurvesNames());
+    boolean bolPL = false;
+    boolean bolPLD = false;
+    boolean bolPLE = false;
+    boolean bolPH = false;
+    boolean bolPHD = false;
+    boolean bolPHE = false;
+    boolean bolAL = false;
+    boolean bolALD = false;
+    boolean bolALE = false;
+    boolean bolAH = false;
+    boolean bolAHD = false;
+    boolean bolAHE = false;
+    int nprobes = 0;
+    int[] num_probe = new int[6];
+    double tvd_start = NAN;
+    double min_tvd_start = NAN;
+    double max_tvd_start = NAN;
+    double alpha = NAN;
+    double min_alpha = NAN;
+    double max_alpha = NAN;
+    double ro_up = NAN;
+    double kanisotropy_up = NAN;
+    double ro_down = NAN;
+    double kanisotropy_down = NAN;
+    double[] arrPL = null;
+    double[] arrPLD = null;
+    double[] arrPLE = null;
+    double[] arrPH = null;
+    double[] arrPHD = null;
+    double[] arrPHE = null;
+    double[] arrAL = null;
+    double[] arrALD = null;
+    double[] arrALE = null;
+    double[] arrAH = null;
+    double[] arrAHD = null;
+    double[] arrAHE = null;
+    ProjectEntity projectEntity = projectRepository.findById(idProject)
+        .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
+    String ROPL = projectEntity.getSootEntity().getROPL();
+    String ROPLD = projectEntity.getSootEntity().getROPLD();
+    String ROPLE = projectEntity.getSootEntity().getROPLE();
+    String ROPH = projectEntity.getSootEntity().getROPH();
+    String ROPHD = projectEntity.getSootEntity().getROPHD();
+    String ROPHE = projectEntity.getSootEntity().getROPHE();
+    String ROAL = projectEntity.getSootEntity().getROAL();
+    String ROALD = projectEntity.getSootEntity().getROALD();
+    String ROALE = projectEntity.getSootEntity().getROALE();
+    String ROAH = projectEntity.getSootEntity().getROAH();
+    String ROAHD = projectEntity.getSootEntity().getROAHD();
+    String ROAHE = projectEntity.getSootEntity().getROAHE();
+    String md = projectEntity.getSootEntity().getMd();
+    String tvd = projectEntity.getSootEntity().getTvd();
+    String x = projectEntity.getSootEntity().getX();
+    String zeni = projectEntity.getSootEntity().getZeni();
+    int length = 0;
+    if (curves.contains(ROPL) || curves.contains(ROAL)) {
+      if (curves.contains(ROPL)) {
+        arrPL = ListDoubleInDoubleArray(lasFileService.
+            getCurveDataByName(ROPL, idProject).getCurveData());
+        bolPL = true;
+        length = arrPL.length;
+      }
+      if (curves.contains(ROAL)) {
+        arrAL = ListDoubleInDoubleArray(lasFileService.
+            getCurveDataByName(ROAL, idProject).getCurveData());
+        bolAL = true;
+        length = arrAL.length;
+      }
+      num_probe[nprobes] = 1039;
+      nprobes += 1;
+    }
         /*if (curves.contains(ROPLD) || curves.contains(ROALD)) {
             if (curves.contains(ROPLD)) {
                 arrPLD = ListDoubleInDoubleArray(lasFileService.
@@ -139,22 +158,22 @@ public class ModelService {
             num_probe[nprobes] = 1041;
             nprobes += 1;
         }*/
-        if (curves.contains(ROPH) || curves.contains(ROAH)) {
-            if (curves.contains(ROPH)) {
-                arrPH = ListDoubleInDoubleArray(lasFileService.
-                    getCurveDataByName(ROPH, idProject).getCurveData());
-                bolPH = true;
-                length = arrPH.length;
-            }
-            if (curves.contains(ROAH)) {
-                arrAH = ListDoubleInDoubleArray(lasFileService.
-                    getCurveDataByName(ROAH, idProject).getCurveData());
-                bolAH = true;
-                length = arrAH.length;
-            }
-            num_probe[nprobes] = 1042;
-            nprobes += 1;
-        }
+    if (curves.contains(ROPH) || curves.contains(ROAH)) {
+      if (curves.contains(ROPH)) {
+        arrPH = ListDoubleInDoubleArray(lasFileService.
+            getCurveDataByName(ROPH, idProject).getCurveData());
+        bolPH = true;
+        length = arrPH.length;
+      }
+      if (curves.contains(ROAH)) {
+        arrAH = ListDoubleInDoubleArray(lasFileService.
+            getCurveDataByName(ROAH, idProject).getCurveData());
+        bolAH = true;
+        length = arrAH.length;
+      }
+      num_probe[nprobes] = 1042;
+      nprobes += 1;
+    }
         /*if (curves.contains(ROPHD) || curves.contains(ROAHD)) {
             if (curves.contains(ROPHD)) {
                 arrPHD = ListDoubleInDoubleArray(lasFileService.
@@ -188,127 +207,127 @@ public class ModelService {
             num_probe[nprobes] = 1044;
             nprobes += 1;
         }*/
-        double[] md2 = null;
-        double[] tvd2 = null;
-        double[] x2 = null;
-        double[] zeni2 = null;
-        double[] ro_by_phases = new double[nprobes * length];
-        double[] ro_by_ampl = new double[nprobes * length];
-        md2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(md, idProject).getCurveData());
-        tvd2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(tvd, idProject).getCurveData());
-        x2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(x, idProject).getCurveData());
-        zeni2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(zeni, idProject).getCurveData());
-        int npoints = md2.length;
-        if (log) {
-            for (int i = 0, j = 0; i < length; i++) {
-                if (bolPL || bolAL) {
-                    if (bolPL) {
-                        ro_by_phases[i * nprobes + j] = arrPL[i];
-                    } else {
-                        ro_by_phases[i * nprobes + j] = 0;
-                    }
-                    if (bolAL) {
-                        ro_by_ampl[i * nprobes + j] = arrAL[i];
-                    } else {
-                        ro_by_ampl[i * nprobes + j] = 0;
-                    }
-                    j++;
-                }
-                if (bolPLD || bolALD) {
-                    if (bolPLD) {
-                        ro_by_phases[i * nprobes + j] = arrPLD[i];
-                    } else {
-                        ro_by_phases[i * nprobes + j] = 0;
-                    }
-                    if (bolALD) {
-                        ro_by_ampl[i * nprobes + j] = arrALD[i];
-                    } else {
-                        ro_by_ampl[i * nprobes + j] = 0;
-                    }
-                    j++;
-                }
-                if (bolPLE || bolALE) {
-                    if (bolPLE) {
-                        ro_by_phases[i * nprobes + j] = arrPLE[i];
-                    } else {
-                        ro_by_phases[i * nprobes + j] = 0;
-                    }
-                    if (bolALE) {
-                        ro_by_ampl[i * nprobes + j] = arrALE[i];
-                    } else {
-                        ro_by_ampl[i * nprobes + j] = 0;
-                    }
-                    j++;
-                }
-                if (bolPH || bolAH) {
-                    if (bolPH) {
-                        ro_by_phases[i * nprobes + j] = arrPH[i];
-                    } else {
-                        ro_by_phases[i * nprobes + j] = 0;
-                    }
-                    if (bolAH) {
-                        ro_by_ampl[i * nprobes + j] = arrAH[i];
-                    } else {
-                        ro_by_ampl[i * nprobes + j] = 0;
-                    }
-                    j++;
-                }
-                if (bolPHD || bolAHD) {
-                    if (bolPHD) {
-                        ro_by_phases[i * nprobes + j] = arrPHD[i];
-                    } else {
-                        ro_by_phases[i * nprobes + j] = 0;
-                    }
-                    if (bolAHD) {
-                        ro_by_ampl[i * nprobes + j] = arrAHD[i];
-                    } else {
-                        ro_by_ampl[i * nprobes + j] = 0;
-                    }
-                    j++;
-                }
-                if (bolPHE || bolAHE) {
-                    if (bolPHE) {
-                        ro_by_phases[i * nprobes + j] = arrPHE[i];
-                    } else {
-                        ro_by_phases[i * nprobes + j] = 0;
-                    }
-                    if (bolAHE) {
-                        ro_by_ampl[i * nprobes + j] = arrAHE[i];
-                    } else {
-                        ro_by_ampl[i * nprobes + j] = 0;
-                    }
-                }
-                j = 0;
-            }
+    double[] md2 = null;
+    double[] tvd2 = null;
+    double[] x2 = null;
+    double[] zeni2 = null;
+    double[] ro_by_phases = new double[nprobes * length];
+    double[] ro_by_ampl = new double[nprobes * length];
+    md2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(md, idProject).getCurveData());
+    tvd2 = ListDoubleInDoubleArray(
+        lasFileService.getCurveDataByName(tvd, idProject).getCurveData());
+    x2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(x, idProject).getCurveData());
+    zeni2 = ListDoubleInDoubleArray(
+        lasFileService.getCurveDataByName(zeni, idProject).getCurveData());
+    int npoints = md2.length;
+    if (log) {
+      for (int i = 0, j = 0; i < length; i++) {
+        if (bolPL || bolAL) {
+          if (bolPL) {
+            ro_by_phases[i * nprobes + j] = arrPL[i];
+          } else {
+            ro_by_phases[i * nprobes + j] = 0;
+          }
+          if (bolAL) {
+            ro_by_ampl[i * nprobes + j] = arrAL[i];
+          } else {
+            ro_by_ampl[i * nprobes + j] = 0;
+          }
+          j++;
         }
-        return new InputBuildModel(nprobes, num_probe, npoints, md2, tvd2, x2, zeni2,
-            ro_by_phases, ro_by_ampl, tvd_start, min_tvd_start, max_tvd_start, alpha,
-            min_alpha, max_alpha, ro_up, kanisotropy_up, ro_down, kanisotropy_down);
+        if (bolPLD || bolALD) {
+          if (bolPLD) {
+            ro_by_phases[i * nprobes + j] = arrPLD[i];
+          } else {
+            ro_by_phases[i * nprobes + j] = 0;
+          }
+          if (bolALD) {
+            ro_by_ampl[i * nprobes + j] = arrALD[i];
+          } else {
+            ro_by_ampl[i * nprobes + j] = 0;
+          }
+          j++;
+        }
+        if (bolPLE || bolALE) {
+          if (bolPLE) {
+            ro_by_phases[i * nprobes + j] = arrPLE[i];
+          } else {
+            ro_by_phases[i * nprobes + j] = 0;
+          }
+          if (bolALE) {
+            ro_by_ampl[i * nprobes + j] = arrALE[i];
+          } else {
+            ro_by_ampl[i * nprobes + j] = 0;
+          }
+          j++;
+        }
+        if (bolPH || bolAH) {
+          if (bolPH) {
+            ro_by_phases[i * nprobes + j] = arrPH[i];
+          } else {
+            ro_by_phases[i * nprobes + j] = 0;
+          }
+          if (bolAH) {
+            ro_by_ampl[i * nprobes + j] = arrAH[i];
+          } else {
+            ro_by_ampl[i * nprobes + j] = 0;
+          }
+          j++;
+        }
+        if (bolPHD || bolAHD) {
+          if (bolPHD) {
+            ro_by_phases[i * nprobes + j] = arrPHD[i];
+          } else {
+            ro_by_phases[i * nprobes + j] = 0;
+          }
+          if (bolAHD) {
+            ro_by_ampl[i * nprobes + j] = arrAHD[i];
+          } else {
+            ro_by_ampl[i * nprobes + j] = 0;
+          }
+          j++;
+        }
+        if (bolPHE || bolAHE) {
+          if (bolPHE) {
+            ro_by_phases[i * nprobes + j] = arrPHE[i];
+          } else {
+            ro_by_phases[i * nprobes + j] = 0;
+          }
+          if (bolAHE) {
+            ro_by_ampl[i * nprobes + j] = arrAHE[i];
+          } else {
+            ro_by_ampl[i * nprobes + j] = 0;
+          }
+        }
+        j = 0;
+      }
     }
-    public ModelDTO createModel(ModelDTO modelDTO, Long idProject, String email){
-        Boolean bol = true;
-        for (ProjectEntity projectEntity : userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")).getProjects()) {
-            if (Objects.equals(projectEntity.getId(), idProject)) {
-                bol = false;
-            }
-        }
+    return new InputBuildModel(nprobes, num_probe, npoints, md2, tvd2, x2, zeni2,
+        ro_by_phases, ro_by_ampl, tvd_start, min_tvd_start, max_tvd_start, alpha,
+        min_alpha, max_alpha, ro_up, kanisotropy_up, ro_down, kanisotropy_down);
+  }
 
+  public ModelDTO createModel(String email, ModelDTO modelDTO, Long idProject) {
+    ProjectEntity projectEntity = projectRepository.findById(idProject)
+        .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
+    if (!Objects.equals(projectEntity.getUser().getEmail(), email)) {
+      throw new EntityNotFoundException("Проект не найден");
+    }
 
-
-        InputBuildModel inputBuildModel = createInputBuildModel(idProject, true);
-        inputBuildModel.setTvd_start(modelDTO.getTvdStart());
-        inputBuildModel.setRo_up(modelDTO.getRoUp());
-        inputBuildModel.setKanisotropy_up(modelDTO.getKanisotropyUp());
-        inputBuildModel.setRo_down(modelDTO.getRoDown());
-        inputBuildModel.setKanisotropy_down(modelDTO.getKanisotropyDown());
-        OutputModel outputModel = nativeLibrary.solverModel(inputBuildModel);
-        System.out.println(outputModel.getMisfit());
-        System.out.println(outputModel.getTvdStart());
-        System.out.println(outputModel.getRoUp());
-        System.out.println(outputModel.getKanisotropyUp());
-        System.out.println(outputModel.getRoDown());
-        System.out.println(outputModel.getKanisotropyDown());
+    InputBuildModel inputBuildModel = createInputBuildModel(idProject, true);
+    inputBuildModel.setTvd_start(modelDTO.getTvdStart());
+    inputBuildModel.setRo_up(modelDTO.getRoUp());
+    inputBuildModel.setKanisotropy_up(modelDTO.getKanisotropyUp());
+    inputBuildModel.setRo_down(modelDTO.getRoDown());
+    inputBuildModel.setKanisotropy_down(modelDTO.getKanisotropyDown());
+    inputBuildModel.setAlpha(modelDTO.getAlpha());
+    OutputModel outputModel = nativeLibrary.solverModel(inputBuildModel);
+    System.out.println(outputModel.getMisfit());
+    System.out.println(outputModel.getTvdStart());
+    System.out.println(outputModel.getRoUp());
+    System.out.println(outputModel.getKanisotropyUp());
+    System.out.println(outputModel.getRoDown());
+    System.out.println(outputModel.getKanisotropyDown());
         /*OutputModel outputModel = nativeLibrary.startModel(new InputBuildModel(nprobes, num_probe, npoints, md2, tvd2, x2, zeni2,
                 ro_by_phases, ro_by_ampl, tvd_start, min_tvd_start, max_tvd_start, alpha,
                 min_alpha, max_alpha, ro_up, kanisotropy_up, ro_down, kanisotropy_down));
@@ -344,62 +363,144 @@ public class ModelService {
         modelEntity.setTvdStart(outputModel.getTvdStart());
         modelEntity.setStatus(outputModel.getStatus());
         modelEntity.setProjectEntity(projectEntity);*/
-       // modelRepository.save(modelEntity);
-        return new ModelDTO(0L, 0D, 0D, outputModel.getKanisotropyDown(), outputModel.getRoDown(), outputModel.getKanisotropyUp(), outputModel.getRoUp(),
-            outputModel.getAlpha(), outputModel.getTvdStart());
+    // modelRepository.save(modelEntity);
+    return new ModelDTO(0L, "", 0D, 0D, outputModel.getKanisotropyDown(), outputModel.getRoDown(),
+        outputModel.getKanisotropyUp(), outputModel.getRoUp(),
+        outputModel.getAlpha(), outputModel.getTvdStart());
 
+  }
+
+  public ModelDTO createStartModel(String email, Long idProject, Double start, Double end) {
+    ProjectEntity projectEntity = projectRepository.findById(idProject)
+        .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
+    if (!Objects.equals(projectEntity.getUser().getEmail(), email)) {
+      throw new EntityNotFoundException("Проект не найден");
     }
 
-    public ModelDTO createStartModel(Long idProject, Double start, Double end){
-        ProjectEntity projectEntity = projectRepository.findById(idProject)
-            .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
-        InputBuildModel inputBuildModel = createInputBuildModel(idProject, true);
-        OutputModel outputModel = nativeLibrary.startModel(inputBuildModel);
-        System.out.println(outputModel.getMisfit());
-        System.out.println(outputModel.getTvdStart());
-        System.out.println(outputModel.getRoUp());
-        System.out.println(outputModel.getKanisotropyUp());
-        System.out.println(outputModel.getRoDown());
-        System.out.println(outputModel.getKanisotropyDown());
-        return new ModelDTO(0L, 0D, 0D, outputModel.getKanisotropyDown(), outputModel.getRoDown(), outputModel.getKanisotropyUp(), outputModel.getRoUp(),
-            outputModel.getAlpha(), outputModel.getTvdStart());
+    InputBuildModel inputBuildModel = createInputBuildModel(idProject, true);
+    OutputModel outputModel = nativeLibrary.startModel(inputBuildModel);
+    System.out.println(outputModel.getMisfit());
+    System.out.println(outputModel.getTvdStart());
+    System.out.println(outputModel.getRoUp());
+    System.out.println(outputModel.getKanisotropyUp());
+    System.out.println(outputModel.getRoDown());
+    System.out.println(outputModel.getKanisotropyDown());
+    return new ModelDTO(0L, "start", 0D, 0D, outputModel.getKanisotropyDown(),
+        outputModel.getRoDown(), outputModel.getKanisotropyUp(), outputModel.getRoUp(),
+        outputModel.getAlpha(), outputModel.getTvdStart());
+  }
+
+  public SaveModelResponse saveModel(String email, ModelDTO modelDTO, Long idProject) {
+    ProjectEntity projectEntity = projectRepository.findById(idProject)
+        .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
+    if (!Objects.equals(projectEntity.getUser().getEmail(), email)) {
+      throw new EntityNotFoundException("Проект не найден");
     }
 
-    public SaveModelResponse saveModel(ModelDTO modelDTO, Long idProject, Double start, Double end){
-        ProjectEntity projectEntity = projectRepository.findById(idProject)
-            .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
-//        InputBuildModel inputBuildModel = createInputBuildModel(idProject, false);
-//
-//        ModelSignal modelSignal = nativeLibrary.simulateModelSignal(new InputModelSignal(inputBuildModel.getNprobes(), inputBuildModel.getNum_probe(), inputBuildModel.getNpoints(), inputBuildModel.getTvd(),
-//            inputBuildModel.getX(), inputBuildModel.getZeni(), modelDTO.getTvdStart(), modelDTO.getAlpha(), modelDTO.getRoUp(), modelDTO.getKanisotropyUp(), modelDTO.getRoDown(), modelDTO.getKanisotropyDown()));
+    InputBuildModel inputBuildModel = createInputBuildModel(idProject, false);
 
-        ModelEntity modelEntity =  projectEntity.getModelEntity();
-        modelEntity.setKanisotropyDown(modelDTO.getKanisotropyDown());
-        modelEntity.setRoDown(modelDTO.getRoDown());
-        modelEntity.setKanisotropyUp(modelDTO.getKanisotropyUp());
-        modelEntity.setRoUp(modelDTO.getRoUp());
-        modelEntity.setAlpha(modelDTO.getAlpha());
-        modelEntity.setTvdStart(modelDTO.getTvdStart());
+    ModelSignal modelSignal = nativeLibrary.simulateModelSignal(
+        new InputModelSignal(inputBuildModel.getNprobes(), inputBuildModel.getNum_probe(),
+            inputBuildModel.getNpoints(), inputBuildModel.getTvd(),
+            inputBuildModel.getX(), inputBuildModel.getZeni(), modelDTO.getTvdStart(),
+            modelDTO.getAlpha(), modelDTO.getRoUp(), modelDTO.getKanisotropyUp(),
+            modelDTO.getRoDown(), modelDTO.getKanisotropyDown()));
+    int n = inputBuildModel.getNprobes();
 
-        List<ModelDTO> modelDTOList = new ArrayList<>();
-        modelDTOList.add(new ModelDTO(modelEntity.getId(), modelEntity.getStartX(),
+    int elementsPerPart = modelSignal.getSyntRoByAmpl().length / n;
+
+    List<CurveDto> curveDtoList = new ArrayList<>();
+    double[][] partAmpl = new double[n][elementsPerPart];
+    double[][] partPhases = new double[n][elementsPerPart];
+    for (int i = 0; i < elementsPerPart; i++) {
+      for (int j = 0; j < n; j++) {
+        partAmpl[j][i] = modelSignal.getSyntRoByAmpl()[i*n+j];
+        partPhases[j][i] = modelSignal.getSyntRoByPhases()[i*n+j];
+      }
+    }
+    int[] numProbe = inputBuildModel.getNum_probe();
+    SootEntity sootEntity = projectEntity.getSootEntity();
+    List<String> nameCurveList = getSootName(sootEntity);
+    for (int j = 0; j < n; j++) {
+      String name = getName(nameCurveList, numProbe[j], true);
+      List<Double> list = new ArrayList<>();
+      for (double value : partAmpl[j]) {
+        list.add(value);
+      }
+      curvesService.saveSyntheticCurve(projectEntity, name, list);
+      curveDtoList.add(new CurveDto(projectsFolderPath  + "\\project" + projectEntity.getId() + "\\data\\synthetic\\" + name, partAmpl[j]));
+
+      name = getName(nameCurveList, numProbe[j], false);
+      list = new ArrayList<>();
+      for (double value : partAmpl[j]) {
+        list.add(value);
+      }
+      curvesService.saveSyntheticCurve(projectEntity, name, list);
+      curveDtoList.add(new CurveDto(projectsFolderPath  + "\\project" + projectEntity.getId() + "\\data\\synthetic\\" + name, partPhases[j]));
+    }
+    ModelEntity modelEntity = projectEntity.getModelEntity();
+    modelEntity.setStartX(modelDTO.getStart());
+    modelEntity.setEndX(modelDTO.getEnd());
+    modelEntity.setKanisotropyDown(modelDTO.getKanisotropyDown());
+    modelEntity.setRoDown(modelDTO.getRoDown());
+    modelEntity.setKanisotropyUp(modelDTO.getKanisotropyUp());
+    modelEntity.setRoUp(modelDTO.getRoUp());
+    modelEntity.setAlpha(modelDTO.getAlpha());
+    modelEntity.setTvdStart(modelDTO.getTvdStart());
+    if (modelDTO.getName() != null) {
+      modelEntity.setName(modelDTO.getName());
+    } else {
+      modelEntity.setName(modelDTO.getStart().toString() + "-" + modelDTO.getEnd().toString());
+    }
+    List<ModelDTO> modelDTOList = new ArrayList<>();
+    modelDTOList.add(
+        new ModelDTO(modelEntity.getId(), modelEntity.getName(), modelEntity.getStartX(),
             modelEntity.getEndX(), modelEntity.getKanisotropyDown(), modelEntity.getRoDown(),
-            modelEntity.getKanisotropyUp(), modelEntity.getRoUp(), modelEntity.getAlpha(), modelEntity.getTvdStart()));
-        projectEntity.setModelEntity(modelEntity);
-        modelEntity.setProjectEntity(projectEntity);
-        projectRepository.save(projectEntity);
-        return new SaveModelResponse(modelDTOList, null);
+            modelEntity.getKanisotropyUp(), modelEntity.getRoUp(), modelEntity.getAlpha(),
+            modelEntity.getTvdStart()));
+    projectEntity.setModelEntity(modelEntity);
+    modelEntity.setProjectEntity(projectEntity);
+    projectRepository.save(projectEntity);
+    return new SaveModelResponse(modelDTOList, curveDtoList);
+  }
+  private List<String> getSootName(SootEntity sootEntity){
+    List<String> stringList = new ArrayList<>();
+    stringList.add(sootEntity.getROAL());
+    stringList.add(sootEntity.getROALD());
+    stringList.add(sootEntity.getROALE());
+    stringList.add(sootEntity.getROAH());
+    stringList.add(sootEntity.getROAHD());
+    stringList.add(sootEntity.getROAHE());
+
+    stringList.add(sootEntity.getROPL());
+    stringList.add(sootEntity.getROPLD());
+    stringList.add(sootEntity.getROPLE());
+    stringList.add(sootEntity.getROPH());
+    stringList.add(sootEntity.getROPHD());
+    stringList.add(sootEntity.getROPHE());
+    return stringList;
+  }
+  private String getName(List<String> sootNameList, int num, boolean f){
+    if(f){
+      return sootNameList.get(num-1039);
+    }
+    return sootNameList.get(num-1039 + 6);
+  }
+
+  public List<ModelDTO> getModel(String email, Long idProject) {
+    ProjectEntity projectEntity = projectRepository.findById(idProject)
+        .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
+    if (!Objects.equals(projectEntity.getUser().getEmail(), email)) {
+      throw new EntityNotFoundException("Проект не найден");
     }
 
-    public List<ModelDTO> getModel(Long idProject){
-        ProjectEntity projectEntity = projectRepository.findById(idProject)
-            .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
-
-        List<ModelDTO> modelDTOList = new ArrayList<>();
-        ModelEntity modelEntity = projectEntity.getModelEntity();
-        modelDTOList.add(new ModelDTO(modelEntity.getId(), modelEntity.getStartX(),
+    List<ModelDTO> modelDTOList = new ArrayList<>();
+    ModelEntity modelEntity = projectEntity.getModelEntity();
+    modelDTOList.add(
+        new ModelDTO(modelEntity.getId(), modelEntity.getName(), modelEntity.getStartX(),
             modelEntity.getEndX(), modelEntity.getKanisotropyDown(), modelEntity.getRoDown(),
-            modelEntity.getKanisotropyUp(), modelEntity.getRoUp(), modelEntity.getAlpha(), modelEntity.getTvdStart()));
-        return modelDTOList;
-    }
+            modelEntity.getKanisotropyUp(), modelEntity.getRoUp(), modelEntity.getAlpha(),
+            modelEntity.getTvdStart()));
+    return modelDTOList;
+  }
 }

@@ -32,7 +32,7 @@ public class ModelController {
         .getAuthentication();
     String email = (modelMapper.map(((UserDetails) token.getPrincipal()), UserDTO.class)
         .getEmail());
-    return ResponseEntity.ok(modelService.createModel(modelDTO, idProject, email));
+    return ResponseEntity.ok(modelService.createModel(email, modelDTO, idProject));
   }
 
   @GetMapping("/createStartModel")
@@ -40,25 +40,33 @@ public class ModelController {
       @RequestParam("project_id") Long idProject, @RequestParam("start") Double Start,
       @RequestParam("end") Double End
   ) {
-    String email = SecurityContextHolder.getContext().getAuthentication().getName();
-    return ResponseEntity.ok(modelService.createStartModel(idProject, Start, End));
+    UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
+        .getAuthentication();
+    String email = (modelMapper.map(((UserDetails) token.getPrincipal()), UserDTO.class)
+        .getEmail());
+    return ResponseEntity.ok(modelService.createStartModel(email, idProject, Start, End));
   }
 
   @PostMapping("/saveModel")
   public ResponseEntity<SaveModelResponse> saveModel(
       @RequestBody ModelDTO modelDTO,
-      @RequestParam("project_id") Long idProject, @RequestParam("start") Double Start,
-      @RequestParam("end") Double End
+      @RequestParam("project_id") Long idProject
   ) {
-    String email = SecurityContextHolder.getContext().getAuthentication().getName();
-    return ResponseEntity.ok(modelService.saveModel(modelDTO, idProject, Start, End));
+    UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
+        .getAuthentication();
+    String email = (modelMapper.map(((UserDetails) token.getPrincipal()), UserDTO.class)
+        .getEmail());
+    return ResponseEntity.ok(modelService.saveModel(email, modelDTO, idProject));
   }
 
   @GetMapping("/getModel")
   public ResponseEntity<List<ModelDTO>> getModel(
       @RequestParam("project_id") Long idProject
   ) {
-    String email = SecurityContextHolder.getContext().getAuthentication().getName();
-    return ResponseEntity.ok(modelService.getModel(idProject));
+    UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
+        .getAuthentication();
+    String email = (modelMapper.map(((UserDetails) token.getPrincipal()), UserDTO.class)
+        .getEmail());
+    return ResponseEntity.ok(modelService.getModel(email, idProject));
   }
 }

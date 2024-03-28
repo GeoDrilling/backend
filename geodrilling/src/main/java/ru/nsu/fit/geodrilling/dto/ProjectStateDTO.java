@@ -18,4 +18,5 @@ public class ProjectStateDTO {
     private TabletProperties tabletProperties;
     private List<TrackProperty> trackProperties;
     private List<String> curvesNames;
+    private List<ModelDTO> modelDTOList;
 }

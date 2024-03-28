@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.nsu.fit.geodrilling.dto.ModelDTO;
 import ru.nsu.fit.geodrilling.dto.ProjectDTO;
 import ru.nsu.fit.geodrilling.dto.ProjectStateDTO;
 import ru.nsu.fit.geodrilling.dto.SaveProjectStateDTO;
@@ -78,7 +79,7 @@ public class ProjectService {
         state.setTabletProperties(tabletProperties);
         projectStateRepository.save(state);
         return new ProjectStateDTO(projectEntity.getId(), tabletProperties,
-                state.getTrackProperties(), Collections.emptyList());
+                state.getTrackProperties(), Collections.emptyList(), null);
     }
     public void saveProjectState(Long projectId, SaveProjectStateDTO state) {
         ProjectState projectState = projectStateRepository.findById(projectId)
@@ -90,11 +91,16 @@ public class ProjectService {
     public ProjectStateDTO getProjectState(Long projectId) {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(() ->
                 new ProjectNotFoundException("Проект не найден"));
+        List<ModelDTO> modelDTOList = new ArrayList<>();
+        ModelEntity modelEntity = project.getModelEntity();
+        modelDTOList.add(new ModelDTO(modelEntity.getId(), modelEntity.getName(), modelEntity.getStartX(),
+            modelEntity.getEndX(), modelEntity.getKanisotropyDown(), modelEntity.getRoDown(),
+            modelEntity.getKanisotropyUp(), modelEntity.getRoUp(), modelEntity.getAlpha(), modelEntity.getTvdStart()));
         return new ProjectStateDTO(project.getId(), project.getState().getTabletProperties(),
                 project.getState().getTrackProperties(),
                 project.getCurves().stream()
                         .map(CurveEntity::getDirInProject)
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList()), modelDTOList);
     }
 
     public ProjectDTO getProjectById(Long id) {
