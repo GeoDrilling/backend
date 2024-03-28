@@ -6,10 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.nsu.fit.geodrilling.dto.InputParamAreasDTO;
-import ru.nsu.fit.geodrilling.dto.SootinDTO;
-import ru.nsu.fit.geodrilling.model.AreasEquivalence;
 import ru.nsu.fit.geodrilling.services.AreasService;
-import ru.nsu.fit.geodrilling.services.ModelService;
 
 @RestController
 @RequestMapping("/areas")

@@ -26,7 +26,16 @@ public class InputBuildModel {
   public double min_alpha;
   public double max_alpha;
   public double ro_up;
+  public double min_ro_up;
+  public double max_ro_up;
+
   public double kanisotropy_up;
+  public double min_kanisotropy_up;
+  public double max_kanisotropy_up;
   public double ro_down;
+  public double min_ro_down;
+  public double max_ro_down;
   public double kanisotropy_down;
+  public double min_kanisotropy_down;
+  public double max_kanisotropy_down;
 }

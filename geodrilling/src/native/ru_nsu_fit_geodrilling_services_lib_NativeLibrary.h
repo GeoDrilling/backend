@@ -10,23 +10,23 @@ extern "C" {
 /*
  * Class:     ru_nsu_fit_geodrilling_services_lib_NativeLibrary
  * Method:    startModelSimpleHorizontalModel6Param1_5D_ByRo
- * Signature: (I[II[D[D[D[D[D[DDDDDDDDDDD)Lru/nsu/fit/geodrilling/model/OutputModel;
+ * Signature: (I[II[D[D[D[D[D[DDDDDDD)Lru/nsu/fit/geodrilling/services/lib/OutputModel;
  */
 JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary_startModelSimpleHorizontalModel6Param1_15D_1ByRo
-  (JNIEnv *, jobject, jint, jintArray, jint, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble);
+  (JNIEnv *, jobject, jint, jintArray, jint, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble);
 
 /*
  * Class:     ru_nsu_fit_geodrilling_services_lib_NativeLibrary
  * Method:    SolverHorizontalModel6Param1_5DByRo
- * Signature: (I[II[D[D[D[D[D[DDDDDDDDDDD)Lru/nsu/fit/geodrilling/model/OutputModel;
+ * Signature: (I[II[D[D[D[D[D[DDDDDDDDDDDDDDDDDDD)Lru/nsu/fit/geodrilling/services/lib/OutputModel;
  */
 JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary_SolverHorizontalModel6Param1_15DByRo
-  (JNIEnv *, jobject, jint, jintArray, jint, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble);
+  (JNIEnv *, jobject, jint, jintArray, jint, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble);
 
 /*
  * Class:     ru_nsu_fit_geodrilling_services_lib_NativeLibrary
  * Method:    LoggingHorizontalModel6Param1_5DRo
- * Signature: (I[II[D[D[DDDDDDD)Lru/nsu/fit/geodrilling/model/ModelSignal;
+ * Signature: (I[II[D[D[DDDDDDD)Lru/nsu/fit/geodrilling/services/lib/ModelSignal;
  */
 JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary_LoggingHorizontalModel6Param1_15DRo
   (JNIEnv *, jobject, jint, jintArray, jint, jdoubleArray, jdoubleArray, jdoubleArray, jdouble, jdouble, jdouble, jdouble, jdouble, jdouble);
@@ -34,7 +34,7 @@ JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary
 /*
  * Class:     ru_nsu_fit_geodrilling_services_lib_NativeLibrary
  * Method:    TargetFunctions
- * Signature: (I[II[D[D[DI[DI[DI[DI[DI[DI[D[D[D)Lru/nsu/fit/geodrilling/model/AreasEquivalence;
+ * Signature: (I[II[D[D[DI[DI[DI[DI[DI[DI[D[D[D)Lru/nsu/fit/geodrilling/services/lib/AreasEquivalence;
  */
 JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary_TargetFunctions
   (JNIEnv *, jobject, jint, jintArray, jint, jdoubleArray, jdoubleArray, jdoubleArray, jint, jdoubleArray, jint, jdoubleArray, jint, jdoubleArray, jint, jdoubleArray, jint, jdoubleArray, jint, jdoubleArray, jdoubleArray, jdoubleArray);

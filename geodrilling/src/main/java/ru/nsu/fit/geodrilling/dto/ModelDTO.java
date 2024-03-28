@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.nsu.fit.geodrilling.model.OutputModel;
 
 @Getter
 @Setter
