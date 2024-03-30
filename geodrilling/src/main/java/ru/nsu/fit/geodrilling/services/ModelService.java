@@ -1,6 +1,7 @@
 package ru.nsu.fit.geodrilling.services;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import ru.nsu.fit.geodrilling.dto.CurveDto;
 import ru.nsu.fit.geodrilling.dto.InputBuildModel;
 import ru.nsu.fit.geodrilling.dto.InputModelSignal;
+import ru.nsu.fit.geodrilling.dto.ModelCreateRequest;
 import ru.nsu.fit.geodrilling.dto.ModelDTO;
 import ru.nsu.fit.geodrilling.dto.SaveModelResponse;
 import ru.nsu.fit.geodrilling.entity.ModelEntity;
@@ -304,30 +306,79 @@ public class ModelService {
     }
     return new InputBuildModel(nprobes, num_probe, npoints, md2, tvd2, x2, zeni2,
         ro_by_phases, ro_by_ampl, tvd_start, min_tvd_start, max_tvd_start, alpha,
-        min_alpha, max_alpha, ro_up, kanisotropy_up, ro_down, kanisotropy_down);
+        min_alpha, max_alpha, ro_up, NAN, NAN, kanisotropy_up, NAN, NAN, ro_down, NAN, NAN, kanisotropy_down, NAN, NAN);
   }
 
-  public ModelDTO createModel(String email, ModelDTO modelDTO, Long idProject) {
+  public ModelDTO createModel(String email, ModelCreateRequest modelCreateRequest, Long idProject) {
     ProjectEntity projectEntity = projectRepository.findById(idProject)
         .orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
     if (!Objects.equals(projectEntity.getUser().getEmail(), email)) {
       throw new EntityNotFoundException("Проект не найден");
     }
-
+    ModelDTO modelDTO = modelCreateRequest.getModelDTO();
     InputBuildModel inputBuildModel = createInputBuildModel(idProject, true);
+
     inputBuildModel.setTvd_start(modelDTO.getTvdStart());
     inputBuildModel.setRo_up(modelDTO.getRoUp());
     inputBuildModel.setKanisotropy_up(modelDTO.getKanisotropyUp());
     inputBuildModel.setRo_down(modelDTO.getRoDown());
     inputBuildModel.setKanisotropy_down(modelDTO.getKanisotropyDown());
     inputBuildModel.setAlpha(modelDTO.getAlpha());
+
+    setDefaultValues(modelCreateRequest.getRangeParameters());
+
+    System.out.println(inputBuildModel.getKanisotropy_down());
+    System.out.println(inputBuildModel.getKanisotropy_up());
+    System.out.println(inputBuildModel.getRo_down());
+    System.out.println(inputBuildModel.getRo_up());
+    System.out.println(inputBuildModel.getAlpha());
+    System.out.println(inputBuildModel.getTvd_start());
+
+    System.out.println("====");
+    System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_up());
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_ro_up());
+    System.out.println(modelCreateRequest.getRangeParameters().getMax_alpha());
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_alpha());
+    System.out.println(modelCreateRequest.getRangeParameters().getMax_tvd_start());
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_tvd_start());
+    System.out.println(modelCreateRequest.getRangeParameters().getMax_kanisotropy_up());
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_kanisotropy_up());
+    System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_down());
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_ro_down());
+    System.out.println(modelCreateRequest.getRangeParameters().getMax_kanisotropy_down());
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());
+    System.out.println("====");
+
+   /* inputBuildModel.setMax_alpha(modelCreateRequest.getRangeParameters().getMax_alpha());
+    inputBuildModel.setMin_alpha(modelCreateRequest.getRangeParameters().getMin_alpha());
+    inputBuildModel.setMax_tvd_start(modelCreateRequest.getRangeParameters().getMax_tvd_start());
+    inputBuildModel.setMin_tvd_start(modelCreateRequest.getRangeParameters().getMin_tvd_start());
+    inputBuildModel.setMax_ro_up(modelCreateRequest.getRangeParameters().getMax_ro_up());
+    inputBuildModel.setMin_ro_up(modelCreateRequest.getRangeParameters().getMin_ro_up());
+    inputBuildModel.setMax_ro_down(modelCreateRequest.getRangeParameters().getMax_ro_down());
+    inputBuildModel.setMin_ro_down(modelCreateRequest.getRangeParameters().getMin_ro_down());
+    inputBuildModel.setMax_kanisotropy_up(modelCreateRequest.getRangeParameters().getMax_kanisotropy_up());
+    inputBuildModel.setMin_kanisotropy_up(modelCreateRequest.getRangeParameters().getMin_kanisotropy_up());
+    inputBuildModel.setMax_kanisotropy_down(modelCreateRequest.getRangeParameters().getMax_kanisotropy_down());
+    inputBuildModel.setMin_kanisotropy_down(modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());*/
+    System.out.println("====");
+    System.out.println(inputBuildModel.getMax_alpha());
+    System.out.println(inputBuildModel.getMin_alpha());
+    System.out.println(inputBuildModel.getMax_tvd_start());
+    System.out.println(inputBuildModel.getMin_tvd_start());
+    System.out.println(inputBuildModel.getMax_ro_up());
+    System.out.println(inputBuildModel.getMin_ro_up());
+    System.out.println(inputBuildModel.getMax_ro_down());
+    System.out.println(inputBuildModel.getMin_ro_down());
+    System.out.println(inputBuildModel.getMax_kanisotropy_up());
+    System.out.println(inputBuildModel.getMin_kanisotropy_up());
+    System.out.println(inputBuildModel.getMax_kanisotropy_down());
+    System.out.println(inputBuildModel.getMin_kanisotropy_down());
     OutputModel outputModel = nativeLibrary.solverModel(inputBuildModel);
+    System.out.println("====");
     System.out.println(outputModel.getMisfit());
-    System.out.println(outputModel.getTvdStart());
-    System.out.println(outputModel.getRoUp());
-    System.out.println(outputModel.getKanisotropyUp());
-    System.out.println(outputModel.getRoDown());
-    System.out.println(outputModel.getKanisotropyDown());
+
+
         /*OutputModel outputModel = nativeLibrary.startModel(new InputBuildModel(nprobes, num_probe, npoints, md2, tvd2, x2, zeni2,
                 ro_by_phases, ro_by_ampl, tvd_start, min_tvd_start, max_tvd_start, alpha,
                 min_alpha, max_alpha, ro_up, kanisotropy_up, ro_down, kanisotropy_down));
@@ -480,6 +531,30 @@ public class ModelService {
     stringList.add(sootEntity.getROPHE());
     return stringList;
   }
+
+  private void setDefaultValues(Object dto) {
+    if (dto == null) {
+      return;
+    }
+
+    Field[] fields = dto.getClass().getDeclaredFields();
+
+    for (Field field : fields) {
+      field.setAccessible(true); // Дает доступ к приватным полям
+      try {
+        // Проверка на null и установка значения в зависимости от типа
+        if (field.get(dto) == null) {
+          // Пример для строк и целых чисел. Добавьте свои типы по необходимости
+          if (field.getType().equals(Double.class)) {
+            field.set(dto, NAN);
+          }
+        }
+      } catch (IllegalAccessException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
   private String getName(List<String> sootNameList, int num, boolean f){
     if(f){
       return sootNameList.get(num-1039);

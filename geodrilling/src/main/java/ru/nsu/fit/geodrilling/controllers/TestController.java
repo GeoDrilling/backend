@@ -26,7 +26,7 @@ public class TestController {
     return modelMapper.map((token.getPrincipal()), UserDTO.class);
   }
 
-  @GetMapping("/lib")
+/*  @GetMapping("/lib")
   public ResponseEntity<OutputModel> demoLib() {
     double[] x = { 0 };
     int size_indata = 2850;
@@ -59,5 +59,5 @@ public class TestController {
   private void fill(double[] arr, int size, double value) {
     for (int i = 0; i < size; i++)
       arr[i] = value;
-  }
+  }*/
 }
