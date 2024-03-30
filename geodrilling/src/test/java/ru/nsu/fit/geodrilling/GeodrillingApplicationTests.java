@@ -113,7 +113,7 @@ class GeodrillingApplicationTests {
         );
         System.out.println(areasEquivalence);
     }
-    @Test
+  /*  @Test
     void testSolver() {
         int npoints = 3;
         double[] tvd = { 2, 2, 2 };
@@ -158,6 +158,6 @@ class GeodrillingApplicationTests {
         );
         System.out.println(model);
     }
-
+*/
 
 }

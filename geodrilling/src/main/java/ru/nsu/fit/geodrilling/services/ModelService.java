@@ -327,15 +327,15 @@ public class ModelService {
 
     setDefaultValues(modelCreateRequest.getRangeParameters());
 
-    System.out.println(inputBuildModel.getKanisotropy_down());
+/*    System.out.println(inputBuildModel.getKanisotropy_down());
     System.out.println(inputBuildModel.getKanisotropy_up());
     System.out.println(inputBuildModel.getRo_down());
     System.out.println(inputBuildModel.getRo_up());
     System.out.println(inputBuildModel.getAlpha());
-    System.out.println(inputBuildModel.getTvd_start());
+    System.out.println(inputBuildModel.getTvd_start());*/
 
     System.out.println("====");
-    System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_up());
+/*    System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_up());
     System.out.println(modelCreateRequest.getRangeParameters().getMin_ro_up());
     System.out.println(modelCreateRequest.getRangeParameters().getMax_alpha());
     System.out.println(modelCreateRequest.getRangeParameters().getMin_alpha());
@@ -346,10 +346,10 @@ public class ModelService {
     System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_down());
     System.out.println(modelCreateRequest.getRangeParameters().getMin_ro_down());
     System.out.println(modelCreateRequest.getRangeParameters().getMax_kanisotropy_down());
-    System.out.println(modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());*/
     System.out.println("====");
 
-   /* inputBuildModel.setMax_alpha(modelCreateRequest.getRangeParameters().getMax_alpha());
+    inputBuildModel.setMax_alpha(modelCreateRequest.getRangeParameters().getMax_alpha());
     inputBuildModel.setMin_alpha(modelCreateRequest.getRangeParameters().getMin_alpha());
     inputBuildModel.setMax_tvd_start(modelCreateRequest.getRangeParameters().getMax_tvd_start());
     inputBuildModel.setMin_tvd_start(modelCreateRequest.getRangeParameters().getMin_tvd_start());
@@ -360,8 +360,9 @@ public class ModelService {
     inputBuildModel.setMax_kanisotropy_up(modelCreateRequest.getRangeParameters().getMax_kanisotropy_up());
     inputBuildModel.setMin_kanisotropy_up(modelCreateRequest.getRangeParameters().getMin_kanisotropy_up());
     inputBuildModel.setMax_kanisotropy_down(modelCreateRequest.getRangeParameters().getMax_kanisotropy_down());
-    inputBuildModel.setMin_kanisotropy_down(modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());*/
-    System.out.println("====");
+    inputBuildModel.setMin_kanisotropy_down(modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());
+
+  /*  System.out.println("====");
     System.out.println(inputBuildModel.getMax_alpha());
     System.out.println(inputBuildModel.getMin_alpha());
     System.out.println(inputBuildModel.getMax_tvd_start());
@@ -373,7 +374,7 @@ public class ModelService {
     System.out.println(inputBuildModel.getMax_kanisotropy_up());
     System.out.println(inputBuildModel.getMin_kanisotropy_up());
     System.out.println(inputBuildModel.getMax_kanisotropy_down());
-    System.out.println(inputBuildModel.getMin_kanisotropy_down());
+    System.out.println(inputBuildModel.getMin_kanisotropy_down());*/
     OutputModel outputModel = nativeLibrary.solverModel(inputBuildModel);
     System.out.println("====");
     System.out.println(outputModel.getMisfit());
