@@ -107,7 +107,7 @@ public class ModelService {
     String ROAH = projectEntity.getSootEntity().getROAH();
     String ROAHD = projectEntity.getSootEntity().getROAHD();
     String ROAHE = projectEntity.getSootEntity().getROAHE();
-    String md = projectEntity.getSootEntity().getMd();
+//    String md = projectEntity.getSootEntity().getMd();
     String tvd = projectEntity.getSootEntity().getTvd();
     String x = projectEntity.getSootEntity().getX();
     String zeni = projectEntity.getSootEntity().getZeni();
@@ -215,13 +215,14 @@ public class ModelService {
     double[] zeni2 = null;
     double[] ro_by_phases = new double[nprobes * length];
     double[] ro_by_ampl = new double[nprobes * length];
-    md2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(md, idProject).getCurveData());
+    //md2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(md, idProject).getCurveData());
     tvd2 = ListDoubleInDoubleArray(
         lasFileService.getCurveDataByName(tvd, idProject).getCurveData());
     x2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(x, idProject).getCurveData());
     zeni2 = ListDoubleInDoubleArray(
         lasFileService.getCurveDataByName(zeni, idProject).getCurveData());
-    int npoints = md2.length;
+    md2 = x2;
+    int npoints = tvd2.length;
     if (log) {
       for (int i = 0, j = 0; i < length; i++) {
         if (bolPL || bolAL) {
@@ -325,17 +326,8 @@ public class ModelService {
     inputBuildModel.setKanisotropy_down(modelDTO.getKanisotropyDown());
     inputBuildModel.setAlpha(modelDTO.getAlpha());
 
-    setDefaultValues(modelCreateRequest.getRangeParameters());
 
-/*    System.out.println(inputBuildModel.getKanisotropy_down());
-    System.out.println(inputBuildModel.getKanisotropy_up());
-    System.out.println(inputBuildModel.getRo_down());
-    System.out.println(inputBuildModel.getRo_up());
-    System.out.println(inputBuildModel.getAlpha());
-    System.out.println(inputBuildModel.getTvd_start());*/
-
-    System.out.println("====");
-/*    System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_up());
+    System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_up());
     System.out.println(modelCreateRequest.getRangeParameters().getMin_ro_up());
     System.out.println(modelCreateRequest.getRangeParameters().getMax_alpha());
     System.out.println(modelCreateRequest.getRangeParameters().getMin_alpha());
@@ -346,7 +338,30 @@ public class ModelService {
     System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_down());
     System.out.println(modelCreateRequest.getRangeParameters().getMin_ro_down());
     System.out.println(modelCreateRequest.getRangeParameters().getMax_kanisotropy_down());
-    System.out.println(modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());*/
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());
+
+    setDefaultValues(modelCreateRequest.getRangeParameters());
+
+/*    System.out.println(inputBuildModel.getKanisotropy_down());
+    System.out.println(inputBuildModel.getKanisotropy_up());
+    System.out.println(inputBuildModel.getRo_down());
+    System.out.println(inputBuildModel.getRo_up());
+    System.out.println(inputBuildModel.getAlpha());
+    System.out.println(inputBuildModel.getTvd_start());*/
+
+    System.out.println("====");
+    System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_up());
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_ro_up());
+    System.out.println(modelCreateRequest.getRangeParameters().getMax_alpha());
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_alpha());
+    System.out.println(modelCreateRequest.getRangeParameters().getMax_tvd_start());
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_tvd_start());
+    System.out.println(modelCreateRequest.getRangeParameters().getMax_kanisotropy_up());
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_kanisotropy_up());
+    System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_down());
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_ro_down());
+    System.out.println(modelCreateRequest.getRangeParameters().getMax_kanisotropy_down());
+    System.out.println(modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());
     System.out.println("====");
 
     inputBuildModel.setMax_alpha(modelCreateRequest.getRangeParameters().getMax_alpha());
@@ -362,7 +377,7 @@ public class ModelService {
     inputBuildModel.setMax_kanisotropy_down(modelCreateRequest.getRangeParameters().getMax_kanisotropy_down());
     inputBuildModel.setMin_kanisotropy_down(modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());
 
-  /*  System.out.println("====");
+    System.out.println("====");
     System.out.println(inputBuildModel.getMax_alpha());
     System.out.println(inputBuildModel.getMin_alpha());
     System.out.println(inputBuildModel.getMax_tvd_start());
@@ -374,7 +389,7 @@ public class ModelService {
     System.out.println(inputBuildModel.getMax_kanisotropy_up());
     System.out.println(inputBuildModel.getMin_kanisotropy_up());
     System.out.println(inputBuildModel.getMax_kanisotropy_down());
-    System.out.println(inputBuildModel.getMin_kanisotropy_down());*/
+    System.out.println(inputBuildModel.getMin_kanisotropy_down());
     OutputModel outputModel = nativeLibrary.solverModel(inputBuildModel);
     System.out.println("====");
     System.out.println(outputModel.getMisfit());
@@ -490,7 +505,7 @@ public class ModelService {
       curvesService.saveSyntheticCurve(projectEntity, name, list);
       curveDtoList.add(new CurveDto(projectsFolderPath  + "\\project" + projectEntity.getId() + "\\data\\synthetic\\" + name, partPhases[j]));
     }
-    ModelEntity modelEntity = projectEntity.getModelEntity();
+    ModelEntity modelEntity = new ModelEntity();
     modelEntity.setStartX(modelDTO.getStart());
     modelEntity.setEndX(modelDTO.getEnd());
     modelEntity.setKanisotropyDown(modelDTO.getKanisotropyDown());

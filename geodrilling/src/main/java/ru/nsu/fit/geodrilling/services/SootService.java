@@ -28,7 +28,6 @@ public class SootService {
         .orElseThrow(
             () -> new EntityNotFoundException("Проект не найден по указанному id: " + idProject));
     SootEntity sootEntity = project.getSootEntity();
-    sootEntity.setMd("DEPT");
     if (!Objects.equals(sootinDTO.getRopl(), "--")) {
       sootEntity.setROPL(sootinDTO.getRopl());
       sootEntity.setROPLp(1);
@@ -212,16 +211,6 @@ public class SootService {
     if (sootEntity.getZenip() != 1 || sootEntity.getXp() != 1 || sootEntity.getTvdp() != 1 ) {
       return false;
     }
-
-    boolean log = true;
-    for (CurveEntity curveEntity : projectEntity.getCurves()){
-      if (Objects.equals(curveEntity.getName(), "DEPT")) {
-        log = false;
-        break;
-      }
-    }
-    if (log)
-      return false;
 
     return sootEntity.getROPLp() == 1 ||
         sootEntity.getROALp() == 1 ||

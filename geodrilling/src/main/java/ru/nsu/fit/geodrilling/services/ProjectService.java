@@ -59,7 +59,7 @@ public class ProjectService {
         sootRepository.save(sootEntity);
         project.setName(name);
         project.setSootEntity(sootEntity);
-        project.setModelEntity(new ModelEntity());
+        //project.setModelEntity(new ModelEntity());
         project.setUser(userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")));
         ProjectState state = new ProjectState();
