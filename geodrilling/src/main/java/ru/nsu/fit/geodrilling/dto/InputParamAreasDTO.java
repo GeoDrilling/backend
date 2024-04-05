@@ -9,4 +9,7 @@ public class InputParamAreasDTO {
     public String param1;
     public String param2;
     public Integer range;
+    public Double colorMin;
+    public Double colorMax;
+    public double[] level;
 }

@@ -15,7 +15,9 @@ import java.util.Objects;
 @Service
 public class PythonService {
     public ByteArrayResource sendIntensityDataAndReceiveImage(
-            List<Float> intensities, int n, double[] param1, double[] param2, String param1Name, String param2Name) {
+            List<Float> intensities, int n, double[] param1, double[] param2,
+            String param1Name, String param2Name,
+            Double colorMin, Double colorMax, double[] level) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -27,6 +29,9 @@ public class PythonService {
         map.put("param2", param2);
         map.put("param1Name", param1Name);
         map.put("param2Name", param2Name);
+        map.put("colorMin", colorMin);
+        map.put("colorMax", colorMax);
+        map.put("level", level);
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(map, headers);
         String url = "http://localhost:5000/getColorMap";

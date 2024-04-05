@@ -243,10 +243,11 @@ public class AreasService {
         double[] zeni2 = null;
         double[] ro_by_phases = new double[nprobes * length];
         double[] ro_by_ampl = new double[nprobes * length];
-        md2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(md, idProject).getCurveData());
+        //md2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(md, idProject).getCurveData());
         tvd2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(tvd, idProject).getCurveData());
         x2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(x, idProject).getCurveData());
         zeni2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(zeni, idProject).getCurveData());
+        md2 = x2;
         int npoints = md2.length;
         for (int i = 0, j = 0; i < length; i++) {
             if (bolPL || bolAL) {
@@ -337,6 +338,8 @@ public class AreasService {
         double[] kanisotropy_downArr = new double[range];
         double[] param1 = new double[range];
         double[] param2 = new double[range];
+        String param1Name = null;
+        String param2Name = null;
 
         int tvd_startArrlength = 1;
         int alphaArrlength = 1;
@@ -363,9 +366,11 @@ public class AreasService {
             if (param1length == 0) {
                 param1 = tvd_startArr;
                 param1length = range;
+                param1Name = "tvd_start";
             }
             else {
                 param2 = tvd_startArr;
+                param2Name = "tvd_start";
             }
         }
         if (Objects.equals(inputParamAreasDTO.param1, "alpha") ||
@@ -377,9 +382,11 @@ public class AreasService {
             if (param1length == 0) {
                 param1 = alphaArr;
                 param1length = range;
+                param1Name = "alpha";
             }
             else {
                 param2 = alphaArr;
+                param2Name = "alpha";
             }
         }
         if (Objects.equals(inputParamAreasDTO.param1, "ro_up") ||
@@ -391,9 +398,11 @@ public class AreasService {
             if (param1length == 0) {
                 param1 = ro_upArr;
                 param1length = range;
+                param1Name = "ro_up";
             }
             else {
                 param2 = ro_upArr;
+                param2Name = "ro_up";
             }
         }
         if (Objects.equals(inputParamAreasDTO.param1, "kanisotropy_up") ||
@@ -405,9 +414,11 @@ public class AreasService {
             if (param1length == 0) {
                 param1 = kanisotropy_upArr;
                 param1length = range;
+                param1Name = "kanisotropy_up";
             }
             else {
                 param2 = kanisotropy_upArr;
+                param2Name = "kanisotropy_up";
             }
         }
         if (Objects.equals(inputParamAreasDTO.param1, "ro_down") ||
@@ -419,9 +430,11 @@ public class AreasService {
             if (param1length == 0) {
                 param1 = ro_downArr;
                 param1length = range;
+                param1Name = "ro_down";
             }
             else {
                 param2 = ro_downArr;
+                param2Name = "ro_down";
             }
         }
         if (Objects.equals(inputParamAreasDTO.param1, "kanisotropy_down") ||
@@ -433,9 +446,11 @@ public class AreasService {
             if (param1length == 0) {
                 param1 = kanisotropy_downArr;
                 param1length = range;
+                param1Name = "kanisotropy_down";
             }
             else {
                 param2 = kanisotropy_downArr;
+                param2Name = "kanisotropy_down";
             }
         }
 
@@ -463,6 +478,8 @@ public class AreasService {
         System.out.println(convertToFloatList(param2));
         System.out.println(convertToFloatList(areasEquivalence.getTargetFunction()));
         return pythonService.sendIntensityDataAndReceiveImage
-                (convertToFloatList(areasEquivalence.getTargetFunction()), range, param1, param2, inputParamAreasDTO.param1, inputParamAreasDTO.param2);
+                (convertToFloatList(areasEquivalence.getTargetFunction()), range,
+                        param1, param2, param1Name, param2Name,
+                        inputParamAreasDTO.colorMin, inputParamAreasDTO.colorMax, inputParamAreasDTO.level);
     }
 }
