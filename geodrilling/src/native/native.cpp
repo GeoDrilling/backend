@@ -103,7 +103,36 @@ JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary
 		ro_down, NAN, NAN,
 		kanisotrypy_down, NAN, NAN,
 		synt_ro_by_phase, synt_ro_by_ampls, misfit
-	);*/
+	);
+  jint nprobes, jintArray num_probe,
+  jint npoints, jdoubleArray md, jdoubleArray tvd, jdoubleArray x, jdoubleArray zeni,
+  jdoubleArray ro_by_phases, jdoubleArray ro_by_ampl, jdouble tvd_start, jdouble min_tvd_start, jdouble max_tvd_start,
+  jdouble alpha, jdouble min_alpha, jdouble max_alpha,
+  jdouble ro_up, jdouble min_ro_up, jdouble max_ro_up,
+  jdouble kanisotropy_up, jdouble min_kanisotropy_up, jdouble max_kanisotropy_up,
+  jdouble ro_down, jdouble min_ro_down, jdouble max_ro_down,
+  jdouble kanisotropy_down, jdouble min_kanisotropy_down, jdouble max_kanisotropy_down
+  
+  std::cout << nprobes << std::endl;
+  std::cout << npoints << std::endl;
+  std::cout << "model params + min max"<< std::endl;
+  std::cout << tvd_start << std::endl;
+  std::cout << min_tvd_start << std::endl;
+  std::cout << max_tvd_start << std::endl;
+  std::cout << alpha << std::endl;
+  std::cout << min_ro_up << std::endl;
+  std::cout << max_ro_up << std::endl;
+  std::cout << kanisotropy_up << std::endl;
+  std::cout << min_kanisotropy_up << std::endl;
+  std::cout << max_kanisotropy_up << std::endl;
+  std::cout << ro_down << std::endl;
+  std::cout << min_ro_down << std::endl;
+  std::cout << max_ro_down << std::endl;
+  std::cout << kanisotropy_down << std::endl;
+  std::cout << min_kanisotropy_down << std::endl;
+  std::cout << max_kanisotropy_down << std::endl;
+
+  std::cout << "NaN from C++ - " << NAN << std::endl;*/
 
     jint status = SolverHorizontalModel6Param1_5DByRoResRo(nprobes, num_probeC, npoints, mdC, tvdC, xC, zeniC, ro_by_phasesC, ro_by_amplC,
   		tvd_start, min_tvd_start, max_tvd_start,
@@ -114,6 +143,13 @@ JNIEXPORT jobject JNICALL Java_ru_nsu_fit_geodrilling_services_lib_NativeLibrary
   		kanisotropy_down, min_kanisotropy_down, max_kanisotropy_down,
   		synt_ro_by_phases, synt_ro_by_ampl,
   		misfit);
+  /*
+  std::cout << tvd_start << std::endl;
+  std::cout << alpha << std::endl;
+  std::cout << kanisotropy_up << std::endl;
+  std::cout << kanisotropy_down << std::endl;
+  std::cout << ro_up << std::endl;
+  std::cout << ro_down << std::endl;*/
 
       env->ReleaseIntArrayElements(num_probe, (jint*) num_probeC, JNI_ABORT);
       env->ReleaseDoubleArrayElements(md, mdC, JNI_ABORT);

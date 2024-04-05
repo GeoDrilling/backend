@@ -66,13 +66,26 @@ public class ProjectService {
         TabletProperties tabletProperties = new TabletProperties();
 
         GroupProperties mainProperties = new GroupProperties();
+        mainProperties.setName("Основные свойства");
         EnumProperty orientation = new EnumProperty("Ориентация", "horizontal", EnumType.ORIENTATION);
         NumberProperty startDepth = new NumberProperty("Начальная глубина", 3200.0);
         NumberProperty endDepth = new NumberProperty("Конечная глубина", 3500.0);
-        mainProperties.setName("Основные свойства");
-        mainProperties.setProperties(List.of(orientation, startDepth, endDepth));
+        NumberProperty scope = new NumberProperty("Масштаб", 700.0);
+        mainProperties.setProperties(List.of(orientation, startDepth, endDepth,
+                scope));
 
-        tabletProperties.setProperties(Collections.singletonList(mainProperties));
+
+        GroupProperties gridStyle = new GroupProperties();
+        gridStyle.setName("Свойства вертикальной сетки");
+        NumberProperty interval = new NumberProperty("Интервал главной сетки", 40.0);
+        NumberProperty secondaryLines = new NumberProperty("Число вторичных линий", 12.0);
+        NumberProperty secondaryThickness = new NumberProperty("Толщина вторичных линий", 1.0);
+        NumberProperty thicknessMain = new NumberProperty("Толщина главной сетки", 2.5);
+        gridStyle.setProperties(List.of(interval, thicknessMain, secondaryLines, secondaryThickness));
+
+
+
+        tabletProperties.setProperties(List.of(mainProperties, gridStyle));
         ProjectEntity projectEntity = projectRepository.save(project);
         state.setId(projectEntity.getId());
         state.setTrackProperties(Collections.emptyList());
