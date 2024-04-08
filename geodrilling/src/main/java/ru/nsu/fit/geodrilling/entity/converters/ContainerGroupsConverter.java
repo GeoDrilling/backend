@@ -4,15 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import lombok.extern.slf4j.Slf4j;
-import ru.nsu.fit.geodrilling.entity.projectstate.TabletProperties;
+import ru.nsu.fit.geodrilling.entity.projectstate.ContainerGroupProperties;
 @Slf4j
-public class TabletConverter implements AttributeConverter<TabletProperties, String> {
+public class ContainerGroupsConverter implements AttributeConverter<ContainerGroupProperties, String> {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public String convertToDatabaseColumn(TabletProperties tabletProperties) {
+    public String convertToDatabaseColumn(ContainerGroupProperties containerGroupProperties) {
         try {
-            return objectMapper.writeValueAsString(tabletProperties);
+            return objectMapper.writeValueAsString(containerGroupProperties);
         } catch (JsonProcessingException jpe) {
             log.error(jpe.getMessage());
             return null;
@@ -20,9 +20,9 @@ public class TabletConverter implements AttributeConverter<TabletProperties, Str
     }
 
     @Override
-    public TabletProperties convertToEntityAttribute(String s) {
+    public ContainerGroupProperties convertToEntityAttribute(String s) {
         try {
-            return objectMapper.readValue(s, TabletProperties.class);
+            return objectMapper.readValue(s, ContainerGroupProperties.class);
         } catch (JsonProcessingException e) {
             log.error(e.getMessage());
             return null;

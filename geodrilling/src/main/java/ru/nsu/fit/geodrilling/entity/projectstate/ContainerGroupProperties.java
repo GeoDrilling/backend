@@ -8,6 +8,6 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-public class TabletProperties {
+public class ContainerGroupProperties {
     private List<GroupProperties> properties;
 }

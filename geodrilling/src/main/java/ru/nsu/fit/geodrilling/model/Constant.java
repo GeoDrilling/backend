@@ -8,4 +8,6 @@ public class Constant {
   public final static int LWD_LOOCH_VIKPB_ROHD = 1043;
   public final static int LWD_LOOCH_VIKPB_ROHE = 1044;
   public static final double NAN = 0.0 / 0.0;
+  public static final String MIN = "Мин значение";
+  public static final String MAX = "Макс значение";
 }

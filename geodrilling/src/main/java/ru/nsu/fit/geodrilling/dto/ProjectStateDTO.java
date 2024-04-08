@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.nsu.fit.geodrilling.entity.projectstate.TabletProperties;
+import ru.nsu.fit.geodrilling.entity.projectstate.ContainerGroupProperties;
 import ru.nsu.fit.geodrilling.entity.projectstate.TrackProperty;
 
 import java.util.List;
@@ -15,7 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 public class ProjectStateDTO {
     private Long id;
-    private TabletProperties tabletProperties;
+    private ContainerGroupProperties tabletProperties;
+    private ContainerGroupProperties depthTrackProperties;
+    private ContainerGroupProperties modelCurveProperties;
     private List<TrackProperty> trackProperties;
     private List<String> curvesNames;
     private List<ModelDTO> modelDTOList;

@@ -14,10 +14,12 @@ import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectState;
 import ru.nsu.fit.geodrilling.entity.SootEntity;
 import ru.nsu.fit.geodrilling.entity.projectstate.GroupProperties;
-import ru.nsu.fit.geodrilling.entity.projectstate.TabletProperties;
+import ru.nsu.fit.geodrilling.entity.projectstate.ContainerGroupProperties;
 import ru.nsu.fit.geodrilling.entity.projectstate.enums.EnumType;
+import ru.nsu.fit.geodrilling.entity.projectstate.property.ColorProperty;
 import ru.nsu.fit.geodrilling.entity.projectstate.property.EnumProperty;
 import ru.nsu.fit.geodrilling.entity.projectstate.property.NumberProperty;
+import ru.nsu.fit.geodrilling.entity.projectstate.property.StringProperty;
 import ru.nsu.fit.geodrilling.exceptions.ProjectNotFoundException;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectStateRepository;
@@ -26,6 +28,9 @@ import ru.nsu.fit.geodrilling.repositories.UserRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static ru.nsu.fit.geodrilling.model.Constant.MAX;
+import static ru.nsu.fit.geodrilling.model.Constant.MIN;
 
 @Service
 @AllArgsConstructor
@@ -63,7 +68,62 @@ public class ProjectService {
         project.setUser(userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")));
         ProjectState state = new ProjectState();
-        TabletProperties tabletProperties = new TabletProperties();
+        ContainerGroupProperties tabletProperties = createTabletProps();
+        ContainerGroupProperties depthTrackProperties = createDepthTackProps();
+        ContainerGroupProperties modelCurveProps = createModelCurveProps();
+
+        ProjectEntity projectEntity = projectRepository.save(project);
+        state.setId(projectEntity.getId());
+        state.setTrackProperties(Collections.emptyList());
+        state.setTabletProperties(tabletProperties);
+        state.setDepthTrackProperties(depthTrackProperties);
+        state.setModelCurveProperties(modelCurveProps);
+        projectStateRepository.save(state);
+        return new ProjectStateDTO(projectEntity.getId(), tabletProperties,
+                depthTrackProperties, modelCurveProps,
+                state.getTrackProperties(), Collections.emptyList(), null);
+    }
+
+    public ContainerGroupProperties createModelCurveProps() {
+        ContainerGroupProperties modelCurve = new ContainerGroupProperties();
+
+        GroupProperties mainProperties = new GroupProperties();
+        mainProperties.setName("Основные свойства");
+        NumberProperty height = new NumberProperty("Высота", 400.0);
+        NumberProperty min = new NumberProperty();
+        min.setName(MIN);
+        //TODO при построении модели указывать границы TVD
+        min.setValue(2292.0);
+        NumberProperty max = new NumberProperty();
+        max.setName(MAX);
+        max.setValue(2314.0);
+        NumberProperty thicknessHorizontal = new NumberProperty("Толщина границы слоёв", 2.5);
+        ColorProperty colorHorizontal = new ColorProperty("Цвет границы слоёв", "#DEDEDE");
+        NumberProperty thicknessVertical = new NumberProperty("Толщина границы моделей", 2.5);
+        ColorProperty colorVertical = new ColorProperty("Цвет границы моделей ", "#DEDEDE");
+
+        mainProperties.setProperties(List.of(height, max, min, thicknessHorizontal, colorHorizontal,
+                thicknessVertical, colorVertical));
+
+        modelCurve.setProperties(List.of(mainProperties));
+        return modelCurve;
+    }
+    public ContainerGroupProperties createDepthTackProps() {
+        ContainerGroupProperties depthTrackProperties = new ContainerGroupProperties();
+
+        GroupProperties mainProperties = new GroupProperties();
+        mainProperties.setName("Основные свойства");
+        NumberProperty height = new NumberProperty("Высота", 61.0);
+        NumberProperty floatingPoint = new NumberProperty("Знаков после запятой", 0.0);
+        ColorProperty colorMain = new ColorProperty("Цвет текста", "#021D38");
+        mainProperties.setProperties(List.of(height, colorMain, floatingPoint));
+
+
+        depthTrackProperties.setProperties(List.of(mainProperties));
+        return depthTrackProperties;
+    }
+    public ContainerGroupProperties createTabletProps() {
+        ContainerGroupProperties tabletProperties = new ContainerGroupProperties();
 
         GroupProperties mainProperties = new GroupProperties();
         mainProperties.setName("Основные свойства");
@@ -77,22 +137,16 @@ public class ProjectService {
 
         GroupProperties gridStyle = new GroupProperties();
         gridStyle.setName("Свойства вертикальной сетки");
-        NumberProperty interval = new NumberProperty("Интервал главной сетки", 40.0);
+        NumberProperty interval = new NumberProperty("Шаг основных линий", 40.0);
         NumberProperty secondaryLines = new NumberProperty("Число вторичных линий", 12.0);
-        NumberProperty secondaryThickness = new NumberProperty("Толщина вторичных линий", 1.0);
-        NumberProperty thicknessMain = new NumberProperty("Толщина главной сетки", 2.5);
-        gridStyle.setProperties(List.of(interval, thicknessMain, secondaryLines, secondaryThickness));
-
-
+        NumberProperty secondaryThickness = new NumberProperty("Толщина основных линий", 1.0);
+        NumberProperty thicknessMain = new NumberProperty("Толщина основных сетки", 2.5);
+        ColorProperty colorMain = new ColorProperty("Цвет основных линий", "#DEDEDE");
+        ColorProperty colorSecondary = new ColorProperty("Цвет основных линий", "#DEDEDE");
+        gridStyle.setProperties(List.of(interval, thicknessMain, colorMain, secondaryLines, secondaryThickness, colorSecondary));
 
         tabletProperties.setProperties(List.of(mainProperties, gridStyle));
-        ProjectEntity projectEntity = projectRepository.save(project);
-        state.setId(projectEntity.getId());
-        state.setTrackProperties(Collections.emptyList());
-        state.setTabletProperties(tabletProperties);
-        projectStateRepository.save(state);
-        return new ProjectStateDTO(projectEntity.getId(), tabletProperties,
-                state.getTrackProperties(), Collections.emptyList(), null);
+        return tabletProperties;
     }
     public void saveProjectState(Long projectId, SaveProjectStateDTO state) {
         ProjectState projectState = projectStateRepository.findById(projectId)
@@ -106,10 +160,13 @@ public class ProjectService {
                 new ProjectNotFoundException("Проект не найден"));
         List<ModelDTO> modelDTOList = new ArrayList<>();
         ModelEntity modelEntity = project.getModelEntity();
-        modelDTOList.add(new ModelDTO(modelEntity.getId(), modelEntity.getName(), modelEntity.getStartX(),
-            modelEntity.getEndX(), modelEntity.getKanisotropyDown(), modelEntity.getRoDown(),
-            modelEntity.getKanisotropyUp(), modelEntity.getRoUp(), modelEntity.getAlpha(), modelEntity.getTvdStart()));
+        if (modelEntity != null)
+            modelDTOList.add(new ModelDTO(modelEntity.getId(), modelEntity.getName(), modelEntity.getStartX(),
+                modelEntity.getEndX(), modelEntity.getKanisotropyDown(), modelEntity.getRoDown(),
+                modelEntity.getKanisotropyUp(), modelEntity.getRoUp(), modelEntity.getAlpha(), modelEntity.getTvdStart()));
         return new ProjectStateDTO(project.getId(), project.getState().getTabletProperties(),
+                project.getState().getDepthTrackProperties(),
+                project.getState().getModelCurveProperties(),
                 project.getState().getTrackProperties(),
                 project.getCurves().stream()
                         .map(CurveEntity::getDirInProject)

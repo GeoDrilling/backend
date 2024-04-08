@@ -17,6 +17,7 @@ import lombok.*;
         @JsonSubTypes.Type(value = StringProperty.class, name = "1"),
         @JsonSubTypes.Type(value = NumberProperty.class, name = "2"),
         @JsonSubTypes.Type(value = ColorProperty.class, name = "3"),
+        @JsonSubTypes.Type(value = GradientProperty.class, name = "4"),
 })
 public class BaseProperty {
     protected String name;
