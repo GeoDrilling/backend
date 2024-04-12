@@ -10,7 +10,6 @@ import ru.nsu.fit.geodrilling.entity.projectstate.TrackProperty;
 import ru.nsu.fit.geodrilling.entity.projectstate.enums.EnumType;
 import ru.nsu.fit.geodrilling.entity.projectstate.property.EnumProperty;
 import ru.nsu.fit.geodrilling.entity.projectstate.property.NumberProperty;
-import ru.nsu.fit.geodrilling.entity.projectstate.TabletProperties;
 import ru.nsu.fit.geodrilling.entity.projectstate.enums.PropertyType;
 import ru.nsu.fit.geodrilling.entity.projectstate.property.StringProperty;
 import ru.nsu.fit.geodrilling.model.*;
