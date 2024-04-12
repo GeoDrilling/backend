@@ -29,7 +29,12 @@ public class CurveEntity {
 
     private String name;
 
-    private File dataFile;
+    @Column(columnDefinition = "TEXT")
+    private String data;
 
     private String dirInProject;
+
+    public String getFullName() {
+        return dirInProject + name;
+    }
 }

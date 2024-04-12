@@ -35,20 +35,12 @@ import static ru.nsu.fit.geodrilling.model.Constant.NAN;
 @RequiredArgsConstructor
 public class ModelService {
 
-  @Value("${lasfile.temp-path}")
-  private String tempFolderPath;
-
-  @Value("${projects.folder-path}")
-  private String projectsFolderPath;
-
   private final UserRepository userRepository;
   private final ProjectRepository projectRepository;
   private final CurvesService lasFileService;
   private final NativeLibrary nativeLibrary;
   private final ModelRepository modelRepository;
   private final CurvesService curvesService;
-//  @Value("${projects.folder-path}")
-//  private String projectsFolderPath;
 
   private double[] ListDoubleInDoubleArray(List<Double> list) {
     return list.stream().mapToDouble(Double::doubleValue).toArray();
@@ -494,16 +486,14 @@ public class ModelService {
       for (double value : partAmpl[j]) {
         list.add(value);
       }
-      curvesService.saveSyntheticCurve(projectEntity, name, list);
-      curveDtoList.add(new CurveDto(projectsFolderPath  + "\\project" + projectEntity.getId() + "\\data\\synthetic\\" + name, partAmpl[j]));
+      curveDtoList.add(new CurveDto(curvesService.saveSyntheticCurve(projectEntity, name, list).getFullName(), partAmpl[j]));
 
       name = getName(nameCurveList, numProbe[j], false);
       list = new ArrayList<>();
       for (double value : partAmpl[j]) {
         list.add(value);
       }
-      curvesService.saveSyntheticCurve(projectEntity, name, list);
-      curveDtoList.add(new CurveDto(projectsFolderPath  + "\\project" + projectEntity.getId() + "\\data\\synthetic\\" + name, partPhases[j]));
+      curveDtoList.add(new CurveDto(curvesService.saveSyntheticCurve(projectEntity, name, list).getFullName() , partPhases[j]));
     }
     ModelEntity modelEntity = new ModelEntity();
     modelEntity.setStartX(modelDTO.getStart());

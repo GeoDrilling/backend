@@ -1,5 +1,6 @@
 package ru.nsu.fit.geodrilling.config;
 
+import com.google.gson.Gson;
 import jakarta.servlet.MultipartConfigElement;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,12 +15,6 @@ import java.nio.file.Path;
 
 @Configuration
 public class ApplicationConfig {
-
-  @Value("${projects.folder-path}")
-  public String projectsDir;
-
-  @Value("${lasfile.temp-path}")
-  public String tempDir;
   @Bean
   public ModelMapper modelMapper() {
     return new ModelMapper();
@@ -34,13 +29,8 @@ public class ApplicationConfig {
     return factory.createMultipartConfig();
   }
 
-
-
   @Bean
-  public CommandLineRunner dirInitializer() {
-    return args -> {
-      Files.createDirectories(Path.of(projectsDir));
-      Files.createDirectories(Path.of(tempDir));
-    };
+  public Gson gson() {
+    return new Gson();
   }
 }
