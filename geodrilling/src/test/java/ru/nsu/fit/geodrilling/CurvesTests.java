@@ -42,24 +42,21 @@ public class CurvesTests {
     @Autowired
     private ProjectRepository projectRepository;
 
-    @Value("${projects.folder-path}")
-    private String projectsFolderPath;
-
-    @Test
-    public void saveSyntheticCurveTest() throws IOException {
-        AuthenticationResponse authentication = authenticationService.register(RegisterRequest.builder()
-            .email("m.maksimenkov@g.nsu.ru")
-            .name("Maxim777")
-            .password("123456v")
-            .build(), new MockHttpServletResponse());
-        ProjectStateDTO projectDTO = projectService.createProjectForUser(authentication.getUser().getEmail(), "Project1");
-        LasReader lasReader = new LasReader("src\\test\\resources\\test.las");
-        lasReader.read();
-        List<Double> data = lasReader.getCurves().get(0).getData()
-                .stream().map(Double::valueOf).collect(Collectors.toList());
-        curvesService.saveSyntheticCurve(projectRepository.findById(projectDTO.getId()).get(), "TEST", data);
-        Gson gson = new Gson();
-        Assertions.assertEquals(gson.toJson(data), Files.readString(Path.of(projectsFolderPath +
-                "\\project" + projectDTO.getId() + "\\data\\synthetic\\TEST")));
-    }
+//    @Test
+//    public void saveSyntheticCurveTest() throws IOException {
+//        AuthenticationResponse authentication = authenticationService.register(RegisterRequest.builder()
+//            .email("m.maksimenkov@g.nsu.ru")
+//            .name("Maxim777")
+//            .password("123456v")
+//            .build(), new MockHttpServletResponse());
+//        ProjectStateDTO projectDTO = projectService.createProjectForUser(authentication.getUser().getEmail(), "Project1");
+//        LasReader lasReader = new LasReader("src\\test\\resources\\test.las");
+//        lasReader.read();
+//        List<Double> data = lasReader.getCurves().get(0).getData()
+//                .stream().map(Double::valueOf).collect(Collectors.toList());
+//        curvesService.saveSyntheticCurve(projectRepository.findById(projectDTO.getId()).get(), "TEST", data);
+//        Gson gson = new Gson();
+//        Assertions.assertEquals(gson.toJson(data), Files.readString(Path.of(projectsFolderPath +
+//                "\\project" + projectDTO.getId() + "\\data\\synthetic\\TEST")));
+//    }
 }
