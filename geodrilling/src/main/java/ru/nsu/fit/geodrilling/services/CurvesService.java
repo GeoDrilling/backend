@@ -61,7 +61,7 @@ public class CurvesService {
             lasReader.getCurves().remove(newDepthCurve);
         }
         for (Curve curve : lasReader.getCurves()) {
-            project.getCurves().add(curveRepository.save(new CurveEntity(null, project, curve.getName(), gson.toJson(curve.getData()), "")));
+            project.getCurves().add(curveRepository.save(new CurveEntity(null, project, curve.getName(), gson.toJson(curve.getData()), "", false)));
         }
         log.info("Кривые добавлены в проект");
         projectRepository.save(project);
@@ -105,7 +105,7 @@ public class CurvesService {
         log.info("Проект {} заморожен", project.getId());
         ProjectEntity newProject = projectRepository.save(new ProjectEntity());
         for (Curve curve : lasReader.getCurves()) {
-            newProject.getCurves().add(curveRepository.save(new CurveEntity(null, newProject, curve.getName(), gson.toJson(curve.getData()), "")));
+            newProject.getCurves().add(curveRepository.save(new CurveEntity(null, newProject, curve.getName(), gson.toJson(curve.getData()), "", false)));
         }
         log.info("Дополненные кривые сохранены в новый проект с id {}", newProject.getId());
         project.setSupplementingProject(newProject);
@@ -116,14 +116,14 @@ public class CurvesService {
             .build();
     }
 
-    public void changeRange(ProjectEntity project, String curveName , Double fromDepth, List<Double> data) {
+    public void changeRange(ProjectEntity project, String curveName , Double fromDepth, List<Double> data, Boolean isSynthetic) {
         List<Double> deptData = getCurveDataByName("DEPT", project.getId()).getCurveData();
         int fromDepthIdx = Arrays.binarySearch(deptData.toArray(), fromDepth);
         if (fromDepthIdx == deptData.size()) {
             log.error("Отрезок данных выходит за пределы кривой");
             throw new RuntimeException("Отрезок данных выходит за пределы кривой");
         }
-        CurveEntity curve = curveRepository.findByNameAndProject(curveName, project).orElseThrow(
+        CurveEntity curve = curveRepository.findByNameAndProjectAndAndIsSynthetic(curveName, project, isSynthetic).orElseThrow(
                 () -> new NoSuchElementException("Кривой не сузествует")
         );
         List<Double> curveData = gson.fromJson(curve.getData(), new TypeToken<List<Double>>(){});
@@ -134,7 +134,7 @@ public class CurvesService {
         curveRepository.save(curve);
     }
 
-    public List<Double> getRange(ProjectEntity project, String curveName, Double fromDepth, Double toDepth) {
+    public List<Double> getRange(ProjectEntity project, String curveName, Double fromDepth, Double toDepth, Boolean isSynthetic) {
         List<Double> deptData = getCurveDataByName("DEPT", project.getId()).getCurveData();
         int fromDepthIdx = Arrays.binarySearch(deptData.toArray(), fromDepth);
         int toDepthIdx = Arrays.binarySearch(deptData.toArray(), toDepth);
@@ -142,12 +142,14 @@ public class CurvesService {
             log.error("Отрезок данных выходит за пределы кривой");
             throw new RuntimeException("Отрезок данных выходит за пределы кривой");
         }
-        List<Double> curveData = getCurveDataByName(curveName, project.getId()).getCurveData();
+        CurveEntity curveEntity = curveRepository.findByNameAndProjectAndAndIsSynthetic(curveName, project, isSynthetic).orElseThrow(
+                () -> new NoSuchElementException("Кривой не существует"));
+        List<Double> curveData = gson.fromJson(curveEntity.getData(), new TypeToken<>(){});
         return curveData.subList(fromDepthIdx, toDepthIdx);
     }
 
     public CurveEntity saveSyntheticCurve(ProjectEntity project, String curveName, List<Double> data) {
-        CurveEntity curve = curveRepository.save(new CurveEntity(null, project, curveName, gson.toJson(data), "synthetic/"));
+        CurveEntity curve = curveRepository.save(new CurveEntity(null, project, curveName, gson.toJson(data), "synthetic/", true));
         project.getCurves().add(curve);
         projectRepository.save(project);
         return curve;

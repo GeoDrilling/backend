@@ -33,6 +33,7 @@ public class CurveEntity {
     private String data;
 
     private String dirInProject;
+    private Boolean isSynthetic = false;
 
     public String getFullName() {
         return dirInProject + name;
