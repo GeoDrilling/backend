@@ -3,6 +3,7 @@ package ru.nsu.fit.geodrilling.services;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import ru.nsu.fit.geodrilling.dto.ModelDTO;
 import ru.nsu.fit.geodrilling.dto.ProjectDTO;
@@ -40,6 +41,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final SootRepository sootRepository;
     private final ProjectStateRepository projectStateRepository;
+    private final ModelMapper modelMapper;
 
     @Transactional
     public ProjectStateDTO createProjectForUser(String email, String name) {
@@ -151,8 +153,7 @@ public class ProjectService {
     public void saveProjectState(Long projectId, SaveProjectStateDTO state) {
         ProjectState projectState = projectStateRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("У проекта нет состояния"));
-        projectState.setTrackProperties(state.getTrackProperties());
-        projectState.setTabletProperties(state.getTabletProperties());
+        modelMapper.map(state, projectState);
         projectStateRepository.save(projectState);
     }
     public ProjectStateDTO getProjectState(Long projectId) {

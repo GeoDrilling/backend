@@ -13,4 +13,6 @@ import java.util.List;
 public class SaveProjectStateDTO {
     private ContainerGroupProperties tabletProperties;
     private List<TrackProperty> trackProperties;
+    private ContainerGroupProperties depthTrackProperties;
+    private ContainerGroupProperties modelCurveProperties;
 }
