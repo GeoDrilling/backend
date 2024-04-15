@@ -143,13 +143,13 @@ public class AreasService {
         if (curves.contains(ROPL) || curves.contains(ROAL)) {
             if (curves.contains(ROPL)) {
                 arrPL = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(ROPL, idProject).getCurveData());
+                        getCurveDataByName(ROPL, idProject, false).getCurveData());
                 bolPL = true;
                 length = arrPL.length;
             }
             if (curves.contains(ROAL)) {
                 arrAL = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(ROAL, idProject).getCurveData());
+                        getCurveDataByName(ROAL, idProject, false).getCurveData());
                 bolAL = true;
                 length = arrAL.length;
             }
@@ -191,13 +191,13 @@ public class AreasService {
         if (curves.contains(ROPH) || curves.contains(ROAH)) {
             if (curves.contains(ROPH)) {
                 arrPH = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(ROPH, idProject).getCurveData());
+                        getCurveDataByName(ROPH, idProject, false).getCurveData());
                 bolPH = true;
                 length = arrPH.length;
             }
             if (curves.contains(ROAH)) {
                 arrAH = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(ROAH, idProject).getCurveData());
+                        getCurveDataByName(ROAH, idProject, false).getCurveData());
                 bolAH = true;
                 length = arrAH.length;
             }
@@ -244,9 +244,9 @@ public class AreasService {
         double[] ro_by_phases = new double[nprobes * length];
         double[] ro_by_ampl = new double[nprobes * length];
         //md2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(md, idProject).getCurveData());
-        tvd2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(tvd, idProject).getCurveData());
-        x2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(x, idProject).getCurveData());
-        zeni2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(zeni, idProject).getCurveData());
+        tvd2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(tvd, idProject, false).getCurveData());
+        x2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(x, idProject, false).getCurveData());
+        zeni2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(zeni, idProject, false).getCurveData());
         md2 = x2;
         int npoints = md2.length;
         for (int i = 0, j = 0; i < length; i++) {
