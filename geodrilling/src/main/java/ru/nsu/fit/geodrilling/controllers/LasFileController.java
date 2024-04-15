@@ -31,9 +31,15 @@ public class LasFileController {
     public ResponseEntity<CurveDataDownloadResponse> downloadByCurveName(
             @RequestParam("project_id") Long projectId,
             @RequestParam("curve_name") String curveName) {
-        return ResponseEntity.ok(curvesService.getCurveDataByName(curveName, projectId));
+        return ResponseEntity.ok(curvesService.getCurveDataByName(curveName, projectId, false));
     }
 
+    @GetMapping("/download/curve/synthetic")
+    public ResponseEntity<CurveDataDownloadResponse> downloadSyntheticByCurveName(
+            @RequestParam("project_id") Long projectId,
+            @RequestParam("curve_name") String curveName) {
+        return ResponseEntity.ok(curvesService.getCurveDataByName(curveName, projectId, true));
+    }
     @GetMapping("/curves")
     public ResponseEntity<GetCurvesNamesResponse> getCurvesNames(
             @RequestParam("project_id") Long projectId) {

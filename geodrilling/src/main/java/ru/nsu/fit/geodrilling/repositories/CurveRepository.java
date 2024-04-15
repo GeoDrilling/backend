@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface CurveRepository extends JpaRepository<CurveEntity, Long> {
 
-    Optional<CurveEntity> findByNameAndProject(String name, ProjectEntity project);
-    Optional<CurveEntity> findByNameAndProjectAndAndIsSynthetic(String name, ProjectEntity projectEntity, Boolean isSynthetic);
+    Optional<CurveEntity> findFirstByNameAndProject(String name, ProjectEntity project);
+    Optional<CurveEntity> findByNameAndProjectAndIsSynthetic(String name, ProjectEntity projectEntity, Boolean isSynthetic);
 }
