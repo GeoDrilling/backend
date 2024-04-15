@@ -115,7 +115,7 @@ public class CurvesService {
     }
 
     public void changeRange(ProjectEntity project, String curveName , Double fromDepth, List<Double> data, Boolean isSynthetic) {
-        List<Double> deptData = getCurveDataByName("DEPT", project.getId(), isSynthetic).getCurveData();
+        List<Double> deptData = getCurveDataByName("DEPT", project.getId(), false).getCurveData();
         int fromDepthIdx = Arrays.binarySearch(deptData.toArray(), fromDepth);
         if (fromDepthIdx == deptData.size()) {
             log.error("Отрезок данных выходит за пределы кривой");

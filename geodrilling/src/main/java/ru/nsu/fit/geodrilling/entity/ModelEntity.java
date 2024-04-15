@@ -37,7 +37,7 @@ public class ModelEntity {
     private Double startX;
     private Double endX;
 
-    @OneToOne(mappedBy = "modelEntity")
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "project_id")
     private ProjectEntity projectEntity;
 

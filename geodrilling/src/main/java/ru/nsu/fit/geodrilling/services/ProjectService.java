@@ -42,6 +42,7 @@ public class ProjectService {
     private final SootRepository sootRepository;
     private final ProjectStateRepository projectStateRepository;
     private final ModelMapper modelMapper;
+    private final ModelService modelService;
 
     @Transactional
     public ProjectStateDTO createProjectForUser(String email, String name) {
@@ -159,12 +160,7 @@ public class ProjectService {
     public ProjectStateDTO getProjectState(Long projectId) {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(() ->
                 new ProjectNotFoundException("Проект не найден"));
-        List<ModelDTO> modelDTOList = new ArrayList<>();
-        ModelEntity modelEntity = project.getModelEntity();
-        if (modelEntity != null)
-            modelDTOList.add(new ModelDTO(modelEntity.getId(), modelEntity.getName(), modelEntity.getStartX(),
-                modelEntity.getEndX(), modelEntity.getKanisotropyDown(), modelEntity.getRoDown(),
-                modelEntity.getKanisotropyUp(), modelEntity.getRoUp(), modelEntity.getAlpha(), modelEntity.getTvdStart()));
+        List<ModelDTO> modelDTOList = modelService.mapModelDtoList(project.getModelEntityList());
         return new ProjectStateDTO(project.getId(), project.getState().getTabletProperties(),
                 project.getState().getDepthTrackProperties(),
                 project.getState().getModelCurveProperties(),
