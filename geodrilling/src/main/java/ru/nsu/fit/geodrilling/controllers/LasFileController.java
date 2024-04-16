@@ -52,4 +52,14 @@ public class LasFileController {
             @RequestParam("project_id") Long projectId) throws IOException {
         return ResponseEntity.ok(curvesService.supplementCurve(file, projectId));
     }
+
+    @GetMapping("/dept/max")
+    public ResponseEntity<Double> getDeptMax(@RequestParam("project_id") Long projectId) {
+        return ResponseEntity.ok(curvesService.getDeptMax(projectId));
+    }
+
+    @GetMapping("/dept/min")
+    public ResponseEntity<Double> getDeptMin(@RequestParam("project_id") Long projectId) {
+        return ResponseEntity.ok(curvesService.getDeptMin(projectId));
+    }
 }

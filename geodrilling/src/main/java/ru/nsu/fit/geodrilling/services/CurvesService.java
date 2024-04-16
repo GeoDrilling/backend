@@ -153,6 +153,22 @@ public class CurvesService {
         return curve;
     }
 
+    public Double getDeptMax(Long projectId) {
+        return getCurveDataByName("DEPT", projectId, false)
+                .getCurveData()
+                .stream()
+                .max(Double::compare)
+                .orElseThrow(() -> new NoSuchElementException("Кривая DEPT - пустая"));
+    }
+
+    public Double getDeptMin(Long projectId) {
+        return getCurveDataByName("DEPT", projectId, false)
+                .getCurveData()
+                .stream()
+                .min(Double::compare)
+                .orElseThrow(() -> new NoSuchElementException("Кривая DEPT - пустая"));
+    }
+
     /**
      * Метод проверяет, что входящие кривые являются дополненными от исходных
      * @param project проект, содержащий исходные кривые
