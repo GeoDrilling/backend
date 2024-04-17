@@ -59,7 +59,7 @@ public class ModelService {
         return list.stream().mapToDouble(Double::doubleValue).toArray();
     }
 
-    private InputBuildModel createInputBuildModel(Long idProject, boolean log, Double start, Double end) {
+    public InputBuildModel createInputBuildModel(Long idProject, boolean log, Double start, Double end) {
         List<String> curves = new ArrayList<>(
                 lasFileService.getCurvesNames(idProject).getCurvesNames());
         boolean bolPL = false;

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import ru.nsu.fit.geodrilling.dto.InputAreasEquivalence;
+import ru.nsu.fit.geodrilling.dto.InputBuildModel;
 import ru.nsu.fit.geodrilling.dto.InputParamAreasDTO;
 import ru.nsu.fit.geodrilling.entity.AreasEntity;
 import ru.nsu.fit.geodrilling.entity.ModelEntity;
@@ -33,6 +34,7 @@ public class AreasService {
     private final CurvesService lasFileService;
     private final NativeLibrary nativeLibrary;
     private final PythonService pythonService;
+    private final ModelService modelService;
     private double[] ListDoubleInDoubleArray(List<Double> list) {
         return list.stream().mapToDouble(Double::doubleValue).toArray();
     }
@@ -86,7 +88,7 @@ public class AreasService {
         Long idProject = projectEntity.getId();
 
 
-        List<String> curves = new ArrayList<>(lasFileService.getCurvesNames(idProject).getCurvesNames());
+        /*List<String> curves = new ArrayList<>(lasFileService.getCurvesNames(idProject).getCurvesNames());
         boolean bolPL = false;
         boolean bolPLD = false;
         boolean bolPLE = false;
@@ -98,9 +100,9 @@ public class AreasService {
         boolean bolALE = false;
         boolean bolAH = false;
         boolean bolAHD = false;
-        boolean bolAHE = false;
+        boolean bolAHE = false;*/
         int nprobes = 0;
-        int[] num_probe = new int[6];
+        /*int[] num_probe = new int[6];
         double tvd_start = NAN;
         double min_tvd_start = NAN;
         double max_tvd_start = NAN;
@@ -138,9 +140,9 @@ public class AreasService {
         String md = projectEntity.getSootEntity().getMd();
         String tvd = projectEntity.getSootEntity().getTvd();
         String x = projectEntity.getSootEntity().getX();
-        String zeni = projectEntity.getSootEntity().getZeni();
+        String zeni = projectEntity.getSootEntity().getZeni();*/
         int length = 0;
-        if (curves.contains(ROPL) || curves.contains(ROAL)) {
+        /*if (curves.contains(ROPL) || curves.contains(ROAL)) {
             if (curves.contains(ROPL)) {
                 arrPL = ListDoubleInDoubleArray(lasFileService.
                         getCurveDataByName(ROPL, idProject, false).getCurveData());
@@ -155,7 +157,7 @@ public class AreasService {
             }
             num_probe[nprobes] = 1039;
             nprobes += 1;
-        }
+        }*/
         /*if (curves.contains(ROPLD) || curves.contains(ROALD)) {
             if (curves.contains(ROPLD)) {
                 arrPLD = ListDoubleInDoubleArray(lasFileService.
@@ -188,7 +190,7 @@ public class AreasService {
             num_probe[nprobes] = 1041;
             nprobes += 1;
         }*/
-        if (curves.contains(ROPH) || curves.contains(ROAH)) {
+        /*if (curves.contains(ROPH) || curves.contains(ROAH)) {
             if (curves.contains(ROPH)) {
                 arrPH = ListDoubleInDoubleArray(lasFileService.
                         getCurveDataByName(ROPH, idProject, false).getCurveData());
@@ -203,7 +205,7 @@ public class AreasService {
             }
             num_probe[nprobes] = 1042;
             nprobes += 1;
-        }
+        }*/
         /*if (curves.contains(ROPHD) || curves.contains(ROAHD)) {
             if (curves.contains(ROPHD)) {
                 arrPHD = ListDoubleInDoubleArray(lasFileService.
@@ -241,15 +243,22 @@ public class AreasService {
         double[] tvd2 = null;
         double[] x2 = null;
         double[] zeni2 = null;
-        double[] ro_by_phases = new double[nprobes * length];
-        double[] ro_by_ampl = new double[nprobes * length];
+        /*double[] ro_by_phases = new double[nprobes * length];
+        double[] ro_by_ampl = new double[nprobes * length];*/
         //md2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(md, idProject).getCurveData());
+/*
         tvd2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(tvd, idProject, false).getCurveData());
         x2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(x, idProject, false).getCurveData());
         zeni2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(zeni, idProject, false).getCurveData());
+*/
+        InputBuildModel inputBuildModel = modelService.createInputBuildModel(idProject, true,
+                modelEntity.getStartX(), modelEntity.getEndX());
+        tvd2 = inputBuildModel.tvd;
+        x2 = inputBuildModel.x;
+        zeni2 = inputBuildModel.zeni;
         md2 = x2;
         int npoints = md2.length;
-        for (int i = 0, j = 0; i < length; i++) {
+        /*for (int i = 0, j = 0; i < length; i++) {
             if (bolPL || bolAL) {
                 if (bolPL) {
                     ro_by_phases[i * nprobes + j] = arrPL[i];
@@ -328,7 +337,7 @@ public class AreasService {
                 }
             }
             j = 0;
-        }
+        }*/
         int range = inputParamAreasDTO.range;
         double[] tvd_startArr = new double[range];
         double[] alphaArr = new double[range];
@@ -454,13 +463,14 @@ public class AreasService {
             }
         }
 
-        InputAreasEquivalence inputAreasEquivalence = new InputAreasEquivalence(nprobes, num_probe, npoints,
+        InputAreasEquivalence inputAreasEquivalence = new InputAreasEquivalence(
+        inputBuildModel.nprobes, inputBuildModel.num_probe, inputBuildModel.npoints,
         tvd2, x2, zeni2, tvd_startArrlength, tvd_startArr,
         alphaArrlength, alphaArr, ro_upArrlength,
         ro_upArr, kanisotropy_upArrlength,
         kanisotropy_upArr, ro_downArrlength,
         ro_downArr, kanisotropy_downArrlength,
-        kanisotropy_downArr, ro_by_phases, ro_by_ampl);
+        kanisotropy_downArr, inputBuildModel.ro_by_phases, inputBuildModel.ro_by_ampl);
 
         AreasEquivalence areasEquivalence = nativeLibrary.createAreasEquivalence(inputAreasEquivalence);
 
