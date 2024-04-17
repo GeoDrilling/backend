@@ -1,6 +1,7 @@
 package ru.nsu.fit.geodrilling.services;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import ru.nsu.fit.geodrilling.entity.AreasEntity;
 import ru.nsu.fit.geodrilling.entity.ModelEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.model.AreasEquivalence;
+import ru.nsu.fit.geodrilling.repositories.AreasRepository;
 import ru.nsu.fit.geodrilling.repositories.ModelRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 import ru.nsu.fit.geodrilling.repositories.UserRepository;
@@ -35,9 +37,11 @@ public class AreasService {
     private final NativeLibrary nativeLibrary;
     private final PythonService pythonService;
     private final ModelService modelService;
+    private final AreasRepository areasRepository;
     private double[] ListDoubleInDoubleArray(List<Double> list) {
         return list.stream().mapToDouble(Double::doubleValue).toArray();
     }
+
 
     private static double findMax(double[] array) {
         if (array == null || array.length == 0) {
@@ -79,6 +83,12 @@ public class AreasService {
         }
 
         return min;
+    }
+
+    public byte[] getAreas(Long idModel, Integer number) {
+        ModelEntity modelEntity = modelRepository.findById(idModel).orElseThrow(() -> new EntityNotFoundException("Модель не найдена"));
+        List<AreasEntity> areasEntityBoundedList = modelEntity.getAreasEntity();
+        return areasEntityBoundedList.get(number).getByteArrayResource();
     }
 
     public ByteArrayResource createAreas(Long idModel, InputParamAreasDTO inputParamAreasDTO) {
@@ -487,9 +497,20 @@ public class AreasService {
         System.out.println(convertToFloatList(param1));
         System.out.println(convertToFloatList(param2));
         System.out.println(convertToFloatList(areasEquivalence.getTargetFunction()));
-        return pythonService.sendIntensityDataAndReceiveImage
+        Integer maxSize = 5;
+        ByteArrayResource byteArrayResource = pythonService.sendIntensityDataAndReceiveImage
                 (convertToFloatList(areasEquivalence.getTargetFunction()), range,
                         param1, param2, param1Name, param2Name,
                         inputParamAreasDTO.colorMin, inputParamAreasDTO.colorMax, inputParamAreasDTO.level);
+        areasEntity.setModelEntity(modelEntity);
+        areasEntity.setByteArrayResource(byteArrayResource.getByteArray());
+        areasRepository.save(areasEntity);
+        List<AreasEntity> areasEntitys = modelEntity.getAreasEntity();
+        if (areasEntitys.size() == (maxSize + 1)) {
+            AreasEntity toRemove = areasEntitys.remove(0);
+            areasRepository.delete(toRemove);
+        }
+        modelRepository.save(modelEntity);
+        return byteArrayResource;
     }
 }

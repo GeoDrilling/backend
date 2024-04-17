@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.core.io.ByteArrayResource;
 
 @Entity
 @Table(name = "_areas")
@@ -18,12 +19,13 @@ public class AreasEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double[] targetFunction;
-    private int status;
+    private byte[] byteArrayResource;
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "model_id")
     private ModelEntity modelEntity;
+
+
 
 
 }

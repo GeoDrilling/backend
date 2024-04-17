@@ -1,11 +1,9 @@
 package ru.nsu.fit.geodrilling.entity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.nsu.fit.geodrilling.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +39,7 @@ public class ModelEntity {
     @JoinColumn(name = "project_id")
     private ProjectEntity projectEntity;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "areas_id")
-    private AreasEntity areasEntity;
+    @OneToMany(mappedBy = "modelEntity")
+    private List<AreasEntity> areasEntity = new ArrayList<>();
 
 }
