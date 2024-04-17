@@ -17,6 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.nsu.fit.geodrilling.dto.curves.*;
 import ru.nsu.fit.geodrilling.entity.CurveEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
+import ru.nsu.fit.geodrilling.entity.projectstate.property.BaseProperty;
+import ru.nsu.fit.geodrilling.entity.projectstate.property.NumberProperty;
 import ru.nsu.fit.geodrilling.exceptions.CurveSupplementationException;
 import ru.nsu.fit.geodrilling.exceptions.NewCurvesAddingException;
 import ru.nsu.fit.geodrilling.repositories.CurveRepository;
@@ -63,6 +65,12 @@ public class CurvesService {
         }
         log.info("Кривые добавлены в проект");
         projectRepository.save(project);
+        updateDeptInProjectState(projectId);
+        try {
+            updateTvdInProjectState(projectId);
+        } catch (NoSuchElementException e) {
+            log.warn("Кривой TVD нет в добавленных кривых");
+        }
         return SaveCurveDataResponse.builder()
                 .curvesNames(project.getCurves().stream().map(CurveEntity::getName).collect(Collectors.toList()))
                 .build();
@@ -109,6 +117,12 @@ public class CurvesService {
         project.setSupplementingProject(newProject);
         projectRepository.save(project);
         projectRepository.save(newProject);
+        updateDeptInProjectState(projectId);
+        try {
+            updateTvdInProjectState(projectId);
+        } catch (NoSuchElementException e) {
+            log.warn("Кривой TVD нет в добавленных кривых");
+        }
         return CurveSupplementationResponse.builder()
             .curvesNames(newProject.getCurves().stream().map(CurveEntity::getName).collect(Collectors.toList()))
             .build();
@@ -167,6 +181,51 @@ public class CurvesService {
                 .stream()
                 .min(Double::compare)
                 .orElseThrow(() -> new NoSuchElementException("Кривая DEPT - пустая"));
+    }
+
+    public void updateTvdInProjectState(Long projectId) {
+        List<Double> curveData = getCurveDataByName("TVD", projectId, false).getCurveData();
+        Double max = curveData.get(curveData.size() - 1);
+        Double min = curveData.get(0);
+        ProjectEntity projectEntity = projectRepository.findById(projectId)
+                .orElseThrow(() -> new NoSuchElementException("Проект c id " + projectId + " не существует"));
+        List<BaseProperty> baseProperties = projectEntity.getState()
+                .getModelCurveProperties()
+                .getProperties()
+                .get(0)
+                .getProperties();
+        NumberProperty minProp = (NumberProperty) baseProperties.stream()
+                .filter(prop -> Objects.equals(prop.getName(), "MIN"))
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("Свойства MIN не существует"));
+        NumberProperty maxProp = (NumberProperty) baseProperties.stream()
+                .filter(prop -> Objects.equals(prop.getName(), "MAX"))
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("Свойства MAX не существует"));
+        minProp.setValue(max);
+        maxProp.setValue(min);
+        projectRepository.save(projectEntity);
+    }
+
+    public void updateDeptInProjectState(Long projectId) {
+        ProjectEntity projectEntity = projectRepository.findById(projectId)
+                .orElseThrow(() -> new NoSuchElementException("Проект c id " + projectId + " не существует"));
+        List<BaseProperty> baseProperties = projectEntity.getState()
+                .getTabletProperties()
+                .getProperties()
+                .get(0)
+                .getProperties();
+        NumberProperty startDeptProp = (NumberProperty) baseProperties.stream()
+                .filter(prop -> Objects.equals(prop.getName(), "Начальная глубина"))
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("Свойства \"Начальная глубина\" не существует"));
+        NumberProperty endDeptProp = (NumberProperty) baseProperties.stream()
+                .filter(prop -> Objects.equals(prop.getName(), "Конечная глубина"))
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("Свойства \"Конечная глубина\" не существует"));
+        startDeptProp.setValue(getDeptMin(projectId));
+        endDeptProp.setValue(getDeptMax(projectId));
+        projectRepository.save(projectEntity);
     }
 
     /**
