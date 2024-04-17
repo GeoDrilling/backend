@@ -119,15 +119,13 @@ public class ModelService {
         int length = 0;
         if (curves.contains(ROPL) || curves.contains(ROAL)) {
             if (curves.contains(ROPL)) {
-                arrPL = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(ROPL, idProject, false).getCurveData());
+                arrPL = ListDoubleInDoubleArray(lasFileService.getRange(projectEntity, ROPL, start, end, false));
                 bolPL = true;
                 length = arrPL.length;
             }
             if (curves.contains(ROAL)) {
                 System.out.println(ROAL);
-                arrAL = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(ROAL, idProject, false).getCurveData());
+                arrAL = ListDoubleInDoubleArray(lasFileService.getRange(projectEntity, ROAL, start, end, false));
                 bolAL = true;
                 length = arrAL.length;
             }
@@ -169,14 +167,12 @@ public class ModelService {
         if (curves.contains(ROPH) || curves.contains(ROAH)) {
             if (curves.contains(ROPH)) {
                 System.out.println(ROPH);
-                arrPH = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(ROPH, idProject, false).getCurveData());
+                arrPH = ListDoubleInDoubleArray(lasFileService.getRange(projectEntity, ROPH, start, end, false));
                 bolPH = true;
                 length = arrPH.length;
             }
             if (curves.contains(ROAH)) {
-                arrAH = ListDoubleInDoubleArray(lasFileService.
-                        getCurveDataByName(ROAH, idProject, false).getCurveData());
+                arrAH = ListDoubleInDoubleArray(lasFileService.getRange(projectEntity, ROAH, start, end, false));
                 bolAH = true;
                 length = arrAH.length;
             }
@@ -445,7 +441,7 @@ public class ModelService {
         modelEntity.setStatus(outputModel.getStatus());
         modelEntity.setProjectEntity(projectEntity);*/
         // modelRepository.save(modelEntity);
-        return new ModelDTO(0L, "", 0D, 0D, outputModel.getKanisotropyDown(), outputModel.getRoDown(),
+        return new ModelDTO(0L, "", modelDTO.getStart(), modelDTO.getEnd(), outputModel.getKanisotropyDown(), outputModel.getRoDown(),
                 outputModel.getKanisotropyUp(), outputModel.getRoUp(),
                 outputModel.getAlpha(), outputModel.getTvdStart());
 
@@ -459,6 +455,11 @@ public class ModelService {
         }
 
         InputBuildModel inputBuildModel = createInputBuildModel(idProject, true, start, end);
+        System.out.println(inputBuildModel.getNpoints());
+        System.out.println(Arrays.toString(inputBuildModel.getX()));
+        System.out.println();
+        System.out.println();
+        System.out.println();
         OutputModel outputModel = nativeLibrary.startModel(inputBuildModel);
         System.out.println(outputModel.getMisfit());
         System.out.println(outputModel.getTvdStart());
@@ -466,7 +467,7 @@ public class ModelService {
         System.out.println(outputModel.getKanisotropyUp());
         System.out.println(outputModel.getRoDown());
         System.out.println(outputModel.getKanisotropyDown());
-        return new ModelDTO(0L, "start", 0D, 0D, outputModel.getKanisotropyDown(),
+        return new ModelDTO(0L, "start", start, end, outputModel.getKanisotropyDown(),
                 outputModel.getRoDown(), outputModel.getKanisotropyUp(), outputModel.getRoUp(),
                 outputModel.getAlpha(), outputModel.getTvdStart());
     }
