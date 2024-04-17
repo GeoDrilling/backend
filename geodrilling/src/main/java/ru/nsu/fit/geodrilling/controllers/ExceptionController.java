@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.nsu.fit.geodrilling.exceptions.FrozenProjectException;
 import ru.nsu.fit.geodrilling.exceptions.InvalidJWT;
 import ru.nsu.fit.geodrilling.exceptions.LoginException;
 import ru.nsu.fit.geodrilling.model.ExceptionMessage;
@@ -59,4 +60,12 @@ public class ExceptionController {
   public ExceptionMessage handleVersionException(RuntimeException ex) {
     return new ExceptionMessage(ex.getMessage());
   }
+
+  @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+  @ExceptionHandler(FrozenProjectException.class)
+  public ExceptionMessage handleFrozenProjectException(RuntimeException ex) {
+    return new ExceptionMessage(ex.getMessage());
+  }
 }
+
+
