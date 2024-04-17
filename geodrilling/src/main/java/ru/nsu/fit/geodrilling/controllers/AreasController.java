@@ -24,6 +24,17 @@ public class AreasController {
                 .body(areasService.createAreas(idModel, inputParamAreasDTO));
     }
 
+    @GetMapping("/getAreas")
+    public ResponseEntity<byte[]> getAreas(
+            @RequestParam("model_id") Long idModel,
+            @RequestParam("number") Integer number) throws Exception {
+        /*UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        String email = (modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());*/
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(areasService.getAreas(idModel, number));
+    }
+
 
 }
 
