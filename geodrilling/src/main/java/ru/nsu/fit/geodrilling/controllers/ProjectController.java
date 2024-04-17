@@ -75,4 +75,9 @@ public class ProjectController {
                                 @RequestBody SaveProjectStateDTO state) {
         projectService.saveProjectState(projectId, state);
     }
+
+    @GetMapping("/chain/{projectId}")
+    public void getProjectChain(@PathVariable Long projectId) {
+        ResponseEntity.ok(projectService.getProjectChain(projectId));
+    }
 }

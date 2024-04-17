@@ -226,4 +226,15 @@ public class ProjectService {
         }
         projectRepository.save(project);
     }
+
+    public List<ProjectDTO> getProjectChain(Long projectId) {
+        List<ProjectDTO> projectsChain = new ArrayList<>();
+        ProjectEntity project = projectRepository.findById(projectId).orElseThrow(
+                () -> new NoSuchElementException("Проект с id=" + projectId + " не найден"));
+        projectsChain.add(modelMapper.map(project, ProjectDTO.class));
+        while ((project = project.getSupplementingProject()) != null) {
+            projectsChain.add(modelMapper.map(project, ProjectDTO.class));
+        }
+        return projectsChain;
+    }
 }
