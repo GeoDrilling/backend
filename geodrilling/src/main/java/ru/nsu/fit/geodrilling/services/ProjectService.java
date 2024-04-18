@@ -161,12 +161,14 @@ public class ProjectService {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(() ->
                 new ProjectNotFoundException("Проект не найден"));
         List<ModelDTO> modelDTOList = modelService.mapModelDtoList(project.getModelEntityList());
+        System.out.println("curves ----");
+        project.getCurves().forEach(System.out::println);
         return new ProjectStateDTO(project.getId(), project.getState().getTabletProperties(),
                 project.getState().getDepthTrackProperties(),
                 project.getState().getModelCurveProperties(),
                 project.getState().getTrackProperties(),
                 project.getCurves().stream()
-                        .map(CurveEntity::getDirInProject)
+                        .map(CurveEntity::getFullName)
                         .collect(Collectors.toList()), modelDTOList);
     }
 
