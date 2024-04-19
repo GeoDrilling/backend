@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.nsu.fit.geodrilling.dto.InputAreasEquivalence;
 import ru.nsu.fit.geodrilling.dto.InputBuildModel;
 import ru.nsu.fit.geodrilling.dto.InputParamAreasDTO;
+import ru.nsu.fit.geodrilling.dto.OutputAreasDTO;
 import ru.nsu.fit.geodrilling.entity.AreasEntity;
 import ru.nsu.fit.geodrilling.entity.ModelEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
@@ -19,9 +20,7 @@ import ru.nsu.fit.geodrilling.repositories.UserRepository;
 import ru.nsu.fit.geodrilling.services.drawingAreasEquivalent.PythonService;
 import ru.nsu.fit.geodrilling.services.lib.NativeLibrary;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static ru.nsu.fit.geodrilling.model.Constant.NAN;
 
@@ -89,6 +88,23 @@ public class AreasService {
         ModelEntity modelEntity = modelRepository.findById(idModel).orElseThrow(() -> new EntityNotFoundException("Модель не найдена"));
         List<AreasEntity> areasEntityBoundedList = modelEntity.getAreasEntity();
         return areasEntityBoundedList.get(number).getByteArrayResource();
+    }
+
+    public List<OutputAreasDTO> getAllAreas(Long idModel) {
+        List<AreasEntity> areasEntitys = modelRepository.findById(idModel)
+                .orElseThrow(() -> new EntityNotFoundException("Модель не найдена")).getAreasEntity();
+        List<OutputAreasDTO> outputAreasDTOS = new ArrayList<>();
+        int i = 0;
+        for (AreasEntity areasEntity : areasEntitys) {
+            OutputAreasDTO outputAreasDTO = new OutputAreasDTO();
+            outputAreasDTO.setParam1(areasEntity.getParam1());
+            outputAreasDTO.setParam2(areasEntity.getParam2());
+            outputAreasDTO.setGridFrequency(areasEntity.getGridFrequency());
+            outputAreasDTO.setNumber(i);
+            outputAreasDTOS.add(outputAreasDTO);
+            i++;
+        }
+        return outputAreasDTOS;
     }
 
     public ByteArrayResource createAreas(Long idModel, InputParamAreasDTO inputParamAreasDTO) {
@@ -504,6 +520,9 @@ public class AreasService {
                         inputParamAreasDTO.colorMin, inputParamAreasDTO.colorMax, inputParamAreasDTO.level);
         areasEntity.setModelEntity(modelEntity);
         areasEntity.setByteArrayResource(byteArrayResource.getByteArray());
+        areasEntity.setParam1(param1Name);
+        areasEntity.setParam2(param2Name);
+        areasEntity.setGridFrequency(range);
         areasRepository.save(areasEntity);
         List<AreasEntity> areasEntitys = modelEntity.getAreasEntity();
         if (areasEntitys.size() == (maxSize + 1)) {

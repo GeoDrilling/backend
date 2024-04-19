@@ -20,6 +20,9 @@ public class AreasEntity {
     private Long id;
 
     private byte[] byteArrayResource;
+    private String param1;
+    private String param2;
+    private int gridFrequency;
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "model_id")

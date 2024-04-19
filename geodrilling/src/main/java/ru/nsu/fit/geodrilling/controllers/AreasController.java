@@ -6,7 +6,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.nsu.fit.geodrilling.dto.InputParamAreasDTO;
+import ru.nsu.fit.geodrilling.dto.OutputAreasDTO;
 import ru.nsu.fit.geodrilling.services.AreasService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/areas")
@@ -35,6 +38,12 @@ public class AreasController {
                 .body(areasService.getAreas(idModel, number));
     }
 
-
+    @GetMapping("/getAllAreas")
+    public ResponseEntity<List<OutputAreasDTO>> getAllAreas(
+            @RequestParam("model_id") Long idModel) throws Exception {
+        /*UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        String email = (modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());*/
+        return ResponseEntity.ok(areasService.getAllAreas(idModel));
+    }
 }
 
