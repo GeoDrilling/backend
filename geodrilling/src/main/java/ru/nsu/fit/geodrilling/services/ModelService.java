@@ -40,12 +40,6 @@ import static ru.nsu.fit.geodrilling.model.Constant.NAN;
 @RequiredArgsConstructor
 public class ModelService {
 
-    @Value("${lasfile.temp-path}")
-    private String tempFolderPath;
-
-    @Value("${projects.folder-path}")
-    private String projectsFolderPath;
-
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final CurvesService lasFileService;
