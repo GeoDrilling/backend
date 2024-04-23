@@ -94,15 +94,15 @@ public class AreasService {
         List<AreasEntity> areasEntitys = modelRepository.findById(idModel)
                 .orElseThrow(() -> new EntityNotFoundException("Модель не найдена")).getAreasEntity();
         List<OutputAreasDTO> outputAreasDTOS = new ArrayList<>();
-        int i = 0;
+        int i = areasEntitys.size();
         for (AreasEntity areasEntity : areasEntitys) {
+            i--;
             OutputAreasDTO outputAreasDTO = new OutputAreasDTO();
             outputAreasDTO.setParam1(areasEntity.getParam1());
             outputAreasDTO.setParam2(areasEntity.getParam2());
             outputAreasDTO.setGridFrequency(areasEntity.getGridFrequency());
             outputAreasDTO.setNumber(i);
             outputAreasDTOS.add(outputAreasDTO);
-            i++;
         }
         return outputAreasDTOS;
     }
