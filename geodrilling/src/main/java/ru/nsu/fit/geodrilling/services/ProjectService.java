@@ -161,6 +161,12 @@ public class ProjectService {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(() ->
                 new ProjectNotFoundException("Проект не найден"));
         List<ModelDTO> modelDTOList = modelService.mapModelDtoList(project.getModelEntityList());
+        Collections.sort(modelDTOList, new Comparator<ModelDTO>() {
+            @Override
+            public int compare(ModelDTO o1, ModelDTO o2) {
+                return Double.compare(o1.getStart(), o2.getStart());
+            }
+        });
         System.out.println("curves ----");
         project.getCurves().forEach(System.out::println);
         return new ProjectStateDTO(project.getId(), project.getState().getTabletProperties(),

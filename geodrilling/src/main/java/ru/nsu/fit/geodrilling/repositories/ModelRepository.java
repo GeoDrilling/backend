@@ -7,4 +7,5 @@ import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 
 public interface ModelRepository extends JpaRepository<ModelEntity, Long> {
   List<ModelEntity> findByProjectEntityOrderByStartXAsc(ProjectEntity projectEntity);
+  List<ModelEntity> findByProjectEntityOrderByStartXDesc(ProjectEntity projectEntity);
 }
