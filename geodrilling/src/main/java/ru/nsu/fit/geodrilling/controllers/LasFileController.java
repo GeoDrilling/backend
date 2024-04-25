@@ -1,16 +1,17 @@
 package ru.nsu.fit.geodrilling.controllers;
 
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.nsu.fit.geodrilling.dto.curves.*;
-import ru.nsu.fit.geodrilling.services.CurvesService;
 import ru.nsu.fit.geodrilling.dto.curves.CurveDataDownloadResponse;
+import ru.nsu.fit.geodrilling.dto.curves.CurveSupplementationResponse;
 import ru.nsu.fit.geodrilling.dto.curves.GetCurvesNamesResponse;
-import ru.nsu.fit.geodrilling.dto.curves.LasFileUploadResponse;
+import ru.nsu.fit.geodrilling.dto.curves.SaveCurveDataResponse;
+import ru.nsu.fit.geodrilling.services.CurvesService;
 import ru.nsu.fit.geodrilling.services.SootService;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/lasfile")
@@ -22,7 +23,7 @@ public class LasFileController {
     @PostMapping("/upload")
     public ResponseEntity<SaveCurveDataResponse> upload(@RequestParam("file") MultipartFile file,
                                                         @RequestParam("project_id") Long projectId) throws IOException {
-        SaveCurveDataResponse saveCurveDataResponse = (curvesService.saveCurves(file, projectId));
+        SaveCurveDataResponse saveCurveDataResponse = (curvesService.save(file, projectId));
         sootService.sootOffer(saveCurveDataResponse, projectId);
         return ResponseEntity.ok(saveCurveDataResponse);
     }

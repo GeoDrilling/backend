@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
@@ -22,7 +21,7 @@ public class ProjectAspect {
 
     private final ProjectRepository projectRepository;
 
-    @Before(value = "execution(* saveCurves(..)) && args(file, projectId)", argNames = "file,projectId")
+    @Before(value = "execution(* save(..)) && args(file, projectId)", argNames = "file,projectId")
     public void uploadLasFilePointcut(MultipartFile file, Long projectId) {
         log.info("Зашли в аспект");
         ProjectEntity project = projectRepository.findById(projectId)

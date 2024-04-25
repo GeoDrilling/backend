@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.File;
-
 @Entity
 @Data
 @NoArgsConstructor
@@ -32,7 +30,7 @@ public class CurveEntity {
     @Column(columnDefinition = "TEXT")
     private String data;
 
-    private String dirInProject;
+    private String dirInProject = "";
     private Boolean isSynthetic = false;
 
     public String getFullName() {

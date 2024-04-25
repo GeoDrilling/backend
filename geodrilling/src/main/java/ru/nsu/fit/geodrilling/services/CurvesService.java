@@ -2,19 +2,19 @@ package ru.nsu.fit.geodrilling.services;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import grillid9.laslib.Curve;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 import grillid9.laslib.LasReader;
 import jakarta.transaction.Transactional;
-
-import java.io.*;
-import java.nio.file.*;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.tomcat.util.http.fileupload.impl.InvalidContentTypeException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.nsu.fit.geodrilling.dto.curves.*;
+import ru.nsu.fit.geodrilling.dto.curves.CurveDataDownloadResponse;
+import ru.nsu.fit.geodrilling.dto.curves.CurveSupplementationResponse;
+import ru.nsu.fit.geodrilling.dto.curves.GetCurvesNamesResponse;
+import ru.nsu.fit.geodrilling.dto.curves.SaveCurveDataResponse;
 import ru.nsu.fit.geodrilling.entity.CurveEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.entity.projectstate.property.BaseProperty;
@@ -24,9 +24,13 @@ import ru.nsu.fit.geodrilling.exceptions.NewCurvesAddingException;
 import ru.nsu.fit.geodrilling.repositories.CurveRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -38,34 +42,43 @@ public class CurvesService {
     private final Gson gson;
 
     @Transactional
-    public SaveCurveDataResponse saveCurves(MultipartFile file, Long projectId) throws IOException {
+    public SaveCurveDataResponse save(MultipartFile file, Long projectId) throws IOException {
         log.info("Добавление кривых в проект id={}", projectId);
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(()
                 -> new NoSuchElementException("Проект с id " + projectId + " не существует"));
-        Path tempPath = Files.createTempFile(null, null);
-        file.transferTo(tempPath);
-        LasReader lasReader = new LasReader(tempPath.toFile().getAbsolutePath());
-        lasReader.read();
-        log.info("Кривых в файле {}: {}", file.getOriginalFilename(), lasReader.getCurves().size());
+        List<CurveEntity> curves;
+        if (file.getContentType().equals("text/csv")) {
+            curves = fromCsv(file);
+        } else if (file.getContentType().equals("text/las")) {
+            curves = fromLas(file);
+        } else {
+            log.error("Расширение файла {} не поддерживается!", file.getContentType());
+            throw new InvalidContentTypeException("Расширение файла " + file.getContentType() + " не поддерживается!");
+        }
         // если в проекте уже есть кривые, происходит склейка по кривой DEPT
         if (!project.getCurves().isEmpty()) {
-            log.info("Дополнение кривых в проекте id={}", projectId);
-            Curve newDepthCurve = lasReader.getCurves().stream()
+            log.info("Склейка кривых в проекте id={}", projectId);
+            CurveEntity newDepthCurve = curves.stream()
                     .filter(curve -> Objects.equals(curve.getName(), "DEPT"))
                     .findFirst().orElseThrow(
                     () -> new NoSuchElementException("Кривой DEPT не существует во входящем файле"));
             String depthInProjectData = gson.toJson(getCurveDataByName("DEPT", project.getId(), false).getCurveData());
-            if (!depthInProjectData.equals(gson.toJson(newDepthCurve.getData()))) {
+            if (!depthInProjectData.equals(newDepthCurve.getData())) {
                 throw new NewCurvesAddingException("Кривая DEPT не соответствует уже добалвенной");
             }
-            lasReader.getCurves().remove(newDepthCurve);
+            curves.remove(newDepthCurve);
         }
-        for (Curve curve : lasReader.getCurves()) {
-            project.getCurves().add(curveRepository.save(new CurveEntity(null, project, curve.getName(), gson.toJson(curve.getData()), "", false)));
+        for (CurveEntity curve : curves) {
+            curve.setProject(project);
+            project.getCurves().add(curveRepository.save(curve));
         }
         log.info("Кривые добавлены в проект");
         projectRepository.save(project);
-        updateDeptInProjectState(projectId);
+        try {
+            updateDeptInProjectState(projectId);
+        } catch (NoSuchElementException e) {
+            log.warn("Кривой DEPT нет в добавленных кривых");
+        }
         try {
             updateTvdInProjectState(projectId);
         } catch (NoSuchElementException e) {
@@ -100,24 +113,34 @@ public class CurvesService {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(()
                 -> new NoSuchElementException("Проект c id " + projectId + " не существует"));
         log.info("Проект " + project.getId() + ": дополнение кривых");
-        Path tempPath = Files.createTempFile(null, null);
-        file.transferTo(tempPath);
-        LasReader lasReader = new LasReader(tempPath.toFile().getAbsolutePath());
-        lasReader.read();
-        if (!isCurvesMatch(project, lasReader.getCurves())) {
+        List<CurveEntity> curves;
+        if (file.getContentType().equals("text/csv")) {
+            curves = fromCsv(file);
+        } else if (file.getContentType().equals("las")) {
+            curves = fromLas(file);
+        } else {
+            log.error("Расширение файла {} не поддерживается!", file.getContentType());
+            throw new InvalidContentTypeException("Расширение файла " + file.getContentType() + " не поддерживается!");
+        }
+        if (!isCurvesMatch(project, curves)) {
+            log.error("Кривые дополняющего файла не соответствуют уже добавленным кривым");
             throw new CurveSupplementationException("Кривые дополняющего файла не соответствуют уже добавленным кривым");
         }
         project.setReadOnly(true);
         log.info("Проект {} заморожен", project.getId());
         ProjectEntity newProject = projectRepository.save(new ProjectEntity());
-        for (Curve curve : lasReader.getCurves()) {
-            newProject.getCurves().add(curveRepository.save(new CurveEntity(null, newProject, curve.getName(), gson.toJson(curve.getData()), "", false)));
+        for (CurveEntity curve : curves) {
+            newProject.getCurves().add(curveRepository.save(curve));
         }
         log.info("Дополненные кривые сохранены в новый проект с id {}", newProject.getId());
         project.setSupplementingProject(newProject);
         projectRepository.save(project);
         projectRepository.save(newProject);
-        updateDeptInProjectState(projectId);
+        try {
+            updateDeptInProjectState(projectId);
+        } catch (NoSuchElementException e) {
+            log.warn("Кривой DEPT нет в добавленных кривых");
+        }
         try {
             updateTvdInProjectState(projectId);
         } catch (NoSuchElementException e) {
@@ -234,12 +257,12 @@ public class CurvesService {
      * @param curves дополненные кривые
      * @return true если являются, false иначе
      */
-    private boolean isCurvesMatch(ProjectEntity project, List<Curve> curves) {
+    private boolean isCurvesMatch(ProjectEntity project, List<CurveEntity> curves) {
         if (project.getCurves()
                 .stream()
                 .map(CurveEntity::getName)
                 .collect(Collectors.toSet())
-                .containsAll(curves.stream().map(Curve::getName).collect(Collectors.toList()))) {
+                .containsAll(curves.stream().map(CurveEntity::getName).collect(Collectors.toList()))) {
             for (int i = 0; i < 3; i++) {
                 CurveEntity curveInProject = project.getCurves().get(i);
                 String curveData = gson.toJson(curves.stream().filter(x -> x.getName().equals(curveInProject.getName()))
@@ -252,6 +275,46 @@ public class CurvesService {
             return true;
         } else {
             return false;
+        }
+    }
+
+    public List<CurveEntity> fromLas(MultipartFile file) {
+        try {
+            Path tempPath = Files.createTempFile(null, null);
+            file.transferTo(tempPath);
+            LasReader lasReader = new LasReader(tempPath.toFile().getAbsolutePath());
+            lasReader.read();
+            return lasReader.getCurves()
+                    .stream()
+                    .map(x -> CurveEntity.builder().name(x.getName()).data(gson.toJson(x.getData())).build())
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public List<CurveEntity> fromCsv(MultipartFile file) {
+        try (CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
+            String[] curvesNames = reader.readNext();
+            Map<String, List<Double>> nameToData  = new HashMap<>();
+            for (String curveName : curvesNames) {
+                nameToData.put(curveName, new ArrayList<>());
+            }
+            String[] dataLine;
+            while ((dataLine = reader.readNext()) != null) {
+                for (int i = 0; i < curvesNames.length; i++) {
+                    nameToData.get(curvesNames[i]).add(Double.parseDouble(dataLine[i]));
+                }
+            }
+            List<CurveEntity> curves = new ArrayList<>(curvesNames.length);
+            for (int i = 0; i < curvesNames.length; i++) {
+                curves.add(CurveEntity.builder().name(curvesNames[i]).data(gson.toJson(nameToData.get(curvesNames[i]))).build());
+            }
+            return curves;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } catch (CsvValidationException e) {
+            throw new RuntimeException(e);
         }
     }
 }
