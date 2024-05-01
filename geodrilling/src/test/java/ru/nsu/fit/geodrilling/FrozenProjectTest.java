@@ -3,7 +3,6 @@ package ru.nsu.fit.geodrilling;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Answers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -38,7 +37,7 @@ public class FrozenProjectTest {
     @Test
     public void addCurvesToFrozenProjectTest() throws IOException {
         Assertions.assertThrows(FrozenProjectException.class,
-                () -> curvesService.saveCurves(new MockMultipartFile("test", new byte[]{}), 1L));
+                () -> curvesService.save(new MockMultipartFile("test", new byte[]{}), 1L));
     }
 
     @Test

@@ -489,8 +489,8 @@ public class ModelService {
                     continue;
                 }
 
-                if (modelEntity.getStartX() >= modelDTO.getStart()
-                        && modelEntity.getEndX() > modelDTO.getEnd()
+                if (modelEntity.getStartX() > modelDTO.getStart()
+                        && modelEntity.getEndX() >= modelDTO.getEnd()
                         && modelEntity.getStartX() < modelDTO.getEnd()) {
                     // c start
                     modelEntity.setStartX(modelDTO.getEnd());
@@ -500,14 +500,14 @@ public class ModelService {
 
                 if (modelEntity.getStartX() >= modelDTO.getStart()
                         && modelEntity.getEndX() > modelDTO.getEnd()
-                        && modelEntity.getStartX() > modelDTO.getEnd()) {
+                        && modelEntity.getStartX() >= modelDTO.getEnd()) {
                     // save
                     modelDTOList.add(mapModelDto(modelEntity));
                     continue;
                 }
 
-                if (modelEntity.getStartX() < modelDTO.getStart()
-                        && modelEntity.getEndX() <= modelDTO.getEnd()
+                if (modelEntity.getStartX() <= modelDTO.getStart()
+                        && modelEntity.getEndX() < modelDTO.getEnd()
                         && modelEntity.getEndX() >= modelDTO.getStart()) {
                     // c end
                     modelEntity.setEndX(modelDTO.getStart());
