@@ -42,4 +42,6 @@ public class ModelEntity {
     @OneToMany(mappedBy = "modelEntity")
     private List<AreasEntity> areasEntity = new ArrayList<>();
 
+    @OneToMany(mappedBy = "modelEntity")
+    private List<CacheAreasEntity> CacheAreasEntity = new ArrayList<>();
 }

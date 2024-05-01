@@ -1,7 +1,6 @@
 package ru.nsu.fit.geodrilling.services;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
@@ -10,20 +9,15 @@ import ru.nsu.fit.geodrilling.dto.InputBuildModel;
 import ru.nsu.fit.geodrilling.dto.InputParamAreasDTO;
 import ru.nsu.fit.geodrilling.dto.OutputAreasDTO;
 import ru.nsu.fit.geodrilling.entity.AreasEntity;
+import ru.nsu.fit.geodrilling.entity.CacheAreasEntity;
 import ru.nsu.fit.geodrilling.entity.ModelEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.model.AreasEquivalence;
-import ru.nsu.fit.geodrilling.repositories.AreasRepository;
-import ru.nsu.fit.geodrilling.repositories.ModelRepository;
-import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
-import ru.nsu.fit.geodrilling.repositories.UserRepository;
+import ru.nsu.fit.geodrilling.repositories.*;
 import ru.nsu.fit.geodrilling.services.drawingAreasEquivalent.PythonService;
 import ru.nsu.fit.geodrilling.services.lib.NativeLibrary;
 
 import java.util.*;
-
-import static ru.nsu.fit.geodrilling.model.Constant.NAN;
-
 
 
 @Service
@@ -37,6 +31,7 @@ public class AreasService {
     private final PythonService pythonService;
     private final ModelService modelService;
     private final AreasRepository areasRepository;
+    private final CacheAreasRepository cacheAreasRepository;
     private double[] ListDoubleInDoubleArray(List<Double> list) {
         return list.stream().mapToDouble(Double::doubleValue).toArray();
     }
@@ -87,7 +82,7 @@ public class AreasService {
     public byte[] getAreas(Long idModel, Integer number) {
         ModelEntity modelEntity = modelRepository.findById(idModel).orElseThrow(() -> new EntityNotFoundException("Модель не найдена"));
         List<AreasEntity> areasEntityBoundedList = modelEntity.getAreasEntity();
-        return areasEntityBoundedList.get(number).getByteArrayResource();
+        return areasEntityBoundedList.get(4 - number).getByteArrayResource();
     }
 
     public List<OutputAreasDTO> getAllAreas(Long idModel) {
@@ -497,9 +492,30 @@ public class AreasService {
         kanisotropy_upArr, ro_downArrlength,
         ro_downArr, kanisotropy_downArrlength,
         kanisotropy_downArr, inputBuildModel.ro_by_phases, inputBuildModel.ro_by_ampl);
-
-        AreasEquivalence areasEquivalence = nativeLibrary.createAreasEquivalence(inputAreasEquivalence);
-
+        CacheAreasEntity cacheAreasEntity = cacheAreasRepository.
+                findCacheAreasEntityByParam1AndParam2AndGridFrequency(param1Name, param2Name, range).
+                orElse(null);
+        double[] targetFunction;
+        int maxSizeCache = 30;
+        if (cacheAreasEntity == null) {
+            AreasEquivalence areasEquivalence = nativeLibrary.createAreasEquivalence(inputAreasEquivalence);
+            targetFunction = areasEquivalence.getTargetFunction();
+            cacheAreasEntity = new CacheAreasEntity();
+            cacheAreasEntity.setModelEntity(modelEntity);
+            cacheAreasEntity.setParam1(param1Name);
+            cacheAreasEntity.setParam2(param2Name);
+            cacheAreasEntity.setGridFrequency(range);
+            cacheAreasEntity.setTargetFunction(targetFunction);
+            cacheAreasRepository.save(cacheAreasEntity);
+            List<CacheAreasEntity> cacheAreasEntitys = modelEntity.getCacheAreasEntity();
+            if (cacheAreasEntitys.size() == (maxSizeCache + 1)) {
+                CacheAreasEntity toRemove = cacheAreasEntitys.remove(0);
+                cacheAreasRepository.delete(toRemove);
+            }
+            modelRepository.save(modelEntity);
+        } else {
+            targetFunction = cacheAreasEntity.getTargetFunction();
+        }
         /*double[][] intensityValues = new double[param1length][param1length];
         for (int i = 0; i < param1length; i++) {
             for (int j = 0; j < param1length; j++) {
@@ -512,12 +528,14 @@ public class AreasService {
                 findMax(areasEquivalence.getTargetFunction())), "ColorMap");*/
         System.out.println(convertToFloatList(param1));
         System.out.println(convertToFloatList(param2));
-        System.out.println(convertToFloatList(areasEquivalence.getTargetFunction()));
-        Integer maxSize = 5;
+        System.out.println(convertToFloatList(targetFunction));
+        int maxSizeHistory = 5;
+        Arrays.sort(inputParamAreasDTO.level);
         ByteArrayResource byteArrayResource = pythonService.sendIntensityDataAndReceiveImage
-                (convertToFloatList(areasEquivalence.getTargetFunction()), range,
+                (convertToFloatList(targetFunction), range,
                         param1, param2, param1Name, param2Name,
-                        inputParamAreasDTO.colorMin, inputParamAreasDTO.colorMax, inputParamAreasDTO.level);
+                        inputParamAreasDTO.colorMin, inputParamAreasDTO.colorMax,
+                        inputParamAreasDTO.level);
         areasEntity.setModelEntity(modelEntity);
         areasEntity.setByteArrayResource(byteArrayResource.getByteArray());
         areasEntity.setParam1(param1Name);
@@ -525,7 +543,7 @@ public class AreasService {
         areasEntity.setGridFrequency(range);
         areasRepository.save(areasEntity);
         List<AreasEntity> areasEntitys = modelEntity.getAreasEntity();
-        if (areasEntitys.size() == (maxSize + 1)) {
+        if (areasEntitys.size() == (maxSizeHistory + 1)) {
             AreasEntity toRemove = areasEntitys.remove(0);
             areasRepository.delete(toRemove);
         }
