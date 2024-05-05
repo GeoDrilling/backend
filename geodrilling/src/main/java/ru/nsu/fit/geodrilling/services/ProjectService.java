@@ -42,7 +42,7 @@ public class ProjectService {
     private final SootRepository sootRepository;
     private final ProjectStateRepository projectStateRepository;
     private final ModelMapper modelMapper;
-    private final ModelService modelService;
+    private final ModelMapService modelMapService;
 
     @Transactional
     public ProjectStateDTO createProjectForUser(String email, String name) {
@@ -160,7 +160,7 @@ public class ProjectService {
     public ProjectStateDTO getProjectState(Long projectId) {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(() ->
                 new ProjectNotFoundException("Проект не найден"));
-        List<ModelDTO> modelDTOList = modelService.mapModelDtoList(project.getModelEntityList());
+        List<ModelDTO> modelDTOList = modelMapService.mapModelDtoList(project.getModelEntityList());
         Collections.sort(modelDTOList, new Comparator<ModelDTO>() {
             @Override
             public int compare(ModelDTO o1, ModelDTO o2) {
