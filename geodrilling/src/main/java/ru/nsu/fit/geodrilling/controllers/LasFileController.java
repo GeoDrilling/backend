@@ -32,7 +32,7 @@ public class LasFileController {
     public ResponseEntity<CurveDataDownloadResponse> downloadByCurveName(
             @RequestParam("project_id") Long projectId,
             @RequestParam("curve_name") String curveName) {
-        return ResponseEntity.ok(curvesService.getCurveDataByName(curveName, projectId, false));
+        return ResponseEntity.ok(curvesService.getByPathName(curveName, projectId));
     }
 
     @GetMapping("/download/curve/synthetic")

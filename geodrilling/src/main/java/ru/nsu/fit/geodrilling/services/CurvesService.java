@@ -281,6 +281,13 @@ public class CurvesService {
         }
     }
 
+    public CurveDataDownloadResponse getByPathName(String name, Long projectId) {
+        if (name.startsWith("/synthetic/ROPL"))
+            return getCurveDataByName(name.substring(11), projectId, true);
+        else
+            return getCurveDataByName(name.substring(11), projectId, false);
+    }
+
     private void clearTracksInProjectState(Long projectId) {
         ProjectEntity projectEntity = projectRepository.findById(projectId)
                 .orElseThrow(() -> new NoSuchElementException("Проект c id " + projectId + " не существует"));
@@ -288,4 +295,5 @@ public class CurvesService {
             track.getCurves().clear();
         }
     }
+
 }
