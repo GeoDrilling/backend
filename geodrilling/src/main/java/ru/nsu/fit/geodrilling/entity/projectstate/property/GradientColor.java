@@ -8,6 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GradientColor {
-    private String color;
-    private Integer position;
+    private String value;
+    private Float position;
 }
