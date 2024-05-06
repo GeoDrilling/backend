@@ -282,10 +282,10 @@ public class CurvesService {
     }
 
     public CurveDataDownloadResponse getByPathName(String name, Long projectId) {
-        if (name.startsWith("/synthetic/ROPL"))
+        if (name.startsWith("/synthetic/"))
             return getCurveDataByName(name.substring(11), projectId, true);
         else
-            return getCurveDataByName(name.substring(11), projectId, false);
+            return getCurveDataByName(name, projectId, false);
     }
 
     private void clearTracksInProjectState(Long projectId) {
