@@ -30,7 +30,10 @@ public class CurveEntity {
     @Column(columnDefinition = "TEXT")
     private String data;
 
+    @Builder.Default
     private String dirInProject = "";
+
+    @Builder.Default
     private Boolean isSynthetic = false;
 
     public String getFullName() {
