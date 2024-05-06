@@ -10,17 +10,14 @@ import ru.nsu.fit.geodrilling.dto.ProjectDTO;
 import ru.nsu.fit.geodrilling.dto.ProjectStateDTO;
 import ru.nsu.fit.geodrilling.dto.SaveProjectStateDTO;
 import ru.nsu.fit.geodrilling.entity.CurveEntity;
-import ru.nsu.fit.geodrilling.entity.ModelEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectState;
 import ru.nsu.fit.geodrilling.entity.SootEntity;
 import ru.nsu.fit.geodrilling.entity.projectstate.GroupProperties;
 import ru.nsu.fit.geodrilling.entity.projectstate.ContainerGroupProperties;
+import ru.nsu.fit.geodrilling.entity.projectstate.ModelCurveGroupProperties;
 import ru.nsu.fit.geodrilling.entity.projectstate.enums.EnumType;
-import ru.nsu.fit.geodrilling.entity.projectstate.property.ColorProperty;
-import ru.nsu.fit.geodrilling.entity.projectstate.property.EnumProperty;
-import ru.nsu.fit.geodrilling.entity.projectstate.property.NumberProperty;
-import ru.nsu.fit.geodrilling.entity.projectstate.property.StringProperty;
+import ru.nsu.fit.geodrilling.entity.projectstate.property.*;
 import ru.nsu.fit.geodrilling.exceptions.ProjectNotFoundException;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectStateRepository;
@@ -73,7 +70,7 @@ public class ProjectService {
         ProjectState state = new ProjectState();
         ContainerGroupProperties tabletProperties = createTabletProps();
         ContainerGroupProperties depthTrackProperties = createDepthTackProps();
-        ContainerGroupProperties modelCurveProps = createModelCurveProps();
+        ModelCurveGroupProperties modelCurveProps = createModelCurveProps();
 
         ProjectEntity projectEntity = projectRepository.save(project);
         state.setId(projectEntity.getId());
@@ -87,8 +84,8 @@ public class ProjectService {
                 state.getTrackProperties(), Collections.emptyList(), null);
     }
 
-    public ContainerGroupProperties createModelCurveProps() {
-        ContainerGroupProperties modelCurve = new ContainerGroupProperties();
+    public ModelCurveGroupProperties createModelCurveProps() {
+        ModelCurveGroupProperties modelCurve = new ModelCurveGroupProperties();
 
         GroupProperties mainProperties = new GroupProperties();
         mainProperties.setName("Основные свойства");
@@ -109,6 +106,9 @@ public class ProjectService {
                 thicknessVertical, colorVertical));
 
         modelCurve.setProperties(List.of(mainProperties));
+        modelCurve.setGradient(List.of(
+                new GradientColor("rgba(251,187,59,1)", 0f),
+                new GradientColor("rgba(241,80,37,1)", 100f)));
         return modelCurve;
     }
     public ContainerGroupProperties createDepthTackProps() {
