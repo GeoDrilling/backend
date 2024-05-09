@@ -489,8 +489,8 @@ public class ModelService {
                     continue;
                 }
 
-                if (modelEntity.getStartX() > modelDTO.getStart()
-                        && modelEntity.getEndX() >= modelDTO.getEnd()
+                if (modelEntity.getStartX() >= modelDTO.getStart()
+                        && modelEntity.getEndX() > modelDTO.getEnd()
                         && modelEntity.getStartX() < modelDTO.getEnd()) {
                     // c start
                     modelEntity.setStartX(modelDTO.getEnd());
@@ -498,26 +498,26 @@ public class ModelService {
                     continue;
                 }
 
-                if (modelEntity.getStartX() >= modelDTO.getStart()
+                if (/*modelEntity.getStartX() > modelDTO.getStart()
                         && modelEntity.getEndX() > modelDTO.getEnd()
-                        && modelEntity.getStartX() >= modelDTO.getEnd()) {
+                        &&*/ modelEntity.getStartX() >= modelDTO.getEnd()) {
                     // save
-                    modelDTOList.add(mapModelDto(modelEntity));
-                    continue;
-                }
-
-                if (modelEntity.getStartX() <= modelDTO.getStart()
-                        && modelEntity.getEndX() < modelDTO.getEnd()
-                        && modelEntity.getEndX() >= modelDTO.getStart()) {
-                    // c end
-                    modelEntity.setEndX(modelDTO.getStart());
                     modelDTOList.add(mapModelDto(modelEntity));
                     continue;
                 }
 
                 if (modelEntity.getStartX() < modelDTO.getStart()
                         && modelEntity.getEndX() <= modelDTO.getEnd()
-                        && modelEntity.getEndX() <= modelDTO.getStart()) {
+                        && modelEntity.getEndX() > modelDTO.getStart()) {
+                    // c end
+                    modelEntity.setEndX(modelDTO.getStart());
+                    modelDTOList.add(mapModelDto(modelEntity));
+                    continue;
+                }
+
+                if (/*modelEntity.getStartX() < modelDTO.getStart()
+                        && modelEntity.getEndX() < modelDTO.getEnd()
+                        &&*/ modelEntity.getEndX() <= modelDTO.getStart()) {
                     //save
                     modelDTOList.add(mapModelDto(modelEntity));
                     continue;
@@ -623,7 +623,7 @@ public class ModelService {
                     lasFileService.saveSyntheticCurve(projectEntity, name, list);
                 }
 
-                curveDtoList.add(new CurveDto("\\synthetic\\" + name,
+                curveDtoList.add(new CurveDto("synthetic/" + name,
                         lasFileService.getCurveDataByName(name, idProject, true).getCurveData() ));
             }
             name = getName(nameCurveList, numProbe[j], false);
@@ -639,7 +639,7 @@ public class ModelService {
                 }
 
                 curveDtoList.add(new CurveDto(
-                         "\\synthetic\\" + name,
+                         "synthetic/" + name,
                         lasFileService.getCurveDataByName(name, idProject, true).getCurveData() ));
             }
         }
