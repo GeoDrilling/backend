@@ -32,18 +32,18 @@ public class ProjectEntity {
 
     private Boolean readOnly = false;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "soot_id")
     private SootEntity sootEntity;
 
-    @OneToMany(mappedBy = "projectEntity")
+    @OneToMany(mappedBy = "projectEntity", cascade = CascadeType.ALL)
     private List<ModelEntity> modelEntityList = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "supplementing_project_id")
     private ProjectEntity supplementingProject;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private ProjectState state;
 }

@@ -35,13 +35,13 @@ public class ModelEntity {
     private Double startX;
     private Double endX;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private ProjectEntity projectEntity;
 
-    @OneToMany(mappedBy = "modelEntity")
+    @OneToMany(mappedBy = "modelEntity", cascade = CascadeType.ALL)
     private List<AreasEntity> areasEntity = new ArrayList<>();
 
-    @OneToMany(mappedBy = "modelEntity")
+    @OneToMany(mappedBy = "modelEntity", cascade = CascadeType.ALL)
     private List<CacheAreasEntity> CacheAreasEntity = new ArrayList<>();
 }
