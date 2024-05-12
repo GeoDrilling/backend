@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.core.io.ByteArrayResource;
 
 @Entity
 @Table(name = "_areas")
@@ -24,7 +23,7 @@ public class AreasEntity {
     private String param2;
     private int gridFrequency;
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "model_id")
     private ModelEntity modelEntity;
 

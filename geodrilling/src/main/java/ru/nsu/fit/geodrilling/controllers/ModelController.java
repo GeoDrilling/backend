@@ -9,25 +9,16 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import ru.nsu.fit.geodrilling.dto.InputBuildModel;
 import ru.nsu.fit.geodrilling.dto.ModelCreateRequest;
 import ru.nsu.fit.geodrilling.dto.ModelDTO;
 import ru.nsu.fit.geodrilling.dto.SaveModelResponse;
 import ru.nsu.fit.geodrilling.dto.UserDTO;
-import ru.nsu.fit.geodrilling.dto.curves.CurveDataDownloadResponse;
-import ru.nsu.fit.geodrilling.entity.ProjectEntity;
-import ru.nsu.fit.geodrilling.model.OutputModel;
 import ru.nsu.fit.geodrilling.services.ModelService;
-import ru.nsu.fit.geodrilling.services.UserService;
-
-import java.io.FileNotFoundException;
 
 @RestController
 @RequestMapping("/model")
 @AllArgsConstructor
 public class ModelController {
-
-  private final UserService userService;
   private final ModelService modelService;
   private final ModelMapper modelMapper;
 

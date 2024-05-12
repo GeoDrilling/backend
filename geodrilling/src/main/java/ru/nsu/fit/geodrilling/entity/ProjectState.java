@@ -9,8 +9,10 @@ import lombok.ToString;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import ru.nsu.fit.geodrilling.entity.converters.ContainerGroupsConverter;
+import ru.nsu.fit.geodrilling.entity.converters.ModelCurveGroupsConverter;
 import ru.nsu.fit.geodrilling.entity.converters.TrackConverter;
 import ru.nsu.fit.geodrilling.entity.projectstate.ContainerGroupProperties;
+import ru.nsu.fit.geodrilling.entity.projectstate.ModelCurveGroupProperties;
 import ru.nsu.fit.geodrilling.entity.projectstate.TrackProperty;
 
 import java.util.List;
@@ -32,6 +34,6 @@ public class ProjectState {
     @Convert(converter = ContainerGroupsConverter.class)
     private ContainerGroupProperties depthTrackProperties;
     @JdbcTypeCode(SqlTypes.JSON)
-    @Convert(converter = ContainerGroupsConverter.class)
-    private ContainerGroupProperties modelCurveProperties;
+    @Convert(converter = ModelCurveGroupsConverter.class)
+    private ModelCurveGroupProperties modelCurveProperties;
 }

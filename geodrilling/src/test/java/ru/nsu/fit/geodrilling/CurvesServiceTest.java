@@ -43,7 +43,7 @@ public class CurvesServiceTest {
 
     @Test
     public void saveCsvTest() throws IOException {
-        MockMultipartFile multipartFile = new MockMultipartFile("M5341", "M5341.csv", "text/csv" , Files.readAllBytes(Path.of("src/test/resources/M_5341.csv")));
+        MockMultipartFile multipartFile = new MockMultipartFile("M5341", "M5341.csv", "application/octet-stream" , Files.readAllBytes(Path.of("src/test/resources/M_5341.csv")));
         ProjectEntity project = new ProjectEntity();
         Mockito.when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
         curvesService.save(multipartFile, 1L);
@@ -53,4 +53,16 @@ public class CurvesServiceTest {
         Assertions.assertEquals(5333.13, gson.fromJson(project.getCurves().get(0).getData(),
                 new TypeToken<List<Double>>(){}).get(1));
     }
+
+//    @Test
+//    public void supplementTest() throws IOException {
+//        ProjectEntity project = new ProjectEntity();
+//        Mockito.when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
+//        MockMultipartFile initDataFile = new MockMultipartFile("M5341", "M5341.csv", "text/csv" , Files.readAllBytes(Path.of("src/test/resources/M_5341.csv")));
+//        curvesService.save(initDataFile, 1L);
+//        MockMultipartFile supplementingDataFile = new MockMultipartFile("M5457", "M5457.csv", "text/csv" , Files.readAllBytes(Path.of("src/test/resources/M_5457.csv")));
+//        curvesService.supplementCurve(supplementingDataFile, 1L);
+//        Assertions.assertEquals();
+//
+//    }
 }

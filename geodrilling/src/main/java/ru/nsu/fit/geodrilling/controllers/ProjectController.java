@@ -8,11 +8,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import ru.nsu.fit.geodrilling.dto.ProjectDTO;
-import ru.nsu.fit.geodrilling.dto.ProjectStateDTO;
-import ru.nsu.fit.geodrilling.dto.SaveProjectStateDTO;
-import ru.nsu.fit.geodrilling.dto.UserDTO;
+import ru.nsu.fit.geodrilling.dto.*;
+import ru.nsu.fit.geodrilling.model.User;
 import ru.nsu.fit.geodrilling.services.ProjectService;
+import ru.nsu.fit.geodrilling.services.ShareProjectService;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +24,7 @@ public class ProjectController {
 
     private final ProjectService projectService;
     private final ModelMapper modelMapper;
+    private final ShareProjectService shareProjectService;
 
     @PostMapping("/{name}")
     public ResponseEntity<ProjectStateDTO> createProject(@PathVariable String name) {
@@ -79,5 +79,22 @@ public class ProjectController {
     @GetMapping("/chain/{projectId}")
     public void getProjectChain(@PathVariable Long projectId) {
         ResponseEntity.ok(projectService.getProjectChain(projectId));
+    }
+    @PostMapping("/share/{projectId}")
+    public String copyProject(@PathVariable Long projectId,
+                              @RequestBody(required = false) ShareDTO shareDTO) {
+        UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken)
+                SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) token.getPrincipal();
+        if (shareDTO == null)
+            return shareProjectService.copyProject(projectId, user, false);
+        return shareProjectService.copyProject(projectId, user, shareDTO.getReadOnly());
+    }
+    @PostMapping("/share/copy/{token}")
+    public Long getProject(@PathVariable String token) {
+        UsernamePasswordAuthenticationToken authToken = (UsernamePasswordAuthenticationToken)
+                SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authToken.getPrincipal();
+        return shareProjectService.getCopyProject(token, user);
     }
 }

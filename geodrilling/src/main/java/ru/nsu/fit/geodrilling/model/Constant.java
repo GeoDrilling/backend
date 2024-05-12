@@ -10,4 +10,5 @@ public class Constant {
   public static final double NAN = 0.0 / 0.0;
   public static final String MIN = "Мин значение";
   public static final String MAX = "Макс значение";
+  public static final String HOST = "http://localhost:5173";
 }
