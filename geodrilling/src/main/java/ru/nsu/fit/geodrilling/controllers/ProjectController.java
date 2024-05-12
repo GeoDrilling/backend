@@ -12,7 +12,9 @@ import ru.nsu.fit.geodrilling.dto.ProjectDTO;
 import ru.nsu.fit.geodrilling.dto.ProjectStateDTO;
 import ru.nsu.fit.geodrilling.dto.SaveProjectStateDTO;
 import ru.nsu.fit.geodrilling.dto.UserDTO;
+import ru.nsu.fit.geodrilling.model.User;
 import ru.nsu.fit.geodrilling.services.ProjectService;
+import ru.nsu.fit.geodrilling.services.ShareProjectService;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,7 @@ public class ProjectController {
 
     private final ProjectService projectService;
     private final ModelMapper modelMapper;
+    private final ShareProjectService shareProjectService;
 
     @PostMapping("/{name}")
     public ResponseEntity<ProjectStateDTO> createProject(@PathVariable String name) {
@@ -79,5 +82,22 @@ public class ProjectController {
     @GetMapping("/chain/{projectId}")
     public void getProjectChain(@PathVariable Long projectId) {
         ResponseEntity.ok(projectService.getProjectChain(projectId));
+    }
+    @PostMapping("/share/copy/{projectId}")
+    public String copyProject(@PathVariable Long projectId,
+                              @RequestBody(required = false) Boolean readOnly) {
+        UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken)
+                SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) token.getPrincipal();
+        if (readOnly == null)
+            readOnly = false;
+        return shareProjectService.copyProject(projectId, user, readOnly);
+    }
+    @PostMapping("/share/{projectId}")
+    public Long getProject(@PathVariable Long projectId) {
+        UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken)
+                SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) token.getPrincipal();
+        return shareProjectService.getCopyProject(projectId, user);
     }
 }
