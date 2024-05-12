@@ -10,16 +10,17 @@ import ru.nsu.fit.geodrilling.exceptions.AccessException;
 import ru.nsu.fit.geodrilling.model.Constant;
 import ru.nsu.fit.geodrilling.model.User;
 import ru.nsu.fit.geodrilling.repositories.*;
-import ru.nsu.fit.geodrilling.services.auth.JwtService;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ShareProjectService {
     private final ProjectRepository projectRepository;
-    private final JwtService jwtService;
+    private final SharedTokenRepository sharedTokenRepository;
     private final ModelMapper modelMapper;
+    @Transactional
     public String copyProject(Long projectId, User user, boolean readOnly) {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(() ->
                 new EntityNotFoundException("Project not found"));
@@ -29,10 +30,15 @@ public class ShareProjectService {
         copyProject.setReadOnly(readOnly);
         copyProject.setName("Copy " + project.getName());
         copyProject = projectRepository.save(copyProject);
-        return Constant.HOST + "/projects/share/" + copyProject.getId();
+        UUID uuid = UUID.randomUUID();
+        String token = uuid.toString();
+        SharedToken sharedToken = new SharedToken();
+        sharedToken.setToken(token);
+        sharedToken.setProject(copyProject);
+        sharedTokenRepository.save(sharedToken);
+        return Constant.HOST + "/projects/share/" + token;
     }
 
-    @Transactional
     private ProjectEntity deepCopy(ProjectEntity project) {
         ProjectEntity copyProject = projectRepository.save(new ProjectEntity());
 
@@ -88,9 +94,10 @@ public class ShareProjectService {
 
         return copyProject;
     }
-    public Long getCopyProject(Long projectId, User user) {
-        ProjectEntity project = projectRepository.findById(projectId).orElseThrow(() ->
+    public Long getCopyProject(String token, User user) {
+        SharedToken sharedToken = sharedTokenRepository.findByToken(token).orElseThrow(() ->
                 new EntityNotFoundException("Project not found"));
+        ProjectEntity project = sharedToken.getProject();
         if (project.getUser() != null)
             throw new EntityNotFoundException("Project not found");
         if (!project.getReadOnly()) {
@@ -100,6 +107,6 @@ public class ShareProjectService {
             copyProject = projectRepository.save(copyProject);
             return copyProject.getId();
         }
-        return projectId;
+        return project.getId();
     }
 }

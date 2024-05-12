@@ -46,4 +46,7 @@ public class ProjectEntity {
     @OneToOne(cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private ProjectState state;
+    @OneToOne(cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private SharedToken token;
 }

@@ -90,11 +90,11 @@ public class ProjectController {
             return shareProjectService.copyProject(projectId, user, false);
         return shareProjectService.copyProject(projectId, user, shareDTO.getReadOnly());
     }
-    @PostMapping("/share/copy/{projectId}")
-    public Long getProject(@PathVariable Long projectId) {
-        UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken)
+    @PostMapping("/share/copy/{token}")
+    public Long getProject(@PathVariable String token) {
+        UsernamePasswordAuthenticationToken authToken = (UsernamePasswordAuthenticationToken)
                 SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) token.getPrincipal();
-        return shareProjectService.getCopyProject(projectId, user);
+        User user = (User) authToken.getPrincipal();
+        return shareProjectService.getCopyProject(token, user);
     }
 }
