@@ -9,5 +9,5 @@ import java.util.List;
 @Setter
 public class InterpolateDTO {
     public List<Double> depth = new ArrayList<>();
-    public List<double[]> curve = new ArrayList<>();
+    public List<List<Double>> curves = new ArrayList<>();
 }

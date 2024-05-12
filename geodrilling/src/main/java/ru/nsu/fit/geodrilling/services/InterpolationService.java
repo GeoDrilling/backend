@@ -11,6 +11,15 @@ import java.util.*;
 @Service
 public class InterpolationService {
 
+    public static List<Double> convertToFloatList(double[] doubleArray) {
+        List<Double> floatList = new ArrayList<>();
+
+        for (double value : doubleArray) {
+            floatList.add((double) value);
+        }
+
+        return floatList;
+    }
     public InterpolateDTO interpolateDepths(
             double[] depths1, List<double[]> values1, double[] depths2, List<double[]> values2) {
 
@@ -31,31 +40,27 @@ public class InterpolationService {
                 Arrays.stream(depths2).max().orElse(Double.NaN));
 
         InterpolateDTO interpolateDTO = new InterpolateDTO();
-        int i = 0;
+        boolean i = true;
         int j = 0;
         for (double depth : allDepths) {
             if (depth >= minDepth && depth <= maxDepth) {
                 interpolateDTO.depth.add(depth);
-            }
-        }
-        for (double depth : allDepths) {
-            if (depth >= minDepth && depth <= maxDepth) {
                 for (double[] v1 : values1) {
-                    if (i == 0) {
-                        interpolateDTO.curve.add(new double[interpolateDTO.depth.size()]);
+                    if (i) {
+                        interpolateDTO.curves.add(new ArrayList<>());
                     }
-                    interpolateDTO.curve.get(j)[i] = interpolatePoint(depths1, v1, depth);
+                    interpolateDTO.curves.get(j).add(interpolatePoint(depths1, v1, depth));
                     j++;
                 }
                 for (double[] v2 : values2) {
-                    if (i == 0) {
-                        interpolateDTO.curve.add(new double[interpolateDTO.depth.size()]);
+                    if (i) {
+                        interpolateDTO.curves.add(new ArrayList<>());
                     }
-                    interpolateDTO.curve.get(j)[i] = interpolatePoint(depths2, v2, depth);
+                    interpolateDTO.curves.get(j).add(interpolatePoint(depths2, v2, depth));
                     j++;
                 }
                 j = 0;
-                i++;
+                i = false;
             }
         }
 
