@@ -8,10 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import ru.nsu.fit.geodrilling.dto.ProjectDTO;
-import ru.nsu.fit.geodrilling.dto.ProjectStateDTO;
-import ru.nsu.fit.geodrilling.dto.SaveProjectStateDTO;
-import ru.nsu.fit.geodrilling.dto.UserDTO;
+import ru.nsu.fit.geodrilling.dto.*;
 import ru.nsu.fit.geodrilling.model.User;
 import ru.nsu.fit.geodrilling.services.ProjectService;
 import ru.nsu.fit.geodrilling.services.ShareProjectService;
@@ -83,17 +80,17 @@ public class ProjectController {
     public void getProjectChain(@PathVariable Long projectId) {
         ResponseEntity.ok(projectService.getProjectChain(projectId));
     }
-    @PostMapping("/share/copy/{projectId}")
+    @PostMapping("/share/{projectId}")
     public String copyProject(@PathVariable Long projectId,
-                              @RequestBody(required = false) Boolean readOnly) {
+                              @RequestBody(required = false) ShareDTO shareDTO) {
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken)
                 SecurityContextHolder.getContext().getAuthentication();
         User user = (User) token.getPrincipal();
-        if (readOnly == null)
-            readOnly = false;
-        return shareProjectService.copyProject(projectId, user, readOnly);
+        if (shareDTO == null)
+            return shareProjectService.copyProject(projectId, user, false);
+        return shareProjectService.copyProject(projectId, user, shareDTO.getReadOnly());
     }
-    @PostMapping("/share/{projectId}")
+    @PostMapping("/share/copy/{projectId}")
     public Long getProject(@PathVariable Long projectId) {
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken)
                 SecurityContextHolder.getContext().getAuthentication();

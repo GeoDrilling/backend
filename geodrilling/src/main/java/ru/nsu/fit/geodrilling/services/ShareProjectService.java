@@ -10,6 +10,7 @@ import ru.nsu.fit.geodrilling.exceptions.AccessException;
 import ru.nsu.fit.geodrilling.model.Constant;
 import ru.nsu.fit.geodrilling.model.User;
 import ru.nsu.fit.geodrilling.repositories.*;
+import ru.nsu.fit.geodrilling.services.auth.JwtService;
 
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ShareProjectService {
     private final ProjectRepository projectRepository;
+    private final JwtService jwtService;
     private final ModelMapper modelMapper;
     public String copyProject(Long projectId, User user, boolean readOnly) {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(() ->
@@ -89,9 +91,12 @@ public class ShareProjectService {
     public Long getCopyProject(Long projectId, User user) {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(() ->
                 new EntityNotFoundException("Project not found"));
+        if (project.getUser() != null)
+            throw new EntityNotFoundException("Project not found");
         if (!project.getReadOnly()) {
             ProjectEntity copyProject = deepCopy(project);
             copyProject.setUser(user);
+            copyProject.setName(project.getName());
             copyProject = projectRepository.save(copyProject);
             return copyProject.getId();
         }
