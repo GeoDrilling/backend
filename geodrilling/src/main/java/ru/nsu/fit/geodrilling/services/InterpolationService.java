@@ -3,14 +3,16 @@ package ru.nsu.fit.geodrilling.services;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.springframework.stereotype.Service;
+import ru.nsu.fit.geodrilling.dto.InterpolateDTO;
 
 import java.util.*;
+
 
 @Service
 public class InterpolationService {
 
-    public Map<Double, Double[]> interpolateDepths(
-            double[] depths1, double[] values1, double[] depths2, double[] values2) {
+    public InterpolateDTO interpolateDepths(
+            double[] depths1, List<double[]> values1, double[] depths2, List<double[]> values2) {
 
         TreeSet<Double> allDepths = new TreeSet<>();
 
@@ -28,18 +30,36 @@ public class InterpolationService {
         double maxDepth = Math.min(Arrays.stream(depths1).max().orElse(Double.NaN),
                 Arrays.stream(depths2).max().orElse(Double.NaN));
 
-        Map<Double, Double[]> interpolatedResults = new LinkedHashMap<>();
-
+        InterpolateDTO interpolateDTO = new InterpolateDTO();
+        int i = 0;
+        int j = 0;
         for (double depth : allDepths) {
             if (depth >= minDepth && depth <= maxDepth) {
-                interpolatedResults.put(depth, new Double[]{
-                        interpolatePoint(depths1, values1, depth),
-                        interpolatePoint(depths2, values2, depth)
-                });
+                interpolateDTO.depth.add(depth);
+            }
+        }
+        for (double depth : allDepths) {
+            if (depth >= minDepth && depth <= maxDepth) {
+                for (double[] v1 : values1) {
+                    if (i == 0) {
+                        interpolateDTO.curve.add(new double[interpolateDTO.depth.size()]);
+                    }
+                    interpolateDTO.curve.get(j)[i] = interpolatePoint(depths1, v1, depth);
+                    j++;
+                }
+                for (double[] v2 : values2) {
+                    if (i == 0) {
+                        interpolateDTO.curve.add(new double[interpolateDTO.depth.size()]);
+                    }
+                    interpolateDTO.curve.get(j)[i] = interpolatePoint(depths2, v2, depth);
+                    j++;
+                }
+                j = 0;
+                i++;
             }
         }
 
-        return interpolatedResults;
+        return interpolateDTO;
     }
 
     private double interpolatePoint(double[] depths, double[] values, double point) {

@@ -9,11 +9,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.fit.geodrilling.dto.InputBuildModel;
+import ru.nsu.fit.geodrilling.dto.InterpolateDTO;
 import ru.nsu.fit.geodrilling.dto.UserDTO;
 import ru.nsu.fit.geodrilling.model.OutputModel;
 import ru.nsu.fit.geodrilling.services.InterpolationService;
 import ru.nsu.fit.geodrilling.services.lib.NativeLibrary;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -32,11 +35,15 @@ public class TestController {
   }
 
   @GetMapping("/inter")
-  public Map<Double, Double[]> inter() {
-    double[] a = {1, 20};
-    double[] aa = {1, 2};
+  public InterpolateDTO inter() {
+    double[] a = {4, 20};
+    List<double[]> aa = new ArrayList<>();
+    aa.add(new double[]{1, 2});
+    aa.add(new double[]{3, 4});
+    List<double[]> bb = new ArrayList<>();
+    bb.add(new double[]{1, 2, 3, 4, 5, 6, 7});
+    bb.add(new double[]{1, 2, 3, 4, 5, 6, 7});
     double[] b = {1, 2, 3, 4, 5, 6, 7};
-    double[] bb = {4, 5, 7, 1, 2, 3, 4};
 
     return interpolationService.interpolateDepths(a, aa, b, bb);
   }
