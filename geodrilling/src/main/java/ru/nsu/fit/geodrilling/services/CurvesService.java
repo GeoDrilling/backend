@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.impl.InvalidContentTypeException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.nsu.fit.geodrilling.dto.MaxMinDTO;
 import ru.nsu.fit.geodrilling.dto.curves.CurveDataDownloadResponse;
 import ru.nsu.fit.geodrilling.dto.curves.CurveSupplementationResponse;
 import ru.nsu.fit.geodrilling.dto.curves.GetCurvesNamesResponse;
@@ -21,6 +22,7 @@ import ru.nsu.fit.geodrilling.entity.projectstate.TrackProperty;
 import ru.nsu.fit.geodrilling.entity.projectstate.property.BaseProperty;
 import ru.nsu.fit.geodrilling.entity.projectstate.property.NumberProperty;
 import ru.nsu.fit.geodrilling.exceptions.NewCurvesAddingException;
+import ru.nsu.fit.geodrilling.model.Constant;
 import ru.nsu.fit.geodrilling.repositories.CurveRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 
@@ -80,11 +82,7 @@ public class CurvesService {
         } catch (Exception e) {
             log.warn("Кривой DEPT нет в добавленных кривых");
         }
-        try {
-            updateTvdInProjectState(projectId);
-        } catch (Exception e) {
-            log.warn("Кривой TVD нет в добавленных кривых");
-        }
+
         return SaveCurveDataResponse.builder()
                 .curvesNames(project.getCurves().stream().map(CurveEntity::getName).collect(Collectors.toList()))
                 .build();
@@ -181,11 +179,22 @@ public class CurvesService {
                 .min(Double::compare)
                 .orElseThrow(() -> new NoSuchElementException("Кривая DEPT - пустая"));
     }
+    public MaxMinDTO getCurveMaxMin(String curveName, Long projectId) {
+        Double min = getCurveDataByName(curveName, projectId, false)
+                .getCurveData()
+                .stream()
+                .min(Double::compare)
+                .orElseThrow(() -> new NoSuchElementException("Кривая "+ curveName +" - пустая"));
+        Double max = getCurveDataByName(curveName, projectId, false)
+                .getCurveData()
+                .stream()
+                .max(Double::compare)
+                .orElseThrow(() -> new NoSuchElementException("Кривая "+ curveName +" - пустая"));
+        return new MaxMinDTO(max, min);
+    }
 
-    public void updateTvdInProjectState(Long projectId) {
-        List<Double> curveData = getCurveDataByName("TVD", projectId, false).getCurveData();
-        Double max = curveData.get(curveData.size() - 1);
-        Double min = curveData.get(0);
+    public void updateTvdInProjectState(Long projectId, String curveName) {
+        MaxMinDTO maxMinDTO = getCurveMaxMin(curveName, projectId);
         ProjectEntity projectEntity = projectRepository.findById(projectId)
                 .orElseThrow(() -> new NoSuchElementException("Проект c id " + projectId + " не существует"));
         List<BaseProperty> baseProperties = projectEntity.getState()
@@ -194,15 +203,15 @@ public class CurvesService {
                 .get(0)
                 .getProperties();
         NumberProperty minProp = (NumberProperty) baseProperties.stream()
-                .filter(prop -> Objects.equals(prop.getName(), "MIN"))
+                .filter(prop -> Objects.equals(prop.getName(), Constant.MIN))
                 .findAny()
                 .orElseThrow(() -> new NoSuchElementException("Свойства MIN не существует"));
         NumberProperty maxProp = (NumberProperty) baseProperties.stream()
-                .filter(prop -> Objects.equals(prop.getName(), "MAX"))
+                .filter(prop -> Objects.equals(prop.getName(), Constant.MAX))
                 .findAny()
                 .orElseThrow(() -> new NoSuchElementException("Свойства MAX не существует"));
-        minProp.setValue(max);
-        maxProp.setValue(min);
+        minProp.setValue(Math.round(maxMinDTO.getMin() * 10.0) / 10.0);
+        maxProp.setValue(Math.round(maxMinDTO.getMax() * 10.0) / 10.0);
         projectRepository.save(projectEntity);
     }
 
@@ -222,8 +231,8 @@ public class CurvesService {
                 .filter(prop -> Objects.equals(prop.getName(), "Конечная глубина"))
                 .findAny()
                 .orElseThrow(() -> new NoSuchElementException("Свойства \"Конечная глубина\" не существует"));
-        startDeptProp.setValue(getDeptMin(projectId));
-        endDeptProp.setValue(getDeptMax(projectId));
+        startDeptProp.setValue(Math.round(getDeptMin(projectId) * 10.0) / 10.0);
+        endDeptProp.setValue(Math.round(getDeptMax(projectId) * 10.0) / 10.0);
         projectRepository.save(projectEntity);
     }
 

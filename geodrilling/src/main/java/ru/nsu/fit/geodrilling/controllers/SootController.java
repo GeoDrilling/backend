@@ -3,6 +3,7 @@ package ru.nsu.fit.geodrilling.controllers;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.nsu.fit.geodrilling.dto.MaxMinDTO;
 import ru.nsu.fit.geodrilling.dto.SootinDTO;
 import ru.nsu.fit.geodrilling.dto.SootoutDTO;
 import ru.nsu.fit.geodrilling.entity.SootEntity;
@@ -15,7 +16,7 @@ public class SootController {
     private final SootService sootService;
 
     @PostMapping("/rename/{project_id}")
-    public ResponseEntity<String> sootRename(
+    public ResponseEntity<MaxMinDTO> sootRename(
             @PathVariable("project_id") Long idProject,
             @RequestBody SootinDTO sootinDTO) throws Exception {
         return ResponseEntity.ok(sootService.sootRename(idProject, sootinDTO));
