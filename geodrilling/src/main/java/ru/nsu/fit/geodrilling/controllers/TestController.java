@@ -47,6 +47,14 @@ public class TestController {
 
     return interpolationService.interpolateDepths(a, aa, b, bb);
   }
+  @GetMapping("/syn")
+  public List<Double> syn() {
+    double[] a = {4, 20, 1, 2, 3, 4, 5};
+    double[] b = {1, 2, 3, 4, 5, 6, 7};
+    double[] bb = {0, 1.5, 2.1, 3.2, 4.3, 5.4, 6.8,7.5, 8, 9, 10};
+
+    return interpolationService.interpolateSynthetic(b, a, bb);
+  }
 /*  @GetMapping("/lib")
   public ResponseEntity<OutputModel> demoLib() {
     double[] x = { 0 };

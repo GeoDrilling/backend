@@ -62,9 +62,69 @@ public class InterpolationService {
                 j = 0;
                 i = false;
             }
+            if (depth < minDepth) {
+                interpolateDTO.depth.add(depth);
+                for (double[] v1 : values1) {
+                    if (i) {
+                        interpolateDTO.curves.add(new ArrayList<>());
+                    }
+                    interpolateDTO.curves.get(j).add(Double.NaN);
+                    j++;
+                }
+                for (double[] v2 : values1) {
+                    if (i) {
+                        interpolateDTO.curves.add(new ArrayList<>());
+                    }
+                    interpolateDTO.curves.get(j).add(Double.NaN);
+                    j++;
+                }
+                j = 0;
+                i = false;
+            }
+            if (depth > maxDepth) {
+                interpolateDTO.depth.add(depth);
+                for (double[] v1 : values1) {
+                    if (i) {
+                        interpolateDTO.curves.add(new ArrayList<>());
+                    }
+                    interpolateDTO.curves.get(j).add(Double.NaN);
+                    j++;
+                }
+                for (double[] v2 : values1) {
+                    if (i) {
+                        interpolateDTO.curves.add(new ArrayList<>());
+                    }
+                    interpolateDTO.curves.get(j).add(Double.NaN);
+                    j++;
+                }
+                j = 0;
+                i = false;
+            }
         }
 
         return interpolateDTO;
+    }
+
+    public List<Double> interpolateSynthetic(double[] depths1, double[] values1, double[] depths2){
+        double minDepth = Math.max(Arrays.stream(depths1).min().orElse(Double.NaN),
+                Arrays.stream(depths2).min().orElse(Double.NaN));
+
+        double maxDepth = Math.min(Arrays.stream(depths1).max().orElse(Double.NaN),
+                Arrays.stream(depths2).max().orElse(Double.NaN));
+        List<Double> curveInterpolate = new ArrayList<>();
+        for (double depth : depths2) {
+            if (depth >= minDepth && depth <= maxDepth) {
+                curveInterpolate.add(interpolatePoint(depths1, values1, depth));
+
+            }
+            if (depth < minDepth) {
+                curveInterpolate.add(values1[0]);
+            }
+            if (depth > maxDepth) {
+                curveInterpolate.add(values1[values1.length - 1]);
+            }
+        }
+        return curveInterpolate;
     }
 
     private double interpolatePoint(double[] depths, double[] values, double point) {
