@@ -3,6 +3,7 @@ package ru.nsu.fit.geodrilling.services;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.nsu.fit.geodrilling.dto.MaxMinDTO;
 import ru.nsu.fit.geodrilling.dto.SootinDTO;
 import ru.nsu.fit.geodrilling.dto.SootoutDTO;
 import ru.nsu.fit.geodrilling.dto.curves.LasFileUploadResponse;
@@ -22,11 +23,13 @@ public class SootService {
 
   private ProjectRepository projectRepository;
   private SootRepository sootRepository;
+  private CurvesService curvesService;
 
-  public String sootRename(Long idProject, SootinDTO sootinDTO) {
+  public MaxMinDTO sootRename(Long idProject, SootinDTO sootinDTO) {
     ProjectEntity project = projectRepository.findById(idProject)
         .orElseThrow(
             () -> new EntityNotFoundException("Проект не найден по указанному id: " + idProject));
+    MaxMinDTO maxMinDTO = null;
     SootEntity sootEntity = project.getSootEntity();
     if (!Objects.equals(sootinDTO.getRopl(), "--")) {
       sootEntity.setROPL(sootinDTO.getRopl());
@@ -79,6 +82,8 @@ public class SootService {
     if (!Objects.equals(sootinDTO.getTvd(), "--")) {
       sootEntity.setTvd(sootinDTO.getTvd());
       sootEntity.setTvdp(1);
+      curvesService.updateTvdInProjectState(idProject, sootinDTO.getTvd());
+      maxMinDTO = curvesService.getCurveMaxMin(sootinDTO.getTvd(), idProject);
     }
     if (!Objects.equals(sootinDTO.getX(), "--")) {
       sootEntity.setX(sootinDTO.getX());
@@ -89,7 +94,7 @@ public class SootService {
       sootEntity.setZenip(1);
     }
     sootRepository.save(sootEntity);
-    return "ok";
+    return maxMinDTO;
   }
 
   public SootoutDTO sootOut(Long idProject) {
@@ -200,7 +205,6 @@ public class SootService {
       sootEntity.setZenip(2);
     }
     sootRepository.save(sootEntity);
-
   }
 
   public Boolean checkCurves(Long projectId) {

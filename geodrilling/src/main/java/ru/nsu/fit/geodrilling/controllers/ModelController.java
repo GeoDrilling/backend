@@ -25,8 +25,7 @@ public class ModelController {
   @PostMapping("/create")
   public ResponseEntity<ModelDTO> createModel(
       @RequestBody ModelCreateRequest modelCreateRequest,
-      @RequestParam("project_id") Long idProject,
-      @RequestParam("start") Double Start, @RequestParam("end") Double End) {
+      @RequestParam("project_id") Long idProject) {
     UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
         .getAuthentication();
     String email = (modelMapper.map(((UserDetails) token.getPrincipal()), UserDTO.class)
