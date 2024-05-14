@@ -218,6 +218,7 @@ public class ModelService {
 //    x2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(x, idProject).getCurveData());
 //    zeni2 = ListDoubleInDoubleArray(
 //        lasFileService.getCurveDataByName(zeni, idProject).getCurveData());
+        System.out.println(tvd);
         tvd2 = ListDoubleInDoubleArray(lasFileService.getRange(projectEntity, tvd, start, end, false));
         x2 = ListDoubleInDoubleArray(lasFileService.getRange(projectEntity, x, start, end, false));
         zeni2 = ListDoubleInDoubleArray(lasFileService.getRange(projectEntity, zeni, start, end, false));

@@ -41,6 +41,7 @@ public class LasFileController {
             @RequestParam("curve_name") String curveName) {
         return ResponseEntity.ok(curvesService.getCurveDataByName(curveName, projectId, true));
     }
+
     @GetMapping("/curves")
     public ResponseEntity<GetCurvesNamesResponse> getCurvesNames(
             @RequestParam("project_id") Long projectId) {
