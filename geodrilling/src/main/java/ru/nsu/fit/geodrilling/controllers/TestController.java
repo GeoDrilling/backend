@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.Double.NaN;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -54,6 +56,15 @@ public class TestController {
     double[] bb = {0, 1.5, 2.1, 3.2, 4.3, 5.4, 6.8,7.5, 8, 9, 10};
 
     return interpolationService.interpolateSynthetic(b, a, bb);
+  }
+  @GetMapping("/extr")
+  public List<Double> extr() {
+    double[] a = {1, 2, 3, 4, 5, 6, 7};
+    double[] aa = {NaN, NaN, 3, 4, 5, NaN, NaN};
+    double[] b = {NaN, NaN, 1, 2, 3, 4, 5, 6, 7, NaN, NaN};
+    double[] bb = {0, 1.5, 2.1, 3.2, 4.3, 5.4, 6.8,7.5, 8, 9, 10};
+
+    return interpolationService.extrapolateCurves(aa, a, false, true, b);
   }
 /*  @GetMapping("/lib")
   public ResponseEntity<OutputModel> demoLib() {

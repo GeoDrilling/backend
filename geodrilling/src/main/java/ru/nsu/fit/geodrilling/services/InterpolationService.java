@@ -3,15 +3,21 @@ package ru.nsu.fit.geodrilling.services;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.springframework.stereotype.Service;
+import ru.nsu.fit.geodrilling.dto.CurveDto;
 import ru.nsu.fit.geodrilling.dto.InterpolateDTO;
+import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 
 import java.util.*;
+
+import static java.lang.Double.NaN;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 
 
 @Service
 public class InterpolationService {
 
-    public static List<Double> convertToFloatList(double[] doubleArray) {
+    public static List<Double> convertToDoubleList(double[] doubleArray) {
         List<Double> floatList = new ArrayList<>();
 
         for (double value : doubleArray) {
@@ -33,11 +39,11 @@ public class InterpolationService {
             allDepths.add(depth);
         }
 
-        double minDepth = Math.max(Arrays.stream(depths1).min().orElse(Double.NaN),
-                Arrays.stream(depths2).min().orElse(Double.NaN));
+        double minDepth = Math.max(Arrays.stream(depths1).min().orElse(NaN),
+                Arrays.stream(depths2).min().orElse(NaN));
 
-        double maxDepth = Math.min(Arrays.stream(depths1).max().orElse(Double.NaN),
-                Arrays.stream(depths2).max().orElse(Double.NaN));
+        double maxDepth = Math.min(Arrays.stream(depths1).max().orElse(NaN),
+                Arrays.stream(depths2).max().orElse(NaN));
 
         InterpolateDTO interpolateDTO = new InterpolateDTO();
         boolean i = true;
@@ -68,14 +74,14 @@ public class InterpolationService {
                     if (i) {
                         interpolateDTO.curves.add(new ArrayList<>());
                     }
-                    interpolateDTO.curves.get(j).add(Double.NaN);
+                    interpolateDTO.curves.get(j).add(NaN);
                     j++;
                 }
                 for (double[] v2 : values1) {
                     if (i) {
                         interpolateDTO.curves.add(new ArrayList<>());
                     }
-                    interpolateDTO.curves.get(j).add(Double.NaN);
+                    interpolateDTO.curves.get(j).add(NaN);
                     j++;
                 }
                 j = 0;
@@ -87,14 +93,14 @@ public class InterpolationService {
                     if (i) {
                         interpolateDTO.curves.add(new ArrayList<>());
                     }
-                    interpolateDTO.curves.get(j).add(Double.NaN);
+                    interpolateDTO.curves.get(j).add(NaN);
                     j++;
                 }
                 for (double[] v2 : values1) {
                     if (i) {
                         interpolateDTO.curves.add(new ArrayList<>());
                     }
-                    interpolateDTO.curves.get(j).add(Double.NaN);
+                    interpolateDTO.curves.get(j).add(NaN);
                     j++;
                 }
                 j = 0;
@@ -105,12 +111,98 @@ public class InterpolationService {
         return interpolateDTO;
     }
 
-    public List<Double> interpolateSynthetic(double[] depths1, double[] values1, double[] depths2){
-        double minDepth = Math.max(Arrays.stream(depths1).min().orElse(Double.NaN),
-                Arrays.stream(depths2).min().orElse(Double.NaN));
+    public List<Double> extrapolateCurves(
+            double[] curve, double[] depth, boolean x, boolean tvd, double[] zeni) {
+        int indexNotNaN = -1;
+        int indexMinZeni = -1;
+        int indexMaxZeni = -1;
+        if (x) {
+            for (int i = 0; indexMinZeni == -1; i++) {
+                if (Double.isNaN(zeni[i])) {
+                }
+                else {
+                    indexMinZeni = i;
+                }
+            }
+            for (int i = indexMinZeni; indexMaxZeni == -1; i++) {
+                if (Double.isNaN(zeni[i])) {
+                    indexMaxZeni = i - 1;
+                }
+            }
+            for (int i = 0; indexNotNaN == -1; i++) {
+                if (Double.isNaN(curve[i])) {
+                }
+                else {
+                    indexNotNaN = i;
+                }
+            }
+            for (int i = indexNotNaN; i >= 0; i--) {
+                if (Double.isNaN(curve[i]))
+                    curve[i] = -sin(zeni[indexMinZeni]) * (depth[i + 2] - depth[i + 1]) + curve[i + 1];
+            }
+            for (int i = indexNotNaN; i < curve.length; i++) {
+                if (Double.isNaN(curve[i])) {
+                    curve[i] = sin(zeni[indexMaxZeni]) * (depth[i - 1] - depth[i - 2]) + curve[i - 1];
+                }
+            }
+            return convertToDoubleList(curve);
+        } else if (tvd) {
+            for (int i = 0; indexMinZeni == -1; i++) {
+                if (Double.isNaN(zeni[i])) {
+                }
+                else {
+                    indexMinZeni = i;
+                }
+            }
+            for (int i = indexMinZeni; indexMaxZeni == -1; i++) {
+                if (Double.isNaN(zeni[i])) {
+                    indexMaxZeni = i - 1;
+                }
+            }
+            for (int i = 0; indexNotNaN == -1; i++) {
+                if (Double.isNaN(curve[i])) {
+                }
+                else {
+                    indexNotNaN = i;
+                }
+            }
+            for (int i = indexNotNaN; i >= 0; i--) {
+                if (Double.isNaN(curve[i]))
+                    curve[i] = -cos(zeni[indexMinZeni]) * (depth[i + 2] - depth[i + 1]) + curve[i + 1];
+            }
+            for (int i = indexNotNaN; i < curve.length; i++) {
+                if (Double.isNaN(curve[i])) {
+                    curve[i] = cos(zeni[indexMaxZeni]) * (depth[i - 1] - depth[i - 2]) + curve[i - 1];
+                }
+            }
+            return convertToDoubleList(curve);
+        } else {
+            for (int i = 0; indexNotNaN == -1; i++) {
+                if (Double.isNaN(curve[i])) {
+                }
+                else {
+                    indexNotNaN = i;
+                }
+            }
+            for (int i = indexNotNaN; i >= 0; i--) {
+                if (Double.isNaN(curve[i]))
+                    curve[i] = curve[i + 1];
+            }
+            for (int i = indexNotNaN; i < curve.length; i++) {
+                if (Double.isNaN(curve[i])) {
+                    curve[i] = curve[i - 1];
+                }
+            }
+            return convertToDoubleList(curve);
+        }
+    }
 
-        double maxDepth = Math.min(Arrays.stream(depths1).max().orElse(Double.NaN),
-                Arrays.stream(depths2).max().orElse(Double.NaN));
+    public List<Double> interpolateSynthetic(double[] depths1, double[] values1, double[] depths2){
+        double minDepth = Math.max(Arrays.stream(depths1).min().orElse(NaN),
+                Arrays.stream(depths2).min().orElse(NaN));
+
+        double maxDepth = Math.min(Arrays.stream(depths1).max().orElse(NaN),
+                Arrays.stream(depths2).max().orElse(NaN));
         List<Double> curveInterpolate = new ArrayList<>();
         for (double depth : depths2) {
             if (depth >= minDepth && depth <= maxDepth) {
@@ -137,7 +229,7 @@ public class InterpolationService {
         PolynomialSplineFunction function = interpolator.interpolate(depths, values);
 
         if (point < depths[0] || point > depths[depths.length - 1]) {
-            return Double.NaN;
+            return NaN;
         }
 
         return function.value(point);

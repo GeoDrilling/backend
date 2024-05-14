@@ -82,7 +82,8 @@ public class AreasService {
     public byte[] getAreas(Long idModel, Integer number) {
         ModelEntity modelEntity = modelRepository.findById(idModel).orElseThrow(() -> new EntityNotFoundException("Модель не найдена"));
         List<AreasEntity> areasEntityBoundedList = modelEntity.getAreasEntity();
-        return areasEntityBoundedList.get(4 - number).getByteArrayResource();
+        return areasEntityBoundedList.get(modelEntity.getAreasEntity().size() - number - 1).
+                getByteArrayResource();
     }
 
     public List<OutputAreasDTO> getAllAreas(Long idModel) {
