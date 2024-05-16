@@ -2,6 +2,7 @@ package ru.nsu.fit.geodrilling;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 
 @SpringBootTest
@@ -38,12 +40,12 @@ public class CurvesServiceTest {
     @BeforeEach
     public void mockState() throws IOException {
         doNothing().when(curvesService).updateDeptInProjectState(anyLong());
-        doNothing().when(curvesService).updateTvdInProjectState(anyLong());
+        doNothing().when(curvesService).updateTvdInProjectState(anyLong(), anyString());
     }
 
     @Test
     public void saveCsvTest() throws IOException {
-        MockMultipartFile multipartFile = new MockMultipartFile("M5341", "M5341.csv", "application/octet-stream" , Files.readAllBytes(Path.of("src/test/resources/M_5341.csv")));
+        MockMultipartFile multipartFile = new MockMultipartFile("M5341", "M5341.csv", "text/csv" , Files.readAllBytes(Path.of("src/test/resources/M_5341.csv")));
         ProjectEntity project = new ProjectEntity();
         Mockito.when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
         curvesService.save(multipartFile, 1L);
@@ -65,4 +67,14 @@ public class CurvesServiceTest {
 //        Assertions.assertEquals();
 //
 //    }
+
+    @Test
+    @Transactional
+    public void handleMultiCurvesTest() throws IOException {
+        MockMultipartFile multipartFile = new MockMultipartFile("multicurves", "multicurves.las", "application/octet-stream" , Files.readAllBytes(Path.of("src/test/resources/multicurves.las")));
+        ProjectEntity project = new ProjectEntity();
+        Mockito.when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
+        curvesService.save(multipartFile, 1L);
+        project.getMultiCurves();
+    }
 }
