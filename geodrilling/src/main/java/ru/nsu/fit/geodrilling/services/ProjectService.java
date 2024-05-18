@@ -13,11 +13,14 @@ import ru.nsu.fit.geodrilling.entity.CurveEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectState;
 import ru.nsu.fit.geodrilling.entity.SootEntity;
-import ru.nsu.fit.geodrilling.entity.projectstate.GroupProperties;
 import ru.nsu.fit.geodrilling.entity.projectstate.ContainerGroupProperties;
+import ru.nsu.fit.geodrilling.entity.projectstate.GroupProperties;
 import ru.nsu.fit.geodrilling.entity.projectstate.ModelCurveGroupProperties;
 import ru.nsu.fit.geodrilling.entity.projectstate.enums.EnumType;
-import ru.nsu.fit.geodrilling.entity.projectstate.property.*;
+import ru.nsu.fit.geodrilling.entity.projectstate.property.ColorProperty;
+import ru.nsu.fit.geodrilling.entity.projectstate.property.EnumProperty;
+import ru.nsu.fit.geodrilling.entity.projectstate.property.GradientColor;
+import ru.nsu.fit.geodrilling.entity.projectstate.property.NumberProperty;
 import ru.nsu.fit.geodrilling.exceptions.ProjectNotFoundException;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectStateRepository;
@@ -40,6 +43,7 @@ public class ProjectService {
     private final ProjectStateRepository projectStateRepository;
     private final ModelMapper modelMapper;
     private final ModelMapService modelMapService;
+    private final CurvesService curvesService;
 
     @Transactional
     public ProjectStateDTO createProjectForUser(String email, String name) {
@@ -175,9 +179,8 @@ public class ProjectService {
                 project.getState().getDepthTrackProperties(),
                 project.getState().getModelCurveProperties(),
                 project.getState().getTrackProperties(),
-                project.getCurves().stream()
-                        .map(CurveEntity::getFullName)
-                        .collect(Collectors.toList()), modelDTOList);
+                curvesService.getCurvesNames(projectId).getCurvesNames(),
+                modelDTOList);
     }
 
     public ProjectDTO getProjectById(Long id) {
