@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.nsu.fit.geodrilling.model.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "_projects")
@@ -49,4 +50,7 @@ public class ProjectEntity {
     @OneToOne(cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private SharedToken token;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<MultiCurveEntity> multiCurves;
 }

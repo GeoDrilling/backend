@@ -11,18 +11,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.impl.InvalidContentTypeException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.nsu.fit.geodrilling.dto.MaxMinDTO;
+import ru.nsu.fit.geodrilling.dto.CurveDto;
 import ru.nsu.fit.geodrilling.dto.InterpolateDTO;
+import ru.nsu.fit.geodrilling.dto.MaxMinDTO;
 import ru.nsu.fit.geodrilling.dto.curves.CurveDataDownloadResponse;
 import ru.nsu.fit.geodrilling.dto.curves.CurveSupplementationResponse;
 import ru.nsu.fit.geodrilling.dto.curves.GetCurvesNamesResponse;
 import ru.nsu.fit.geodrilling.dto.curves.SaveCurveDataResponse;
 import ru.nsu.fit.geodrilling.entity.CurveEntity;
+import ru.nsu.fit.geodrilling.entity.MultiCurveEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.entity.projectstate.TrackProperty;
 import ru.nsu.fit.geodrilling.entity.projectstate.property.BaseProperty;
 import ru.nsu.fit.geodrilling.entity.projectstate.property.NumberProperty;
-import ru.nsu.fit.geodrilling.exceptions.NewCurvesAddingException;
+import ru.nsu.fit.geodrilling.mapper.CurveMapper;
 import ru.nsu.fit.geodrilling.model.Constant;
 import ru.nsu.fit.geodrilling.repositories.CurveRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
@@ -33,6 +35,9 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,6 +50,7 @@ public class CurvesService {
     private final Gson gson;
     private final ProjectService projectService;
     private final InterpolationService interpolationService;
+    private final CurveMapper curveMapper;
 
     @Transactional
     public SaveCurveDataResponse save(MultipartFile file, Long projectId) throws IOException {
@@ -166,17 +172,25 @@ public class CurvesService {
             log.warn("Кривой DEPT нет в добавленных кривых");
         }
 
+        handleMultiCurves(project);
         return SaveCurveDataResponse.builder()
-                .curvesNames(project.getCurves().stream().map(CurveEntity::getName).collect(Collectors.toList()))
+                .curvesNames(getCurvesNames(projectId).getCurvesNames())
                 .build();
     }
 
     public GetCurvesNamesResponse getCurvesNames(Long projectId) {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(()
                 -> new NoSuchElementException("Проект c id " + projectId + " не существует"));
-        return GetCurvesNamesResponse.builder()
-                .curvesNames(project.getCurves().stream().map(CurveEntity::getName).collect(Collectors.toList()))
+        GetCurvesNamesResponse response = GetCurvesNamesResponse.builder()
+                .curvesNames(project.getCurves().stream()
+                        .filter(curve -> !isMultiCurve(curve))
+                        .map(CurveEntity::getName)
+                        .collect(Collectors.toList()))
                 .build();
+        for (MultiCurveEntity multiCurve : project.getMultiCurves()) {
+            response.getCurvesNames().add("/multicurve/" + multiCurve.getName());
+        }
+        return response;
     }
 
     public CurveDataDownloadResponse getCurveDataByName(String curveName, Long projectId, Boolean isSynthetic) {
@@ -339,6 +353,49 @@ public class CurvesService {
         projectRepository.save(projectEntity);
     }
 
+    private void handleMultiCurves(ProjectEntity project) {
+        List<MultiCurveEntity> multiCurves = getMultiCurves(project.getCurves());
+        project.setMultiCurves(new ArrayList<>());
+        for (MultiCurveEntity multiCurve : multiCurves) {
+             project.getMultiCurves().add(multiCurve);
+        }
+        projectRepository.save(project);
+    }
+
+    private List<MultiCurveEntity> getMultiCurves(List<CurveEntity> curves) {
+        Map<String, CurveEntity> curvesOfMultiCurves = curves.stream()
+                .filter(this::isMultiCurve)
+                .collect(Collectors.toMap(CurveEntity::getName, Function.identity()));
+
+        Map<String, MultiCurveEntity> multiCurves = new HashMap<>();
+        curves.stream()
+                .map(curve -> getMultiCurveNameMatcher(curve.getName()))
+                .filter(Matcher::find)
+                .forEach(matcher -> {
+                    if (!multiCurves.containsKey(matcher.group(1))) {
+                        MultiCurveEntity multiCurve = new MultiCurveEntity();
+                        multiCurve.setName(matcher.group(1));
+                        multiCurve.setCurves(new ArrayList<>());
+                        multiCurve.getCurves().add(curvesOfMultiCurves.get(matcher.group(0)));
+
+                        multiCurves.put(matcher.group(1), multiCurve);
+                    } else {
+                        MultiCurveEntity multiCurve = multiCurves.get(matcher.group(1));
+                        multiCurve.getCurves().add(curvesOfMultiCurves.get(matcher.group(0)));
+                    }
+                });
+        return new ArrayList<>(multiCurves.values());
+    }
+
+    private boolean isMultiCurve(CurveEntity curveEntity) {
+        return getMultiCurveNameMatcher(curveEntity.getName()).find();
+    }
+
+    private Matcher getMultiCurveNameMatcher(String name) {
+        Pattern pattern = Pattern.compile("([A-Za-z]+)_(\\d+)_?([A-Za-z]+)?");
+        return pattern.matcher(name);
+    }
+
     /**
      * Метод проверяет, что входящие кривые являются дополненными от исходных
      * @param project проект, содержащий исходные кривые
@@ -398,6 +455,18 @@ public class CurvesService {
             return getCurveDataByName(name.substring(11), projectId, true);
         else
             return getCurveDataByName(name, projectId, false);
+    }
+
+    public List<CurveDto> getMultiCurve(String name, Long projectId) {
+        ProjectEntity project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new NoSuchElementException("Проект c id " + projectId + " не существует"));
+        String nameWithoutPath = name.substring(12);
+        MultiCurveEntity multiCurve = project.getMultiCurves().stream()
+            .filter(mCurve -> mCurve.getName().equals(nameWithoutPath))
+            .findAny().orElseThrow(() -> new NoSuchElementException("Мультикривая с именем " + name + " не найдена"));
+        return multiCurve.getCurves().stream()
+                .map(curveMapper::map)
+                .collect(Collectors.toList());
     }
 
     private void clearTracksInProjectState(Long projectId) {
