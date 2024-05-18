@@ -44,7 +44,14 @@ public class CurvesService {
         GetCurvesNamesResponse response = GetCurvesNamesResponse.builder()
                 .curvesNames(project.getCurves().stream()
                         .filter(curve -> !isMultiCurve(curve))
-                        .map(CurveEntity::getName)
+                        .map(curve -> {
+                            if (curve.getIsSynthetic()){
+                                return "/synthetic/" + curve.getName();
+                            }
+                            else {
+                                return  curve.getName();
+                            }
+                        })
                         .collect(Collectors.toList()))
                 .build();
         for (MultiCurveEntity multiCurve : project.getMultiCurves()) {

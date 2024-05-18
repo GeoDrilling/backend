@@ -638,7 +638,7 @@ public class ModelService {
                 }
                 System.out.println("npoints = " + inputBuildModel.npoints);
                 System.out.println(list.size());
-                curveDtoList.add(new CurveDto("synthetic/" + name,
+                curveDtoList.add(new CurveDto("/synthetic/" + name,
                         lasFileService.getCurveDataByName(name, idProject, true).getCurveData() ));
             }
             name = getName(nameCurveList, numProbe[j], false);
@@ -654,7 +654,7 @@ public class ModelService {
                 }
 
                 curveDtoList.add(new CurveDto(
-                         "synthetic/" + name,
+                         "/synthetic/" + name,
                         lasFileService.getCurveDataByName(name, idProject, true).getCurveData() ));
                 System.out.println("npoints = " + inputBuildModel.npoints);
                 System.out.println(list.size());
