@@ -44,7 +44,7 @@ public class FileService {
     private final ModelService modelService;
     private final CurveRepository curveRepository;
 
-    public  void printCurves(CurveEntity zeni1, CurveEntity zeni2) {
+    /*public  void printCurves(CurveEntity zeni1, CurveEntity zeni2) {
         // Извлекаем и преобразуем данные первой кривой
         Double[] curve1 = extractCurve(zeni1);
         // Извлекаем и преобразуем данные второй кривой
@@ -65,7 +65,7 @@ public class FileService {
                 .curveData(gson.fromJson(zeni
                         .getData(), floatListTypeToken))
                 .build().getCurveData().toArray(Double[]::new);
-    }
+    }*/
 
     @Transactional
     public SaveCurveDataResponse save(MultipartFile file, Long projectId) throws IOException {
@@ -104,9 +104,9 @@ public class FileService {
 //            }
 
             //nik
-            for (CurveEntity с : curves) {
+            /*for (CurveEntity с : curves) {
                 System.out.println(newDepthCurve.getName());
-            }
+            }*/
 
 
             TypeToken<List<Double>> floatListTypeToken = new TypeToken<>(){};
@@ -155,10 +155,10 @@ public class FileService {
                 names.add(curve.getName());
             }
 
-            for (String name :  names){
+            /*for (String name :  names){
                 System.out.println(name);
             }
-
+*/
 
             List<double []> curvesInProjectInArray =   curvesInProject.stream()
                     .map(list -> CurveDataDownloadResponse.builder()
@@ -178,12 +178,12 @@ public class FileService {
                             .mapToDouble(Double::doubleValue)
                             .toArray())
                     .collect(Collectors.toList());
-            System.out.println(DeptInArray.length);
+           /* System.out.println(DeptInArray.length);
             System.out.println(DeptNewInArray.length);
             System.out.println(curvesNewInArray.size());
             System.out.println(curvesNewInArray.get(0).length);
             System.out.println(curvesInProjectInArray.size());
-            System.out.println(curvesInProjectInArray.get(0).length);
+            System.out.println(curvesInProjectInArray.get(0).length);*/
             InterpolateDTO interpolateDTO = interpolationService.interpolateDepths(DeptNewInArray, curvesNewInArray, DeptInArray, curvesInProjectInArray);
 
             List <CurveEntity> curveS = curveRepository.findAllByProjectAndIsSynthetic(project, true);
@@ -258,7 +258,7 @@ public class FileService {
         TypeToken<List<Double>> floatListTypeToken = new TypeToken<>(){};
         System.out.println();
         for(CurveEntity c : curveS){
-            System.out.println(CurveDataDownloadResponse.builder()
+            /*System.out.println(CurveDataDownloadResponse.builder()
                     .curveData(gson.fromJson(dept
                             .getData(), floatListTypeToken))
                     .build().getCurveData().stream().mapToDouble(Double::doubleValue).toArray().length);
@@ -269,7 +269,7 @@ public class FileService {
             System.out.println(CurveDataDownloadResponse.builder()
                     .curveData(gson.fromJson(deptNew
                             .getData(), floatListTypeToken))
-                    .build().getCurveData().stream().mapToDouble(Double::doubleValue).toArray().length);
+                    .build().getCurveData().stream().mapToDouble(Double::doubleValue).toArray().length);*/
             List<Double> data = interpolationService.interpolateSynthetic(
                     CurveDataDownloadResponse.builder()
                         .curveData(gson.fromJson(dept

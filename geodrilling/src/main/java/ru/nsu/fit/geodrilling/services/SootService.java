@@ -34,7 +34,7 @@ public class SootService {
   private final ModelService modelService;
   private  final CurveRepository curveRepository;
 
-  public  void printCurves(CurveEntity zeni1, CurveEntity zeni2) {
+ /* public  void printCurves(CurveEntity zeni1, CurveEntity zeni2) {
     // Извлекаем и преобразуем данные первой кривой
     Double[] curve1 = extractCurve(zeni1);
     // Извлекаем и преобразуем данные второй кривой
@@ -55,7 +55,7 @@ public class SootService {
             .curveData(gson.fromJson(zeni
                     .getData(), floatListTypeToken))
             .build().getCurveData().toArray(Double[]::new);
-  }
+  }*/
   public MaxMinDTO sootRename(Long idProject, SootinDTO sootinDTO) {
     ProjectEntity project = projectRepository.findById(idProject)
         .orElseThrow(
@@ -152,7 +152,7 @@ public class SootService {
         boolean x = Objects.equals(curveEntity.getName(), sootEntity.getX());
         boolean tvd = Objects.equals(curveEntity.getName(), sootEntity.getTvd());
 
-        System.out.println(curveEntity.getName());
+        //System.out.println(curveEntity.getName());
         curveData = interpolationService.extrapolateCurves(
                 CurveDataDownloadResponse.builder()
                         .curveData(gson.fromJson(curveEntity
@@ -169,10 +169,10 @@ public class SootService {
                         .curveData(gson.fromJson(zeni.get()
                                 .getData(), floatListTypeToken))
                         .build().getCurveData().toArray(Double[]::new));
-        System.out.println(curveEntity.getName());
+        //System.out.println(curveEntity.getName());
 
         curveEntity.setData(gson.toJson(curveData));
-        printCurves(curveEntity, p);
+        //printCurves(curveEntity, p);
       }
       projectRepository.save(project);
       curvesService.updateTvdInProjectState(idProject, sootinDTO.getTvd());
@@ -190,12 +190,12 @@ public class SootService {
       }
       TypeToken<List<Double>> floatListTypeToken = new TypeToken<>() {
       };
-      for (CurveEntity curveEntity : project.getCurves()) {
+      /*for (CurveEntity curveEntity : project.getCurves()) {
         System.out.println(curveEntity.getName() + "    :" + CurveDataDownloadResponse.builder()
                 .curveData(gson.fromJson(curveEntity
                         .getData(), floatListTypeToken))
                 .build().getCurveData().stream().mapToDouble(Double::doubleValue).toArray().length);
-      }
+      }*/
     }
 
     return maxMinDTO;
