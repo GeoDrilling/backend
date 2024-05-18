@@ -17,7 +17,7 @@ import static java.lang.Math.sin;
 @Service
 public class InterpolationService {
 
-    public static List<Double> convertToDoubleList(double[] doubleArray) {
+    public static List<Double> convertToDoubleList(Double[] doubleArray) {
         List<Double> floatList = new ArrayList<>();
 
         for (double value : doubleArray) {
@@ -68,39 +68,20 @@ public class InterpolationService {
                 j = 0;
                 i = false;
             }
-            if (depth < minDepth) {
+            if (depth < minDepth || depth > maxDepth) {
                 interpolateDTO.depth.add(depth);
                 for (double[] v1 : values1) {
                     if (i) {
                         interpolateDTO.curves.add(new ArrayList<>());
                     }
-                    interpolateDTO.curves.get(j).add(NaN);
+                    interpolateDTO.curves.get(j).add(null);
                     j++;
                 }
-                for (double[] v2 : values1) {
+                for (double[] v2 : values2) {
                     if (i) {
                         interpolateDTO.curves.add(new ArrayList<>());
                     }
-                    interpolateDTO.curves.get(j).add(NaN);
-                    j++;
-                }
-                j = 0;
-                i = false;
-            }
-            if (depth > maxDepth) {
-                interpolateDTO.depth.add(depth);
-                for (double[] v1 : values1) {
-                    if (i) {
-                        interpolateDTO.curves.add(new ArrayList<>());
-                    }
-                    interpolateDTO.curves.get(j).add(NaN);
-                    j++;
-                }
-                for (double[] v2 : values1) {
-                    if (i) {
-                        interpolateDTO.curves.add(new ArrayList<>());
-                    }
-                    interpolateDTO.curves.get(j).add(NaN);
+                    interpolateDTO.curves.get(j).add(null);
                     j++;
                 }
                 j = 0;
@@ -112,84 +93,84 @@ public class InterpolationService {
     }
 
     public List<Double> extrapolateCurves(
-            double[] curve, double[] depth, boolean x, boolean tvd, double[] zeni) {
-        int indexNotNaN = -1;
+            Double[] curve, Double[] depth, boolean x, boolean tvd, Double[] zeni) {
+        int indexNotNull = -1;
         int indexMinZeni = -1;
         int indexMaxZeni = -1;
         if (x) {
             for (int i = 0; indexMinZeni == -1; i++) {
-                if (Double.isNaN(zeni[i])) {
+                if ((zeni[i]) == null) {
                 }
                 else {
                     indexMinZeni = i;
                 }
             }
             for (int i = indexMinZeni; indexMaxZeni == -1; i++) {
-                if (Double.isNaN(zeni[i])) {
+                if ((zeni[i]) == null) {
                     indexMaxZeni = i - 1;
                 }
             }
-            for (int i = 0; indexNotNaN == -1; i++) {
-                if (Double.isNaN(curve[i])) {
+            for (int i = 0; indexNotNull == -1; i++) {
+                if ((curve[i]) == null) {
                 }
                 else {
-                    indexNotNaN = i;
+                    indexNotNull = i;
                 }
             }
-            for (int i = indexNotNaN; i >= 0; i--) {
-                if (Double.isNaN(curve[i]))
+            for (int i = indexNotNull; i >= 0; i--) {
+                if ((curve[i]) == null)
                     curve[i] = -sin(zeni[indexMinZeni]) * (depth[i + 2] - depth[i + 1]) + curve[i + 1];
             }
-            for (int i = indexNotNaN; i < curve.length; i++) {
-                if (Double.isNaN(curve[i])) {
+            for (int i = indexNotNull; i < curve.length; i++) {
+                if ((curve[i]) == null) {
                     curve[i] = sin(zeni[indexMaxZeni]) * (depth[i - 1] - depth[i - 2]) + curve[i - 1];
                 }
             }
             return convertToDoubleList(curve);
         } else if (tvd) {
             for (int i = 0; indexMinZeni == -1; i++) {
-                if (Double.isNaN(zeni[i])) {
+                if ((zeni[i]) == null) {
                 }
                 else {
                     indexMinZeni = i;
                 }
             }
             for (int i = indexMinZeni; indexMaxZeni == -1; i++) {
-                if (Double.isNaN(zeni[i])) {
+                if ((zeni[i]) == null) {
                     indexMaxZeni = i - 1;
                 }
             }
-            for (int i = 0; indexNotNaN == -1; i++) {
-                if (Double.isNaN(curve[i])) {
+            for (int i = 0; indexNotNull == -1; i++) {
+                if ((curve[i]) == null) {
                 }
                 else {
-                    indexNotNaN = i;
+                    indexNotNull = i;
                 }
             }
-            for (int i = indexNotNaN; i >= 0; i--) {
-                if (Double.isNaN(curve[i]))
+            for (int i = indexNotNull; i >= 0; i--) {
+                if ((curve[i]) == null)
                     curve[i] = -cos(zeni[indexMinZeni]) * (depth[i + 2] - depth[i + 1]) + curve[i + 1];
             }
-            for (int i = indexNotNaN; i < curve.length; i++) {
-                if (Double.isNaN(curve[i])) {
+            for (int i = indexNotNull; i < curve.length; i++) {
+                if ((curve[i]) == null) {
                     curve[i] = cos(zeni[indexMaxZeni]) * (depth[i - 1] - depth[i - 2]) + curve[i - 1];
                 }
             }
             return convertToDoubleList(curve);
         } else {
-            for (int i = 0; indexNotNaN == -1; i++) {
-                if (Double.isNaN(curve[i])) {
+            for (int i = 0; indexNotNull == -1; i++) {
+                if ((curve[i]) == null) {
                 }
                 else {
-                    indexNotNaN = i;
+                    indexNotNull = i;
                 }
             }
-            for (int i = indexNotNaN; i >= 0; i--) {
-                if (Double.isNaN(curve[i]))
+            for (int i = indexNotNull; i >= 0; i--) {
+                if ((curve[i]) == null)
                     curve[i] = curve[i + 1];
             }
-            for (int i = indexNotNaN; i < curve.length; i++) {
-                if (Double.isNaN(curve[i])) {
+            for (int i = indexNotNull; i < curve.length; i++) {
+                if ((curve[i]) == null) {
                     curve[i] = curve[i - 1];
                 }
             }
