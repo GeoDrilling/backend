@@ -106,6 +106,9 @@ public class InterpolationService {
                 }
             }
             for (int i = indexMinZeni; indexMaxZeni == -1; i++) {
+                if (i == zeni.length - 1) {
+                    indexMaxZeni = i;
+                }
                 if ((zeni[i]) == null) {
                     indexMaxZeni = i - 1;
                 }
@@ -136,6 +139,9 @@ public class InterpolationService {
                 }
             }
             for (int i = indexMinZeni; indexMaxZeni == -1; i++) {
+                if (i == zeni.length - 1) {
+                    indexMaxZeni = i;
+                }
                 if ((zeni[i]) == null) {
                     indexMaxZeni = i - 1;
                 }
