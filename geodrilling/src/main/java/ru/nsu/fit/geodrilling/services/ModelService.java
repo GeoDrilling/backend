@@ -23,6 +23,7 @@ import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.entity.SootEntity;
 import ru.nsu.fit.geodrilling.model.ModelSignal;
 import ru.nsu.fit.geodrilling.model.OutputModel;
+import ru.nsu.fit.geodrilling.repositories.CurveRepository;
 import ru.nsu.fit.geodrilling.repositories.ModelRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 import ru.nsu.fit.geodrilling.repositories.UserRepository;
@@ -43,6 +44,7 @@ public class ModelService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final CurvesService lasFileService;
+    private final CurveRepository curveRepository;
     private final NativeLibrary nativeLibrary;
     private final ModelRepository modelRepository;
 
@@ -107,6 +109,8 @@ public class ModelService {
         String ROAHD = projectEntity.getSootEntity().getROAHD();
         String ROAHE = projectEntity.getSootEntity().getROAHE();
 //    String md = projectEntity.getSootEntity().getMd();
+        System.out.println( lasFileService.getRange(projectEntity, "DEPT", start, end, false).size());
+
         String tvd = projectEntity.getSootEntity().getTvd();
         String x = projectEntity.getSootEntity().getX();
         String zeni = projectEntity.getSootEntity().getZeni();
@@ -452,6 +456,15 @@ public class ModelService {
         InputBuildModel inputBuildModel = createInputBuildModel(idProject, true, start, end);
         System.out.println(inputBuildModel.getNpoints());
         System.out.println(Arrays.toString(inputBuildModel.getX()));
+        System.out.println(inputBuildModel.getX().length);
+        System.out.println(Arrays.toString(inputBuildModel.getZeni()));
+        System.out.println(inputBuildModel.getZeni().length);
+        System.out.println(Arrays.toString(inputBuildModel.getTvd()));
+        System.out.println(inputBuildModel.getTvd().length);
+        System.out.println(Arrays.toString(inputBuildModel.ro_by_ampl));
+        System.out.println(Arrays.toString(inputBuildModel.ro_by_phases));
+
+
         System.out.println();
         System.out.println();
         System.out.println();
@@ -623,7 +636,8 @@ public class ModelService {
                 } else {
                     lasFileService.saveSyntheticCurve(projectEntity, name, list);
                 }
-
+                System.out.println("npoints = " + inputBuildModel.npoints);
+                System.out.println(list.size());
                 curveDtoList.add(new CurveDto("synthetic/" + name,
                         lasFileService.getCurveDataByName(name, idProject, true).getCurveData() ));
             }
@@ -642,6 +656,185 @@ public class ModelService {
                 curveDtoList.add(new CurveDto(
                          "synthetic/" + name,
                         lasFileService.getCurveDataByName(name, idProject, true).getCurveData() ));
+                System.out.println("npoints = " + inputBuildModel.npoints);
+                System.out.println(list.size());
+            }
+        }
+
+
+        projectRepository.save(projectEntity);
+        return new SaveModelResponse(modelDTOList, curveDtoList);
+    }
+    @Transactional
+    public SaveModelResponse saveModel(ModelDTO modelDTO, ProjectEntity projectEntity) {
+        boolean log = true;
+        List<ModelEntity> modelEntityList = modelRepository.findByProjectEntityOrderByStartXAsc(projectEntity);
+        if (modelEntityList.size() == 0) {
+            log = false;
+        }
+        System.out.println(modelEntityList.size());
+        List<ModelDTO> modelDTOList = new ArrayList<>();
+        if (log) {
+            for (ModelEntity modelEntity : modelEntityList) {
+                if (modelEntity.getStartX() >= modelDTO.getStart()
+                        && modelEntity.getEndX() <= modelDTO.getEnd()) {
+                    //del
+                    modelRepository.delete(modelEntity);
+                    continue;
+                }
+
+                if (modelEntity.getStartX() >= modelDTO.getStart()
+                        && modelEntity.getEndX() > modelDTO.getEnd()
+                        && modelEntity.getStartX() < modelDTO.getEnd()) {
+                    // c start
+                    modelEntity.setStartX(modelDTO.getEnd());
+                    modelDTOList.add(mapModelDto(modelEntity));
+                    continue;
+                }
+
+                if (/*modelEntity.getStartX() > modelDTO.getStart()
+                        && modelEntity.getEndX() > modelDTO.getEnd()
+                        &&*/ modelEntity.getStartX() >= modelDTO.getEnd()) {
+                    // save
+                    modelDTOList.add(mapModelDto(modelEntity));
+                    continue;
+                }
+
+                if (modelEntity.getStartX() < modelDTO.getStart()
+                        && modelEntity.getEndX() <= modelDTO.getEnd()
+                        && modelEntity.getEndX() > modelDTO.getStart()) {
+                    // c end
+                    modelEntity.setEndX(modelDTO.getStart());
+                    modelDTOList.add(mapModelDto(modelEntity));
+                    continue;
+                }
+
+                if (/*modelEntity.getStartX() < modelDTO.getStart()
+                        && modelEntity.getEndX() < modelDTO.getEnd()
+                        &&*/ modelEntity.getEndX() <= modelDTO.getStart()) {
+                    //save
+                    modelDTOList.add(mapModelDto(modelEntity));
+                    continue;
+                }
+
+                if (modelEntity.getStartX() < modelDTO.getStart()
+                        && modelEntity.getEndX() > modelDTO.getEnd()) {
+                    // razrez
+                    ModelEntity modelEntity2 = new ModelEntity();
+
+                    modelEntity2.setStartX(modelDTO.getEnd());
+                    modelEntity2.setEndX(modelEntity.getEndX());
+                    modelEntity2.setAlpha(modelEntity.getAlpha());
+                    modelEntity2.setTvdStart(modelEntity.getTvdStart());
+                    modelEntity2.setRoDown(modelEntity.getRoDown());
+                    modelEntity2.setRoUp(modelEntity.getRoUp());
+                    modelEntity2.setKanisotropyDown(modelEntity.getKanisotropyDown());
+                    modelEntity2.setKanisotropyUp(modelEntity.getKanisotropyUp());
+
+                    modelEntity.setEndX(modelDTO.getStart());
+
+                    modelEntity2.setProjectEntity(projectEntity);
+                    projectEntity.getModelEntityList().add(modelEntity2);
+                    modelRepository.save(modelEntity2);
+
+                    modelDTOList.add(mapModelDto(modelEntity));
+                    modelDTOList.add(mapModelDto(modelEntity2));
+                }
+
+            }
+        }
+        ModelEntity modelEntity = new ModelEntity();
+        modelEntity.setStartX(modelDTO.getStart());
+        modelEntity.setEndX(modelDTO.getEnd());
+        modelEntity.setKanisotropyDown(modelDTO.getKanisotropyDown());
+        modelEntity.setRoDown(modelDTO.getRoDown());
+        modelEntity.setKanisotropyUp(modelDTO.getKanisotropyUp());
+        modelEntity.setRoUp(modelDTO.getRoUp());
+        modelEntity.setAlpha(modelDTO.getAlpha());
+        modelEntity.setTvdStart(modelDTO.getTvdStart());
+        if (modelDTO.getName() != null) {
+            modelEntity.setName(modelDTO.getName());
+        } else {
+            modelEntity.setName(modelDTO.getStart().toString() + "-" + modelDTO.getEnd().toString());
+        }
+        modelEntity.setProjectEntity(projectEntity);
+        projectEntity.getModelEntityList().add(modelEntity);
+        modelRepository.save(modelEntity);
+
+        modelDTOList.add(mapModelDto(modelEntity));
+
+        Collections.sort(modelDTOList, new Comparator<ModelDTO>() {
+            @Override
+            public int compare(ModelDTO o1, ModelDTO o2) {
+                return Double.compare(o1.getStart(), o2.getStart());
+            }
+        });
+
+
+        InputBuildModel inputBuildModel = createInputBuildModel(projectEntity.getId(), false, modelDTO.getStart(), modelDTO.getEnd());
+
+        ModelSignal modelSignal = nativeLibrary.simulateModelSignal(
+                new InputModelSignal(inputBuildModel.getNprobes(), inputBuildModel.getNum_probe(),
+                        inputBuildModel.getNpoints(), inputBuildModel.getTvd(),
+                        inputBuildModel.getX(), inputBuildModel.getZeni(), modelDTO.getTvdStart(),
+                        modelDTO.getAlpha(), modelDTO.getRoUp(), modelDTO.getKanisotropyUp(),
+                        modelDTO.getRoDown(), modelDTO.getKanisotropyDown()));
+        System.out.print("getNpoints=");
+        System.out.println(inputBuildModel.getNpoints());
+        int n = inputBuildModel.getNprobes();
+        System.out.print("n=");
+        System.out.println(n);
+        int elementsPerPart = modelSignal.getSyntRoByAmpl().length / n;
+        System.out.print("elementsPerPart=");
+        System.out.println(elementsPerPart);
+        List<CurveDto> curveDtoList = new ArrayList<>();
+        double[][] partAmpl = new double[n][elementsPerPart];
+        double[][] partPhases = new double[n][elementsPerPart];
+        for (int i = 0; i < elementsPerPart; i++) {
+            for (int j = 0; j < n; j++) {
+                partAmpl[j][i] = modelSignal.getSyntRoByAmpl()[i * n + j];
+                partPhases[j][i] = modelSignal.getSyntRoByPhases()[i * n + j];
+            }
+        }
+        int[] numProbe = inputBuildModel.getNum_probe();
+        SootEntity sootEntity = projectEntity.getSootEntity();
+        List<String> nameCurveList = getSootName(sootEntity);
+        System.out.println(log);
+        for (int j = 0; j < n; j++) {
+            String name = getName(nameCurveList, numProbe[j], true);
+            List<Double> list = new ArrayList<>();
+            for (double value : partAmpl[j]) {
+                list.add(value);
+            }
+
+            List<String> curves = new ArrayList<>(
+                    lasFileService.getCurvesNames(projectEntity.getId()).getCurvesNames());
+
+            if (curves.contains(name)) { // временая проверкка
+                if (log) {
+                    lasFileService.changeRange(projectEntity, name, modelDTO.getStart(), list, true);
+                } else {
+                    lasFileService.saveSyntheticCurve(projectEntity, name, list);
+                }
+
+                curveDtoList.add(new CurveDto("synthetic/" + name,
+                        lasFileService.getCurveDataByName(name, projectEntity.getId(), true).getCurveData() ));
+            }
+            name = getName(nameCurveList, numProbe[j], false);
+            list = new ArrayList<>();
+            for (double value : partAmpl[j]) {
+                list.add(value);
+            }
+            if (curves.contains(name)) { // временая проверкка
+                if (log) {
+                    lasFileService.changeRange(projectEntity, name, modelDTO.getStart(), list, true);
+                } else {
+                    lasFileService.saveSyntheticCurve(projectEntity, name, list);
+                }
+
+                curveDtoList.add(new CurveDto(
+                        "synthetic/" + name,
+                        lasFileService.getCurveDataByName(name, projectEntity.getId(), true).getCurveData() ));
             }
         }
 
@@ -708,7 +901,7 @@ public class ModelService {
         return mapModelDtoList(modelRepository.findByProjectEntityOrderByStartXAsc(projectEntity));
     }
 
-    private ModelDTO mapModelDto(ModelEntity modelEntity) {
+    public ModelDTO mapModelDto(ModelEntity modelEntity) {
         return new ModelDTO(modelEntity.getId(), modelEntity.getName(), modelEntity.getStartX(),
                 modelEntity.getEndX(), modelEntity.getKanisotropyDown(), modelEntity.getRoDown(),
                 modelEntity.getKanisotropyUp(), modelEntity.getRoUp(), modelEntity.getAlpha(),
@@ -722,4 +915,135 @@ public class ModelService {
         }
         return modelDTOList;
     }
+
+/*    public SaveModelResponse updateModelSignal(ProjectEntity projectEntity){
+        List<ModelEntity> modelEntityList = projectEntity.getModelEntityList();
+        List<CurveDto> curveDtoList = new ArrayList<>();
+        int n;
+        SootEntity sootEntity = projectEntity.getSootEntity();
+        List<String> nameCurveList = getSootName(sootEntity);
+        for (ModelEntity modelEntity : modelEntityList){
+            InputBuildModel inputBuildModel = createInputBuildModel(projectEntity.getId(), false, modelEntity.getStartX(), modelEntity.getEndX());
+
+            ModelSignal modelSignal = nativeLibrary.simulateModelSignal(
+                    new InputModelSignal(inputBuildModel.getNprobes(), inputBuildModel.getNum_probe(),
+                            inputBuildModel.getNpoints(), inputBuildModel.getTvd(),
+                            inputBuildModel.getX(), inputBuildModel.getZeni(), modelEntity.getTvdStart(),
+                            modelEntity.getAlpha(), modelEntity.getRoUp(), modelEntity.getKanisotropyUp(),
+                            modelEntity.getRoDown(), modelEntity.getKanisotropyDown()));
+
+
+            n = inputBuildModel.getNprobes();
+            int elementsPerPart = modelSignal.getSyntRoByAmpl().length / n;
+            System.out.print("elementsPerPart=");
+            System.out.println(elementsPerPart);
+            double[][] partAmpl = new double[n][elementsPerPart];
+            double[][] partPhases = new double[n][elementsPerPart];
+            for (int i = 0; i < elementsPerPart; i++) {
+                for (int j = 0; j < n; j++) {
+                    partAmpl[j][i] = modelSignal.getSyntRoByAmpl()[i * n + j];
+                    partPhases[j][i] = modelSignal.getSyntRoByPhases()[i * n + j];
+                }
+            }
+            int[] numProbe = inputBuildModel.getNum_probe();
+
+            for (int j = 0; j < n; j++) {
+                String name = getName(nameCurveList, numProbe[j], true);
+                List<Double> list = new ArrayList<>();
+                for (double value : partAmpl[j]) {
+                    list.add(value);
+                }
+
+                List<String> curves = new ArrayList<>(
+                        lasFileService.getCurvesNames(projectEntity.getId()).getCurvesNames());
+
+                if (curves.contains(name)) { // временая проверкка
+                    lasFileService.changeRange(projectEntity, name, modelEntity.getStartX(), list, true);
+                }
+                name = getName(nameCurveList, numProbe[j], false);
+                list = new ArrayList<>();
+                for (double value : partAmpl[j]) {
+                    list.add(value);
+                }
+                if (curves.contains(name)) { // временая проверкка
+                    lasFileService.changeRange(projectEntity, name, modelEntity.getStartX(), list, true);
+
+                }
+            }
+        }
+        for (String nameCurve: nameCurveList) {
+            curveDtoList.add(new CurveDto(
+                    "synthetic/" + nameCurve,
+                    lasFileService.getCurveDataByName(nameCurve, projectEntity.getId(), true).getCurveData() ));
+        }
+
+        List<ModelDTO> modelDTOList = mapModelDtoList(modelEntityList);
+        return new SaveModelResponse(modelDTOList, curveDtoList);
+    }*/
+
+/*        public SaveModelResponse updateModelSignal(ProjectEntity projectEntity, List <Double> DeptOld){
+        List<ModelEntity> modelEntityList = projectEntity.getModelEntityList();
+        List<CurveDto> curveDtoList = new ArrayList<>();
+        int n;
+        SootEntity sootEntity = projectEntity.getSootEntity();
+        List<String> nameCurveList = getSootName(sootEntity);
+        for (ModelEntity modelEntity : modelEntityList){
+            InputBuildModel inputBuildModel = createInputBuildModel(projectEntity.getId(), false, modelEntity.getStartX(), modelEntity.getEndX());
+
+            ModelSignal modelSignal = nativeLibrary.simulateModelSignal(
+                    new InputModelSignal(inputBuildModel.getNprobes(), inputBuildModel.getNum_probe(),
+                            inputBuildModel.getNpoints(), inputBuildModel.getTvd(),
+                            inputBuildModel.getX(), inputBuildModel.getZeni(), modelEntity.getTvdStart(),
+                            modelEntity.getAlpha(), modelEntity.getRoUp(), modelEntity.getKanisotropyUp(),
+                            modelEntity.getRoDown(), modelEntity.getKanisotropyDown()));
+
+
+            n = inputBuildModel.getNprobes();
+            int elementsPerPart = modelSignal.getSyntRoByAmpl().length / n;
+            System.out.print("elementsPerPart=");
+            System.out.println(elementsPerPart);
+            double[][] partAmpl = new double[n][elementsPerPart];
+            double[][] partPhases = new double[n][elementsPerPart];
+            for (int i = 0; i < elementsPerPart; i++) {
+                for (int j = 0; j < n; j++) {
+                    partAmpl[j][i] = modelSignal.getSyntRoByAmpl()[i * n + j];
+                    partPhases[j][i] = modelSignal.getSyntRoByPhases()[i * n + j];
+                }
+            }
+            int[] numProbe = inputBuildModel.getNum_probe();
+
+            for (int j = 0; j < n; j++) {
+                String name = getName(nameCurveList, numProbe[j], true);
+                List<Double> list = new ArrayList<>();
+                for (double value : partAmpl[j]) {
+                    list.add(value);
+                }
+
+                List<String> curves = new ArrayList<>(
+                        lasFileService.getCurvesNames(projectEntity.getId()).getCurvesNames());
+
+                if (curves.contains(name)) { // временая проверкка
+                    lasFileService.changeRange(projectEntity, name, modelEntity.getStartX(), list, true);
+                }
+                name = getName(nameCurveList, numProbe[j], false);
+                list = new ArrayList<>();
+                for (double value : partAmpl[j]) {
+                    list.add(value);
+                }
+                if (curves.contains(name)) { // временая проверкка
+                    lasFileService.changeRange(projectEntity, name, modelEntity.getStartX(), list, true);
+
+                }
+            }
+        }
+        for (String nameCurve: nameCurveList) {
+            curveDtoList.add(new CurveDto(
+                    "synthetic/" + nameCurve,
+                    lasFileService.getCurveDataByName(nameCurve, projectEntity.getId(), true).getCurveData() ));
+        }
+
+        List<ModelDTO> modelDTOList = mapModelDtoList(modelEntityList);
+        return new SaveModelResponse(modelDTOList, curveDtoList);
+    }*/
+
 }

@@ -73,11 +73,13 @@ public class ProjectService {
         ModelCurveGroupProperties modelCurveProps = createModelCurveProps();
 
         ProjectEntity projectEntity = projectRepository.save(project);
+        project.setState(state);
         state.setId(projectEntity.getId());
         state.setTrackProperties(Collections.emptyList());
         state.setTabletProperties(tabletProperties);
         state.setDepthTrackProperties(depthTrackProperties);
         state.setModelCurveProperties(modelCurveProps);
+        projectRepository.save(project);
         projectStateRepository.save(state);
         return new ProjectStateDTO(projectEntity.getId(), tabletProperties,
                 depthTrackProperties, modelCurveProps,

@@ -15,6 +15,22 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ModelEntity {
+
+    public ModelEntity(ModelEntity d) {
+        if (d == null) {
+            throw new IllegalArgumentException("Cannot copy, 'd' is null");
+        }
+        // Копирование всех полей из объекта 'd'
+        this.name = d.name;
+        this.kanisotropyDown = d.kanisotropyDown;
+        this.roDown = d.roDown;
+        this.kanisotropyUp = d.kanisotropyUp;
+        this.roUp = d.roUp;
+        this.alpha = d.alpha;
+        this.tvdStart = d.tvdStart;
+        this.startX = d.startX;
+        this.endX = d.endX;
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -44,4 +60,6 @@ public class ModelEntity {
 
     @OneToMany(mappedBy = "modelEntity", cascade = CascadeType.ALL)
     private List<CacheAreasEntity> CacheAreasEntity = new ArrayList<>();
+
+
 }

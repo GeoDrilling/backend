@@ -5,11 +5,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.nsu.fit.geodrilling.dto.CurveDto;
+import ru.nsu.fit.geodrilling.dto.ProjectStateDTO;
 import ru.nsu.fit.geodrilling.dto.curves.CurveDataDownloadResponse;
 import ru.nsu.fit.geodrilling.dto.curves.CurveSupplementationResponse;
 import ru.nsu.fit.geodrilling.dto.curves.GetCurvesNamesResponse;
 import ru.nsu.fit.geodrilling.dto.curves.SaveCurveDataResponse;
+import ru.nsu.fit.geodrilling.entity.ProjectState;
 import ru.nsu.fit.geodrilling.services.CurvesService;
+import ru.nsu.fit.geodrilling.services.FileService;
 import ru.nsu.fit.geodrilling.services.SootService;
 
 import java.io.IOException;
@@ -22,10 +25,11 @@ public class LasFileController {
 
     private final CurvesService curvesService;
     private final SootService sootService;
+    private final FileService fileService;
     @PostMapping("/upload")
     public ResponseEntity<SaveCurveDataResponse> upload(@RequestParam("file") MultipartFile file,
                                                         @RequestParam("project_id") Long projectId) throws IOException {
-        SaveCurveDataResponse saveCurveDataResponse = (curvesService.save(file, projectId));
+        SaveCurveDataResponse saveCurveDataResponse = (fileService.save(file, projectId));
         sootService.sootOffer(saveCurveDataResponse, projectId);
         return ResponseEntity.ok(saveCurveDataResponse);
     }
@@ -51,10 +55,10 @@ public class LasFileController {
     }
 
     @PostMapping("/upload/supplement")
-    public ResponseEntity<CurveSupplementationResponse> dataSupplementation(
+    public ResponseEntity<ProjectStateDTO> dataSupplementation(
             @RequestParam("file") MultipartFile file,
             @RequestParam("project_id") Long projectId) throws IOException {
-        return ResponseEntity.ok(curvesService.supplementCurve(file, projectId));
+        return ResponseEntity.ok(fileService.supplementCurve(file, projectId));
     }
 
     @GetMapping("/dept/max")

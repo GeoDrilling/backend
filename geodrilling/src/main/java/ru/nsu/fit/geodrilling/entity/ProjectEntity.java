@@ -32,6 +32,7 @@ public class ProjectEntity {
     private List<CurveEntity> curves = new ArrayList<>();
 
     private Boolean readOnly = false;
+    private Boolean newProject;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "soot_id")

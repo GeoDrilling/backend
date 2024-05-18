@@ -47,136 +47,10 @@ public class CurvesService {
 
     private final ProjectRepository projectRepository;
     private final CurveRepository curveRepository;
-    private final Gson gson;
-    private final ProjectService projectService;
-    private final InterpolationService interpolationService;
     private final CurveMapper curveMapper;
-
-    @Transactional
-    public SaveCurveDataResponse save(MultipartFile file, Long projectId) throws IOException {
-        log.info("Добавление кривых в проект id={}", projectId);
-        ProjectEntity project = projectRepository.findById(projectId).orElseThrow(()
-                -> new NoSuchElementException("Проект с id " + projectId + " не существует"));
-        List<CurveEntity> curves;
-        CurveEntity newDepthCurve;
-        if (file.getContentType().equals("text/csv")) {
-            curves = fromCsv(file);
-            newDepthCurve = curves.stream()
-                    .filter(curve -> Objects.equals(curve.getName(), "MD"))
-                    .findFirst().orElseThrow(
-                            () -> new NoSuchElementException("Кривой DEPT не существует во входящем файле"));
-            newDepthCurve.setName("DEPT");
-
-        } else if (file.getContentType().equals("application/octet-stream")) {
-            curves = fromLas(file);
-            newDepthCurve = curves.stream()
-                    .filter(curve -> Objects.equals(curve.getName(), "DEPT"))
-                    .findFirst().orElseThrow(
-                            () -> new NoSuchElementException("Кривой DEPT не существует во входящем файле"));
-        } else {
-            log.error("Расширение файла {} не поддерживается!", file.getContentType());
-            throw new InvalidContentTypeException("Расширение файла " + file.getContentType() + " не поддерживается!");
-        }
-        log.info("123");
-        // если в проекте уже есть кривые, происходит склейка по кривой DEPT
-        if (!project.getCurves().isEmpty()) {
-            log.info("Склейка кривых в проекте id={}", projectId);
-
-//            String depthInProjectData = gson.toJson(getCurveDataByName("DEPT", project.getId(), false).getCurveData());
-//            if (!depthInProjectData.equals(newDepthCurve.getData())) {
-//                throw new NewCurvesAddingException("Кривая DEPT не соответствует уже добалвенной");
-//            }
-
-            //nik
-            for (CurveEntity с : curves) {
-                System.out.println(newDepthCurve.getName());
-            }
+    private final Gson gson;
 
 
-            TypeToken<List<Double>> floatListTypeToken = new TypeToken<>(){};
-
-            double[] DeptNewInArray = CurveDataDownloadResponse.builder()
-                    .curveData(gson.fromJson(newDepthCurve
-                            .getData(), floatListTypeToken))
-                    .build().getCurveData().stream().mapToDouble(Double::doubleValue).toArray();
-
-            curves.remove(newDepthCurve);
-
-
-            List<CurveEntity> curvesInProject = project.getCurves();
-            CurveEntity Dept = curvesInProject.stream()
-                    .filter(curve -> Objects.equals(curve.getName(), "DEPT"))
-                    .findFirst().orElseThrow(
-                            () -> new NoSuchElementException("123"));
-
-            double[] DeptInArray = CurveDataDownloadResponse.builder()
-                    .curveData(gson.fromJson(Dept
-                            .getData(), floatListTypeToken))
-                    .build().getCurveData().stream().mapToDouble(Double::doubleValue).toArray();
-
-            curvesInProject.remove(Dept);
-
-            List<String> names = new ArrayList<>();
-            for (CurveEntity curve :  curves){
-                names.add(curve.getName());
-            }
-
-            for (CurveEntity curve :  curvesInProject){
-                names.add(curve.getName());
-            }
-
-            for (String name :  names){
-                System.out.println(name);
-            }
-
-
-            List<double []> curvesInProjectInArray =   curvesInProject.stream()
-                    .map(list -> CurveDataDownloadResponse.builder()
-                            .curveData(gson.fromJson(list
-                                    .getData(), floatListTypeToken))
-                            .build().getCurveData().stream()
-                            .mapToDouble(Double::doubleValue)
-                            .toArray())
-                    .collect(Collectors.toList());
-
-
-            List<double []> curvesNewInArray =   curves.stream()
-                    .map(list -> CurveDataDownloadResponse.builder()
-                            .curveData(gson.fromJson(list
-                                    .getData(), floatListTypeToken))
-                            .build().getCurveData().stream()
-                            .mapToDouble(Double::doubleValue)
-                            .toArray())
-                    .collect(Collectors.toList());
-
-            InterpolateDTO interpolateDTO = interpolationService.interpolateDepths(DeptNewInArray, curvesNewInArray, DeptInArray, curvesInProjectInArray);
-
-            project.getCurves().clear();
-            curves.clear();
-
-            curves.add(new CurveEntity(null, project, "DEPT", gson.toJson(interpolateDTO.getDepth()), "", false));
-            for(int i =0; i < interpolateDTO.getCurves().size(); i++){
-                curves.add(new CurveEntity(null, project, names.get(i), gson.toJson(interpolateDTO.getCurves().get(i)), "", false));
-            }
-        }
-
-        for (CurveEntity curve : curves) {
-            curve.setProject(project);
-            project.getCurves().add(curveRepository.save(curve));
-        }
-        log.info("Кривые добавлены в проект");
-        projectRepository.save(project);
-        try {
-            updateDeptInProjectState(projectId);
-        } catch (Exception e) {
-            log.warn("Кривой DEPT нет в добавленных кривых");
-        }
-
-        handleMultiCurves(project);
-        return SaveCurveDataResponse.builder()
-                .curvesNames(getCurvesNames(projectId).getCurvesNames())
-                .build();
-    }
 
     public GetCurvesNamesResponse getCurvesNames(Long projectId) {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow(()
@@ -194,8 +68,12 @@ public class CurvesService {
     }
 
     public CurveDataDownloadResponse getCurveDataByName(String curveName, Long projectId, Boolean isSynthetic) {
-        ProjectEntity project = projectRepository.findById(projectId).orElseThrow(()
-                -> new NoSuchElementException("Проект c id " + projectId + " не существует"));
+        ProjectEntity project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new NoSuchElementException("Проект c id " + projectId + " не существует"));
+        return getCurveDataByName(curveName, project, isSynthetic);
+    }
+
+    public CurveDataDownloadResponse getCurveDataByName(String curveName, ProjectEntity project, Boolean isSynthetic) {
         TypeToken<List<Double>> floatListTypeToken = new TypeToken<>(){};
         return CurveDataDownloadResponse.builder()
                 .curveData(gson.fromJson(curveRepository.findByNameAndProjectAndIsSynthetic(curveName, project, isSynthetic)
@@ -204,23 +82,6 @@ public class CurvesService {
                 .build();
     }
 
-    @Transactional
-    public CurveSupplementationResponse supplementCurve(MultipartFile file, Long projectId) throws IOException {
-        log.info("Проект " + projectId + ": дополнение кривых");
-        ProjectEntity project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new NoSuchElementException("Проект не найден"));
-        ProjectEntity newProject = projectRepository.findById(projectService
-                        .createProjectForUser(project.getUser().getEmail(), project.getName()).getId())
-                .orElseThrow(() -> new NoSuchElementException("Не найден новый проект"));
-        save(file, newProject.getId());
-        log.info("Дополненные кривые сохранены в новый проект с id {}", newProject.getId());
-        project.setReadOnly(true);
-        log.info("Проект {} заморожен", project.getId());
-        project.setSupplementingProject(newProject);
-        return CurveSupplementationResponse.builder()
-            .curvesNames(newProject.getCurves().stream().map(CurveEntity::getName).collect(Collectors.toList()))
-            .build();
-    }
 
     public void changeRange(ProjectEntity project, String curveName , Double fromDepth, List<Double> data, Boolean isSynthetic) {
         List<Double> deptData = getCurveDataByName("DEPT", project.getId(), false).getCurveData();
@@ -247,7 +108,9 @@ public class CurvesService {
     public List<Double> getRange(ProjectEntity project, String curveName, Double fromDepth, Double toDepth, Boolean isSynthetic) {
 
         List<Double> deptData = getCurveDataByName("DEPT", project.getId(), isSynthetic).getCurveData();
+        System.out.println(deptData.size());
         Double[] deptArray = deptData.toArray(new Double[0]);
+        System.out.println(deptArray.length);
         int fromDepthIdx = Arrays.binarySearch(deptArray, fromDepth);
         int toDepthIdx = Arrays.binarySearch(deptArray, toDepth);
         System.out.println(fromDepthIdx);
@@ -258,6 +121,9 @@ public class CurvesService {
         if (toDepthIdx < 0) {
             toDepthIdx = -toDepthIdx - 1;
         }
+        if (toDepthIdx == deptData.size()){
+            toDepthIdx = toDepthIdx -1;
+        }
         System.out.println(fromDepthIdx);
         System.out.println(toDepthIdx);
         if (fromDepthIdx >= deptData.size() || toDepthIdx >= deptData.size() || fromDepthIdx > toDepthIdx) {
@@ -267,10 +133,14 @@ public class CurvesService {
             log.error("Отрезок данных выходит за пределы кривой или неверно задан");
             throw new RuntimeException("Отрезок данных выходит за пределы кривой или неверно задан");
         }
-
+        toDepthIdx = toDepthIdx + 1;
         CurveEntity curveEntity = curveRepository.findByNameAndProjectAndIsSynthetic(curveName, project, isSynthetic).orElseThrow(
                 () -> new NoSuchElementException("Кривой не существует"));
         List<Double> curveData = gson.fromJson(curveEntity.getData(), new TypeToken<>(){});
+        System.out.println(curveData.size());
+        System.out.println(fromDepthIdx);
+        System.out.println(toDepthIdx);
+        System.out.println(curveData.subList(fromDepthIdx, toDepthIdx).size());
         return curveData.subList(fromDepthIdx, toDepthIdx);
     }
 
@@ -335,6 +205,10 @@ public class CurvesService {
     public void updateDeptInProjectState(Long projectId) {
         ProjectEntity projectEntity = projectRepository.findById(projectId)
                 .orElseThrow(() -> new NoSuchElementException("Проект c id " + projectId + " не существует"));
+        updateDeptInProjectState(projectEntity);
+    }
+
+    public void updateDeptInProjectState(ProjectEntity projectEntity) {
         List<BaseProperty> baseProperties = projectEntity.getState()
                 .getTabletProperties()
                 .getProperties()
@@ -348,8 +222,8 @@ public class CurvesService {
                 .filter(prop -> Objects.equals(prop.getName(), "Конечная глубина"))
                 .findAny()
                 .orElseThrow(() -> new NoSuchElementException("Свойства \"Конечная глубина\" не существует"));
-        startDeptProp.setValue(Math.round(getDeptMin(projectId) * 10.0) / 10.0);
-        endDeptProp.setValue(Math.round(getDeptMax(projectId) * 10.0) / 10.0);
+        startDeptProp.setValue(Math.round(getDeptMin(projectEntity.getId()) * 10.0) / 10.0);
+        endDeptProp.setValue(Math.round(getDeptMax(projectEntity.getId()) * 10.0) / 10.0);
         projectRepository.save(projectEntity);
     }
 
@@ -410,45 +284,7 @@ public class CurvesService {
                 .containsAll(curves.stream().map(CurveEntity::getName).collect(Collectors.toList()));
     }
 
-    public List<CurveEntity> fromLas(MultipartFile file) {
-        try {
-            Path tempPath = Files.createTempFile(null, null);
-            file.transferTo(tempPath);
-            LasReader lasReader = new LasReader(tempPath.toFile().getAbsolutePath());
-            lasReader.read();
-            return lasReader.getCurves()
-                    .stream()
-                    .map(x -> CurveEntity.builder().name(x.getName()).data(gson.toJson(x.getData())).build())
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
 
-    public List<CurveEntity> fromCsv(MultipartFile file) {
-        try (CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
-            String[] curvesNames = reader.readNext();
-            Map<String, List<Double>> nameToData  = new HashMap<>();
-            for (String curveName : curvesNames) {
-                nameToData.put(curveName, new ArrayList<>());
-            }
-            String[] dataLine;
-            while ((dataLine = reader.readNext()) != null) {
-                for (int i = 0; i < curvesNames.length; i++) {
-                    nameToData.get(curvesNames[i]).add(Double.parseDouble(dataLine[i]));
-                }
-            }
-            List<CurveEntity> curves = new ArrayList<>(curvesNames.length);
-            for (int i = 0; i < curvesNames.length; i++) {
-                curves.add(CurveEntity.builder().name(curvesNames[i]).data(gson.toJson(nameToData.get(curvesNames[i]))).build());
-            }
-            return curves;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } catch (CsvValidationException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public CurveDataDownloadResponse getByPathName(String name, Long projectId) {
         if (name.startsWith("/synthetic/"))
