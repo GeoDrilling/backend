@@ -2,7 +2,6 @@ package ru.nsu.fit.geodrilling;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 import ru.nsu.fit.geodrilling.services.CurvesService;
+import ru.nsu.fit.geodrilling.services.FileService;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,6 +32,9 @@ public class CurvesServiceTest {
     private ProjectRepository projectRepository;
 
     @SpyBean
+    private FileService fileService;
+
+    @SpyBean
     private CurvesService curvesService;
 
     @Autowired
@@ -48,7 +51,7 @@ public class CurvesServiceTest {
         MockMultipartFile multipartFile = new MockMultipartFile("M5341", "M5341.csv", "text/csv" , Files.readAllBytes(Path.of("src/test/resources/M_5341.csv")));
         ProjectEntity project = new ProjectEntity();
         Mockito.when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
-        curvesService.save(multipartFile, 1L);
+        fileService.save(multipartFile, 1L);
         Assertions.assertEquals(20, project.getCurves().size());
         Assertions.assertEquals(5303.87, gson.fromJson(project.getCurves().get(0).getData(),
                 new TypeToken<List<Double>>(){}).get(0));
@@ -69,12 +72,10 @@ public class CurvesServiceTest {
 //    }
 
     @Test
-    @Transactional
     public void handleMultiCurvesTest() throws IOException {
-        MockMultipartFile multipartFile = new MockMultipartFile("multicurves", "multicurves.las", "application/octet-stream" , Files.readAllBytes(Path.of("src/test/resources/multicurves.las")));
+        MockMultipartFile multipartFile = new MockMultipartFile("data", "data.las", "application/octet-stream" , Files.readAllBytes(Path.of("src/test/resources/data.las")));
         ProjectEntity project = new ProjectEntity();
         Mockito.when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
-        curvesService.save(multipartFile, 1L);
-        project.getMultiCurves();
+        fileService.save(multipartFile, 1L);
     }
 }

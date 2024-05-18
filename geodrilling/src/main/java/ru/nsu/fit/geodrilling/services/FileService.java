@@ -218,8 +218,9 @@ public class FileService {
             log.warn("Кривой DEPT нет в добавленных кривых");
         }
 
+        curvesService.handleMultiCurves(project);
         return SaveCurveDataResponse.builder()
-                .curvesNames(project.getCurves().stream().map(CurveEntity::getName).collect(Collectors.toList()))
+                .curvesNames(curvesService.getCurvesNames(projectId).getCurvesNames())
                 .build();
     }
 

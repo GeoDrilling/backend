@@ -2,22 +2,13 @@ package ru.nsu.fit.geodrilling.services;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvValidationException;
-import grillid9.laslib.LasReader;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.fileupload.impl.InvalidContentTypeException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import ru.nsu.fit.geodrilling.dto.CurveDto;
-import ru.nsu.fit.geodrilling.dto.InterpolateDTO;
 import ru.nsu.fit.geodrilling.dto.MaxMinDTO;
 import ru.nsu.fit.geodrilling.dto.curves.CurveDataDownloadResponse;
-import ru.nsu.fit.geodrilling.dto.curves.CurveSupplementationResponse;
 import ru.nsu.fit.geodrilling.dto.curves.GetCurvesNamesResponse;
-import ru.nsu.fit.geodrilling.dto.curves.SaveCurveDataResponse;
 import ru.nsu.fit.geodrilling.entity.CurveEntity;
 import ru.nsu.fit.geodrilling.entity.MultiCurveEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
@@ -29,11 +20,6 @@ import ru.nsu.fit.geodrilling.model.Constant;
 import ru.nsu.fit.geodrilling.repositories.CurveRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -66,6 +52,8 @@ public class CurvesService {
         }
         return response;
     }
+
+
 
     public CurveDataDownloadResponse getCurveDataByName(String curveName, Long projectId, Boolean isSynthetic) {
         ProjectEntity project = projectRepository.findById(projectId)
@@ -227,7 +215,7 @@ public class CurvesService {
         projectRepository.save(projectEntity);
     }
 
-    private void handleMultiCurves(ProjectEntity project) {
+    public void handleMultiCurves(ProjectEntity project) {
         List<MultiCurveEntity> multiCurves = getMultiCurves(project.getCurves());
         project.setMultiCurves(new ArrayList<>());
         for (MultiCurveEntity multiCurve : multiCurves) {
@@ -236,7 +224,7 @@ public class CurvesService {
         projectRepository.save(project);
     }
 
-    private List<MultiCurveEntity> getMultiCurves(List<CurveEntity> curves) {
+    public List<MultiCurveEntity> getMultiCurves(List<CurveEntity> curves) {
         Map<String, CurveEntity> curvesOfMultiCurves = curves.stream()
                 .filter(this::isMultiCurve)
                 .collect(Collectors.toMap(CurveEntity::getName, Function.identity()));
@@ -261,11 +249,11 @@ public class CurvesService {
         return new ArrayList<>(multiCurves.values());
     }
 
-    private boolean isMultiCurve(CurveEntity curveEntity) {
+    public boolean isMultiCurve(CurveEntity curveEntity) {
         return getMultiCurveNameMatcher(curveEntity.getName()).find();
     }
 
-    private Matcher getMultiCurveNameMatcher(String name) {
+    public Matcher getMultiCurveNameMatcher(String name) {
         Pattern pattern = Pattern.compile("([A-Za-z]+)_(\\d+)_?([A-Za-z]+)?");
         return pattern.matcher(name);
     }
