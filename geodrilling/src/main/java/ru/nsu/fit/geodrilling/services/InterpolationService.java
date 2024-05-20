@@ -26,7 +26,11 @@ public class InterpolationService {
 
         return floatList;
     }
-    public InterpolateDTO interpolateDepths(
+
+    private double[] listDoubleInDoubleArray(List<Double> list) {
+        return list.stream().mapToDouble(Double::doubleValue).toArray();
+    }
+    /*public InterpolateDTO interpolateDepths(
             double[] depths1, List<double[]> values1, double[] depths2, List<double[]> values2) {
 
         TreeSet<Double> allDepths = new TreeSet<>();
@@ -39,18 +43,17 @@ public class InterpolationService {
             allDepths.add(depth);
         }
 
-        double minDepth = Math.max(Arrays.stream(depths1).min().orElse(NaN),
+        double minDepth1 = Math.max(Arrays.stream(depths1).min().orElse(NaN),
                 Arrays.stream(depths2).min().orElse(NaN));
 
-        double maxDepth = Math.min(Arrays.stream(depths1).max().orElse(NaN),
-                Arrays.stream(depths2).max().orElse(NaN));
+        double maxDepth1 = Math.min(Arrays.stream(depths1).max().orElse(NaN));
 
         InterpolateDTO interpolateDTO = new InterpolateDTO();
         boolean i = true;
         int j = 0;
         for (double depth : allDepths) {
+            interpolateDTO.depth.add(depth);
             if (depth >= minDepth && depth <= maxDepth) {
-                interpolateDTO.depth.add(depth);
                 for (double[] v1 : values1) {
                     if (i) {
                         interpolateDTO.curves.add(new ArrayList<>());
@@ -69,7 +72,6 @@ public class InterpolationService {
                 i = false;
             }
             if (depth < minDepth || depth > maxDepth) {
-                interpolateDTO.depth.add(depth);
                 for (double[] v1 : values1) {
                     if (i) {
                         interpolateDTO.curves.add(new ArrayList<>());
@@ -90,8 +92,35 @@ public class InterpolationService {
         }
 
         return interpolateDTO;
-    }
+    }*/
 
+    public InterpolateDTO interpolateDepths(
+            double[] depths1, List<double[]> values1, double[] depths2, List<double[]> values2) {
+
+        TreeSet<Double> allDepthsSet = new TreeSet<>();
+
+        for (double depth : depths1) {
+            allDepthsSet.add(depth);
+        }
+
+        for (double depth : depths2) {
+            allDepthsSet.add(depth);
+        }
+
+        List<Double> allDepthList = new ArrayList<>(allDepthsSet);
+        double[] allDepth = listDoubleInDoubleArray(allDepthList);
+        InterpolateDTO interpolateDTO = new InterpolateDTO();
+        interpolateDTO.depth = allDepthList;
+        for (double[] v1 : values1) {
+            interpolateDTO.curves.add(interpolateNull(depths1, v1, allDepth));
+        }
+        for (double[] v2 : values2) {
+            interpolateDTO.curves.add(interpolateNull(depths2, v2, allDepth));
+        }
+
+
+        return interpolateDTO;
+    }
     public List<Double> extrapolateCurves(
             Double[] curve, Double[] depth, boolean x, boolean tvd, Double[] zeni) {
         int indexNotNull = -1;
@@ -201,6 +230,28 @@ public class InterpolationService {
             }
             if (depth > maxDepth) {
                 curveInterpolate.add(values1[values1.length - 1]);
+            }
+        }
+        return curveInterpolate;
+    }
+
+    public List<Double> interpolateNull(double[] depths1, double[] values1, double[] depths2){
+        double minDepth = Math.max(Arrays.stream(depths1).min().orElse(NaN),
+                Arrays.stream(depths2).min().orElse(NaN));
+
+        double maxDepth = Math.min(Arrays.stream(depths1).max().orElse(NaN),
+                Arrays.stream(depths2).max().orElse(NaN));
+        List<Double> curveInterpolate = new ArrayList<>();
+        for (double depth : depths2) {
+            if (depth >= minDepth && depth <= maxDepth) {
+                curveInterpolate.add(interpolatePoint(depths1, values1, depth));
+
+            }
+            if (depth < minDepth) {
+                curveInterpolate.add(null);
+            }
+            if (depth > maxDepth) {
+                curveInterpolate.add(null);
             }
         }
         return curveInterpolate;
