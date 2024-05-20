@@ -527,9 +527,9 @@ public class AreasService {
         colorMapBuilder.saveColorMapToFile(colorMapBuilder.generateLogarithmicColorMap(
                 param1, param2, intensityValues, findMin(areasEquivalence.getTargetFunction()),
                 findMax(areasEquivalence.getTargetFunction())), "ColorMap");*/
-        System.out.println(convertToFloatList(param1));
+        /*System.out.println(convertToFloatList(param1));
         System.out.println(convertToFloatList(param2));
-        System.out.println(convertToFloatList(targetFunction));
+        System.out.println(convertToFloatList(targetFunction));*/
         int maxSizeHistory = 5;
         Arrays.sort(inputParamAreasDTO.level);
         ByteArrayResource byteArrayResource = pythonService.sendIntensityDataAndReceiveImage

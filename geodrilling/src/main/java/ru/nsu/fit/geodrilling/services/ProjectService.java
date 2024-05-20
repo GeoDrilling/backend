@@ -161,6 +161,7 @@ public class ProjectService {
         ProjectState projectState = projectStateRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("У проекта нет состояния"));
         modelMapper.map(state, projectState);
+        projectState.setTrackProperties(state.getTrackProperties());
         projectStateRepository.save(projectState);
     }
     public ProjectStateDTO getProjectState(Long projectId) {
@@ -173,8 +174,6 @@ public class ProjectService {
                 return Double.compare(o1.getStart(), o2.getStart());
             }
         });
-        System.out.println("curves ----");
-        project.getCurves().forEach(System.out::println);
         return new ProjectStateDTO(project.getId(), project.getState().getTabletProperties(),
                 project.getState().getDepthTrackProperties(),
                 project.getState().getModelCurveProperties(),

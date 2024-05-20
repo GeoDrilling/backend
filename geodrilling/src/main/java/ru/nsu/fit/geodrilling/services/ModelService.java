@@ -109,7 +109,7 @@ public class ModelService {
         String ROAHD = projectEntity.getSootEntity().getROAHD();
         String ROAHE = projectEntity.getSootEntity().getROAHE();
 //    String md = projectEntity.getSootEntity().getMd();
-        System.out.println( lasFileService.getRange(projectEntity, "DEPT", start, end, false).size());
+        /*System.out.println( lasFileService.getRange(projectEntity, "DEPT", start, end, false).size());*/
 
         String tvd = projectEntity.getSootEntity().getTvd();
         String x = projectEntity.getSootEntity().getX();
@@ -122,7 +122,7 @@ public class ModelService {
                 length = arrPL.length;
             }
             if (curves.contains(ROAL)) {
-                System.out.println(ROAL);
+                /*System.out.println(ROAL);*/
                 arrAL = ListDoubleInDoubleArray(lasFileService.getRange(projectEntity, ROAL, start, end, false));
                 bolAL = true;
                 length = arrAL.length;
@@ -164,7 +164,7 @@ public class ModelService {
         }*/
         if (curves.contains(ROPH) || curves.contains(ROAH)) {
             if (curves.contains(ROPH)) {
-                System.out.println(ROPH);
+                /*System.out.println(ROPH);*/
                 arrPH = ListDoubleInDoubleArray(lasFileService.getRange(projectEntity, ROPH, start, end, false));
                 bolPH = true;
                 length = arrPH.length;
@@ -222,7 +222,7 @@ public class ModelService {
 //    x2 = ListDoubleInDoubleArray(lasFileService.getCurveDataByName(x, idProject).getCurveData());
 //    zeni2 = ListDoubleInDoubleArray(
 //        lasFileService.getCurveDataByName(zeni, idProject).getCurveData());
-        System.out.println(tvd);
+        /*System.out.println(tvd);*/
         tvd2 = ListDoubleInDoubleArray(lasFileService.getRange(projectEntity, tvd, start, end, false));
         x2 = ListDoubleInDoubleArray(lasFileService.getRange(projectEntity, x, start, end, false));
         zeni2 = ListDoubleInDoubleArray(lasFileService.getRange(projectEntity, zeni, start, end, false));
@@ -332,7 +332,7 @@ public class ModelService {
         inputBuildModel.setKanisotropy_down(modelDTO.getKanisotropyDown());
         inputBuildModel.setAlpha(modelDTO.getAlpha());
 
-        System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_up());
+        /*System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_up());
         System.out.println(modelCreateRequest.getRangeParameters().getMin_ro_up());
         System.out.println(modelCreateRequest.getRangeParameters().getMax_alpha());
         System.out.println(modelCreateRequest.getRangeParameters().getMin_alpha());
@@ -343,7 +343,7 @@ public class ModelService {
         System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_down());
         System.out.println(modelCreateRequest.getRangeParameters().getMin_ro_down());
         System.out.println(modelCreateRequest.getRangeParameters().getMax_kanisotropy_down());
-        System.out.println(modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());
+        System.out.println(modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());*/
 
         setDefaultValues(modelCreateRequest.getRangeParameters());
 
@@ -354,7 +354,7 @@ public class ModelService {
     System.out.println(inputBuildModel.getAlpha());
     System.out.println(inputBuildModel.getTvd_start());*/
 
-        System.out.println("====");
+       /* System.out.println("====");
         System.out.println(modelCreateRequest.getRangeParameters().getMax_ro_up());
         System.out.println(modelCreateRequest.getRangeParameters().getMin_ro_up());
         System.out.println(modelCreateRequest.getRangeParameters().getMax_alpha());
@@ -367,7 +367,7 @@ public class ModelService {
         System.out.println(modelCreateRequest.getRangeParameters().getMin_ro_down());
         System.out.println(modelCreateRequest.getRangeParameters().getMax_kanisotropy_down());
         System.out.println(modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());
-        System.out.println("====");
+        System.out.println("====");*/
 
         inputBuildModel.setMax_alpha(modelCreateRequest.getRangeParameters().getMax_alpha());
         inputBuildModel.setMin_alpha(modelCreateRequest.getRangeParameters().getMin_alpha());
@@ -386,7 +386,7 @@ public class ModelService {
         inputBuildModel.setMin_kanisotropy_down(
                 modelCreateRequest.getRangeParameters().getMin_kanisotropy_down());
 
-        System.out.println("====");
+        /*System.out.println("====");
         System.out.println(inputBuildModel.getMax_alpha());
         System.out.println(inputBuildModel.getMin_alpha());
         System.out.println(inputBuildModel.getMax_tvd_start());
@@ -398,10 +398,10 @@ public class ModelService {
         System.out.println(inputBuildModel.getMax_kanisotropy_up());
         System.out.println(inputBuildModel.getMin_kanisotropy_up());
         System.out.println(inputBuildModel.getMax_kanisotropy_down());
-        System.out.println(inputBuildModel.getMin_kanisotropy_down());
-        OutputModel outputModel = nativeLibrary.solverModel(inputBuildModel);
+        System.out.println(inputBuildModel.getMin_kanisotropy_down());*/
+        OutputModel outputModel = nativeLibrary.solverModel(inputBuildModel);/*
         System.out.println("====");
-        System.out.println(outputModel.getMisfit());
+        System.out.println(outputModel.getMisfit());*/
 
 
         /*OutputModel outputModel = nativeLibrary.startModel(new InputBuildModel(nprobes, num_probe, npoints, md2, tvd2, x2, zeni2,
@@ -453,7 +453,7 @@ public class ModelService {
             throw new EntityNotFoundException("Проект не найден");
         }
 
-        InputBuildModel inputBuildModel = createInputBuildModel(idProject, true, start, end);
+        InputBuildModel inputBuildModel = createInputBuildModel(idProject, true, start, end);/*
         System.out.println(inputBuildModel.getNpoints());
         System.out.println(Arrays.toString(inputBuildModel.getX()));
         System.out.println(inputBuildModel.getX().length);
@@ -462,19 +462,19 @@ public class ModelService {
         System.out.println(Arrays.toString(inputBuildModel.getTvd()));
         System.out.println(inputBuildModel.getTvd().length);
         System.out.println(Arrays.toString(inputBuildModel.ro_by_ampl));
-        System.out.println(Arrays.toString(inputBuildModel.ro_by_phases));
+        System.out.println(Arrays.toString(inputBuildModel.ro_by_phases));*/
 
-
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        OutputModel outputModel = nativeLibrary.startModel(inputBuildModel);
+//
+//        System.out.println();
+//        System.out.println();
+//        System.out.println();
+        OutputModel outputModel = nativeLibrary.startModel(inputBuildModel);/*
         System.out.println(outputModel.getMisfit());
         System.out.println(outputModel.getTvdStart());
         System.out.println(outputModel.getRoUp());
         System.out.println(outputModel.getKanisotropyUp());
         System.out.println(outputModel.getRoDown());
-        System.out.println(outputModel.getKanisotropyDown());
+        System.out.println(outputModel.getKanisotropyDown());*/
         return new ModelDTO(0L, "start", start, end, outputModel.getKanisotropyDown(),
                 outputModel.getRoDown(), outputModel.getKanisotropyUp(), outputModel.getRoUp(),
                 outputModel.getAlpha(), outputModel.getTvdStart());
@@ -491,8 +491,8 @@ public class ModelService {
         List<ModelEntity> modelEntityList = modelRepository.findByProjectEntityOrderByStartXAsc(projectEntity);
         if (modelEntityList.size() == 0) {
             log = false;
-        }
-        System.out.println(modelEntityList.size());
+        }/*
+        System.out.println(modelEntityList.size());*/
         List<ModelDTO> modelDTOList = new ArrayList<>();
         if (log) {
             for (ModelEntity modelEntity : modelEntityList) {
@@ -598,15 +598,15 @@ public class ModelService {
                         inputBuildModel.getNpoints(), inputBuildModel.getTvd(),
                         inputBuildModel.getX(), inputBuildModel.getZeni(), modelDTO.getTvdStart(),
                         modelDTO.getAlpha(), modelDTO.getRoUp(), modelDTO.getKanisotropyUp(),
-                        modelDTO.getRoDown(), modelDTO.getKanisotropyDown()));
+                        modelDTO.getRoDown(), modelDTO.getKanisotropyDown()));/*
         System.out.print("getNpoints=");
-        System.out.println(inputBuildModel.getNpoints());
-        int n = inputBuildModel.getNprobes();
+        System.out.println(inputBuildModel.getNpoints());*/
+        int n = inputBuildModel.getNprobes();/*
         System.out.print("n=");
-        System.out.println(n);
-        int elementsPerPart = modelSignal.getSyntRoByAmpl().length / n;
+        System.out.println(n);*/
+        int elementsPerPart = modelSignal.getSyntRoByAmpl().length / n;/*
         System.out.print("elementsPerPart=");
-        System.out.println(elementsPerPart);
+        System.out.println(elementsPerPart);*/
         List<CurveDto> curveDtoList = new ArrayList<>();
         double[][] partAmpl = new double[n][elementsPerPart];
         double[][] partPhases = new double[n][elementsPerPart];
@@ -618,8 +618,8 @@ public class ModelService {
         }
         int[] numProbe = inputBuildModel.getNum_probe();
         SootEntity sootEntity = projectEntity.getSootEntity();
-        List<String> nameCurveList = getSootName(sootEntity);
-        System.out.println(log);
+        List<String> nameCurveList = getSootName(sootEntity);/*
+        System.out.println(log);*/
         for (int j = 0; j < n; j++) {
             String name = getName(nameCurveList, numProbe[j], true);
             List<Double> list = new ArrayList<>();
@@ -635,9 +635,9 @@ public class ModelService {
                     lasFileService.changeRange(projectEntity, name, modelDTO.getStart(), list, true);
                 } else {
                     lasFileService.saveSyntheticCurve(projectEntity, name, list);
-                }
+                }/*
                 System.out.println("npoints = " + inputBuildModel.npoints);
-                System.out.println(list.size());
+                System.out.println(list.size());*/
                 curveDtoList.add(new CurveDto("/synthetic/" + name,
                         lasFileService.getCurveDataByName(name, idProject, true).getCurveData() ));
             }
@@ -655,9 +655,9 @@ public class ModelService {
 
                 curveDtoList.add(new CurveDto(
                          "/synthetic/" + name,
-                        lasFileService.getCurveDataByName(name, idProject, true).getCurveData() ));
+                        lasFileService.getCurveDataByName(name, idProject, true).getCurveData() ));/*
                 System.out.println("npoints = " + inputBuildModel.npoints);
-                System.out.println(list.size());
+                System.out.println(list.size());*/
             }
         }
 
@@ -778,15 +778,15 @@ public class ModelService {
                         inputBuildModel.getNpoints(), inputBuildModel.getTvd(),
                         inputBuildModel.getX(), inputBuildModel.getZeni(), modelDTO.getTvdStart(),
                         modelDTO.getAlpha(), modelDTO.getRoUp(), modelDTO.getKanisotropyUp(),
-                        modelDTO.getRoDown(), modelDTO.getKanisotropyDown()));
+                        modelDTO.getRoDown(), modelDTO.getKanisotropyDown()));/*
         System.out.print("getNpoints=");
-        System.out.println(inputBuildModel.getNpoints());
-        int n = inputBuildModel.getNprobes();
+        System.out.println(inputBuildModel.getNpoints());*/
+        int n = inputBuildModel.getNprobes();/*
         System.out.print("n=");
-        System.out.println(n);
-        int elementsPerPart = modelSignal.getSyntRoByAmpl().length / n;
+        System.out.println(n);*/
+        int elementsPerPart = modelSignal.getSyntRoByAmpl().length / n;/*
         System.out.print("elementsPerPart=");
-        System.out.println(elementsPerPart);
+        System.out.println(elementsPerPart);*/
         List<CurveDto> curveDtoList = new ArrayList<>();
         double[][] partAmpl = new double[n][elementsPerPart];
         double[][] partPhases = new double[n][elementsPerPart];
@@ -799,7 +799,7 @@ public class ModelService {
         int[] numProbe = inputBuildModel.getNum_probe();
         SootEntity sootEntity = projectEntity.getSootEntity();
         List<String> nameCurveList = getSootName(sootEntity);
-        System.out.println(log);
+        /*System.out.println(log);*/
         for (int j = 0; j < n; j++) {
             String name = getName(nameCurveList, numProbe[j], true);
             List<Double> list = new ArrayList<>();

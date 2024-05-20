@@ -103,13 +103,13 @@ public class CurvesService {
     public List<Double> getRange(ProjectEntity project, String curveName, Double fromDepth, Double toDepth, Boolean isSynthetic) {
 
         List<Double> deptData = getCurveDataByName("DEPT", project.getId(), isSynthetic).getCurveData();
-        System.out.println(deptData.size());
+        /*System.out.println(deptData.size());*/
         Double[] deptArray = deptData.toArray(new Double[0]);
-        System.out.println(deptArray.length);
+       /* System.out.println(deptArray.length);*/
         int fromDepthIdx = Arrays.binarySearch(deptArray, fromDepth);
         int toDepthIdx = Arrays.binarySearch(deptArray, toDepth);
-        System.out.println(fromDepthIdx);
-        System.out.println(toDepthIdx);
+        /*System.out.println(fromDepthIdx);
+        System.out.println(toDepthIdx);*/
         if (fromDepthIdx < 0) {
             fromDepthIdx = -fromDepthIdx - 1;
         }
@@ -119,12 +119,12 @@ public class CurvesService {
         if (toDepthIdx == deptData.size()){
             toDepthIdx = toDepthIdx -1;
         }
-        System.out.println(fromDepthIdx);
-        System.out.println(toDepthIdx);
+       /* System.out.println(fromDepthIdx);
+        System.out.println(toDepthIdx);*/
         if (fromDepthIdx >= deptData.size() || toDepthIdx >= deptData.size() || fromDepthIdx > toDepthIdx) {
-            System.out.println(fromDepthIdx >= deptData.size());
+            /*System.out.println(fromDepthIdx >= deptData.size());
             System.out.println(toDepthIdx >= deptData.size());
-            System.out.println(fromDepthIdx > toDepthIdx);
+            System.out.println(fromDepthIdx > toDepthIdx);*/
             log.error("Отрезок данных выходит за пределы кривой или неверно задан");
             throw new RuntimeException("Отрезок данных выходит за пределы кривой или неверно задан");
         }
@@ -132,10 +132,10 @@ public class CurvesService {
         CurveEntity curveEntity = curveRepository.findByNameAndProjectAndIsSynthetic(curveName, project, isSynthetic).orElseThrow(
                 () -> new NoSuchElementException("Кривой не существует"));
         List<Double> curveData = gson.fromJson(curveEntity.getData(), new TypeToken<>(){});
-        System.out.println(curveData.size());
+        /*System.out.println(curveData.size());
         System.out.println(fromDepthIdx);
         System.out.println(toDepthIdx);
-        System.out.println(curveData.subList(fromDepthIdx, toDepthIdx).size());
+        System.out.println(curveData.subList(fromDepthIdx, toDepthIdx).size());*/
         return curveData.subList(fromDepthIdx, toDepthIdx);
     }
 
