@@ -238,6 +238,7 @@ public class FileService {
         save(file, newProject.getId());
         log.info("Дополненные кривые сохранены в новый проект с id {}", newProject.getId());
         project.setReadOnly(true);
+        projectRepository.save(project);
         log.info("Проект {} заморожен", project.getId());
         project.setSupplementingProject(newProject);
         List<ModelEntity> newModelList =new ArrayList<>();

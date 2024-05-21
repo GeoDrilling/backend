@@ -50,6 +50,13 @@ public class ProjectController {
         return ResponseEntity.ok(projects);
     }
 
+    @GetMapping("/userAll/frozen")
+    public ResponseEntity<List<ProjectDTO>> getProjectsFrozenByUser() {
+        UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        List<ProjectDTO> projects = projectService.getProjectsFrozenByUserId(modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());
+        return ResponseEntity.ok(projects);
+    }
+
     @DeleteMapping("/{projectId}")
     public ResponseEntity<?> deleteProject(@PathVariable Long projectId) {
         projectService.deleteProject(projectId);

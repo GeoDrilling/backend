@@ -192,6 +192,12 @@ public class ProjectService {
                         .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")).getId()));
     }
 
+    public List<ProjectDTO> getProjectsFrozenByUserId(String email) {
+        return getListProjectDTObyListProjectEntity(
+                projectRepository.findAllByUserIdAndReadOnly(userRepository.findByEmail(email)
+                        .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")).getId(), true));
+    }
+
     public ProjectDTO getProjectDTObyId(Long idProject) {
         ProjectEntity projectEntity = projectRepository.findById(idProject).orElse(null);
         ProjectDTO projectDTO = new ProjectDTO();
