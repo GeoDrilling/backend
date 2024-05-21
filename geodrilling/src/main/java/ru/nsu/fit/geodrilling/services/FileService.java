@@ -45,6 +45,7 @@ public class FileService {
     private final InterpolationService interpolationService;
     private final ModelService modelService;
     private final CurveRepository curveRepository;
+    private final SootService sootService;
 
     /*public  void printCurves(CurveEntity zeni1, CurveEntity zeni2) {
         // Извлекаем и преобразуем данные первой кривой
@@ -311,6 +312,8 @@ public class FileService {
         }
         newProject.getState().setTrackProperties(newProject.getState().getTrackProperties().stream().filter(c -> ! c.getCurves().isEmpty()).collect(Collectors.toList()));
         projectRepository.save(newProject);
+
+        sootService.sootOffer(new SaveCurveDataResponse(names), projectId);
         return projectService.getProjectState(newProject.getId());
     }
 

@@ -188,8 +188,8 @@ public class ProjectService {
 
     public List<ProjectDTO> getProjectsByUserId(String email) {
         return getListProjectDTObyListProjectEntity(
-                projectRepository.findAllByUserId(userRepository.findByEmail(email)
-                        .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")).getId()));
+                projectRepository.findAllByUserIdAndReadOnly(userRepository.findByEmail(email)
+                        .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")).getId(), false));
     }
 
     public List<ProjectDTO> getProjectsFrozenByUserId(String email) {
@@ -212,6 +212,7 @@ public class ProjectService {
             ProjectDTO projectDTO = new ProjectDTO();
             projectDTO.setId(projectEntity.getId());
             projectDTO.setName(projectEntity.getName());
+            projectDTO.setReadOnly(projectEntity.getReadOnly());
             projectDTOS.add(projectDTO);
         }
         return projectDTOS;
