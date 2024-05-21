@@ -5,10 +5,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import ru.nsu.fit.geodrilling.dto.ModelDTO;
-import ru.nsu.fit.geodrilling.dto.ProjectDTO;
-import ru.nsu.fit.geodrilling.dto.ProjectStateDTO;
-import ru.nsu.fit.geodrilling.dto.SaveProjectStateDTO;
+import ru.nsu.fit.geodrilling.dto.*;
 import ru.nsu.fit.geodrilling.entity.CurveEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectState;
@@ -192,10 +189,15 @@ public class ProjectService {
                         .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")).getId(), false));
     }
 
-    public List<ProjectDTO> getProjectsFrozenByUserId(String email) {
-        return getListProjectDTObyListProjectEntity(
-                projectRepository.findAllByUserIdAndReadOnly(userRepository.findByEmail(email)
-                        .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден")).getId(), true));
+    public List<ProjectFrozenDTO> getProjectsFrozenByUserId(String email, Long projectId) {
+        List<ProjectEntity> projectEntityList = new ArrayList<>();
+        ProjectEntity project =  projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Проект не найден"));
+        Optional<ProjectEntity> optionalProject = projectRepository.findBySupplementingProject(project);
+        while(optionalProject.isPresent()){
+            projectEntityList.add(optionalProject.get());
+            optionalProject = projectRepository.findBySupplementingProject(optionalProject.get());
+        }
+        return getListProjectFrozenDTObyListProjectEntity(projectEntityList);
     }
 
     public ProjectDTO getProjectDTObyId(Long idProject) {
@@ -204,6 +206,19 @@ public class ProjectService {
         projectDTO.setId(projectEntity.getId());
         projectDTO.setName(projectEntity.getName());
         return projectDTO;
+    }
+
+    public List<ProjectFrozenDTO> getListProjectFrozenDTObyListProjectEntity(List<ProjectEntity> entities) {
+        List<ProjectFrozenDTO> projectDTOS = new ArrayList<>();
+        for (ProjectEntity projectEntity : entities) {
+            ProjectFrozenDTO projectDTO = new ProjectFrozenDTO();
+            projectDTO.setId(projectEntity.getId());
+            projectDTO.setName(projectEntity.getName());
+            projectDTO.setReadOnly(projectEntity.getReadOnly());
+            projectDTO.setMaxDepth(curvesService.getDeptMax(projectEntity.getId()));
+            projectDTOS.add(projectDTO);
+        }
+        return projectDTOS;
     }
 
     public List<ProjectDTO> getListProjectDTObyListProjectEntity(List<ProjectEntity> entities) {

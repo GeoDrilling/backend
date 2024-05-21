@@ -50,10 +50,10 @@ public class ProjectController {
         return ResponseEntity.ok(projects);
     }
 
-    @GetMapping("/userAll/frozen")
-    public ResponseEntity<List<ProjectDTO>> getProjectsFrozenByUser() {
+    @GetMapping("/userAll/frozen/{projectId}")
+    public ResponseEntity<List<ProjectFrozenDTO>> getProjectsFrozenByUser(@PathVariable Long projectId) {
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        List<ProjectDTO> projects = projectService.getProjectsFrozenByUserId(modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail());
+        List<ProjectFrozenDTO> projects = projectService.getProjectsFrozenByUserId(modelMapper.map(( (UserDetails) token.getPrincipal()), UserDTO.class).getEmail(), projectId);
         return ResponseEntity.ok(projects);
     }
 
