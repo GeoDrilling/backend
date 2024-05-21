@@ -293,7 +293,9 @@ public class FileService {
             );
             newProject.getCurves().add(new CurveEntity(null, newProject, c.getName(), gson.toJson(data), "synthetic/", true));
         }
-//        newProject.getState().getTabletProperties().getProperties().addAll(project.getState().getTabletProperties().getProperties());
+        newProject.getState().setTabletProperties(project.getState().getTabletProperties());
+        newProject.getState().setModelCurveProperties(project.getState().getModelCurveProperties());
+        newProject.getState().setDepthTrackProperties(project.getState().getDepthTrackProperties());
         newProject.getState().setTrackProperties(new ArrayList<>());
         newProject.getState().getTrackProperties().addAll(
                 project.getState().getTrackProperties().stream()
