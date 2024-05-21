@@ -87,7 +87,7 @@ public class ProjectService {
         projectStateRepository.save(state);
         return new ProjectStateDTO(projectEntity.getId(), tabletProperties,
                 depthTrackProperties, modelCurveProps,
-                state.getTrackProperties(), Collections.emptyList(), null);
+                state.getTrackProperties(), Collections.emptyList(), null, false);
     }
 
     public ModelCurveGroupProperties createModelCurveProps() {
@@ -179,7 +179,7 @@ public class ProjectService {
                 project.getState().getModelCurveProperties(),
                 project.getState().getTrackProperties(),
                 curvesService.getCurvesNames(projectId).getCurvesNames(),
-                modelDTOList);
+                modelDTOList, project.getReadOnly());
     }
 
     public ProjectDTO getProjectById(Long id) {

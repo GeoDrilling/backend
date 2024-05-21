@@ -308,7 +308,10 @@ public class FileService {
         );
         List<String> names = curvesService.getCurvesNames(newProject.getId()).getCurvesNames();
         for (TrackProperty trackProperty : newProject.getState().getTrackProperties()){
-            trackProperty.setProperties(trackProperty.getProperties().stream().filter( c -> names.contains( c.getName())).collect(Collectors.toList()));
+            if(trackProperty.getCurves().isEmpty()){
+                continue;
+            }
+            trackProperty.setCurves(trackProperty.getCurves().stream().filter( c -> names.contains( c.getName())).collect(Collectors.toList()));
         }
         newProject.getState().setTrackProperties(newProject.getState().getTrackProperties().stream().filter(c -> ! c.getCurves().isEmpty()).collect(Collectors.toList()));
         projectRepository.save(newProject);

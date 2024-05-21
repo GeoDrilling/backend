@@ -22,4 +22,5 @@ public class ProjectStateDTO {
     private List<TrackProperty> trackProperties;
     private List<String> curvesNames;
     private List<ModelDTO> modelDTOList;
+    private Boolean readOnly;
 }
