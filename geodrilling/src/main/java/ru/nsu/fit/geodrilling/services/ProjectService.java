@@ -95,7 +95,6 @@ public class ProjectService {
         NumberProperty height = new NumberProperty("Высота", 400.0);
         NumberProperty min = new NumberProperty();
         min.setName(MIN);
-        //TODO при построении модели указывать границы TVD
         min.setValue(2292.0);
         NumberProperty max = new NumberProperty();
         max.setName(MAX);
@@ -145,10 +144,10 @@ public class ProjectService {
         gridStyle.setName("Свойства вертикальной сетки");
         NumberProperty interval = new NumberProperty("Шаг основных линий", 40.0);
         NumberProperty secondaryLines = new NumberProperty("Число вторичных линий", 12.0);
-        NumberProperty secondaryThickness = new NumberProperty("Толщина основных линий", 1.0);
+        NumberProperty secondaryThickness = new NumberProperty("Толщина вторичных линий", 1.0);
         NumberProperty thicknessMain = new NumberProperty("Толщина основных сетки", 2.5);
         ColorProperty colorMain = new ColorProperty("Цвет основных линий", "#DEDEDE");
-        ColorProperty colorSecondary = new ColorProperty("Цвет основных линий", "#DEDEDE");
+        ColorProperty colorSecondary = new ColorProperty("Цвет вторичных линий", "#DEDEDE");
         gridStyle.setProperties(List.of(interval, thicknessMain, colorMain, secondaryLines, secondaryThickness, colorSecondary));
 
         tabletProperties.setProperties(List.of(mainProperties, gridStyle));

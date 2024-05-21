@@ -260,7 +260,7 @@ public class FileService {
         CurveEntity deptNew = curveRepository.findByNameAndProjectAndIsSynthetic("DEPT", newProject, false).get();
         List<CurveEntity> curveS = curveRepository.findAllByProjectAndIsSynthetic(project, true);
         TypeToken<List<Double>> floatListTypeToken = new TypeToken<>(){};
-        System.out.println();
+
         for(CurveEntity c : curveS){
             /*System.out.println(CurveDataDownloadResponse.builder()
                     .curveData(gson.fromJson(dept
