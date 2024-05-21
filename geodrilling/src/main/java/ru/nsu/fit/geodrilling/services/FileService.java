@@ -8,6 +8,7 @@ import grillid9.laslib.LasReader;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.tomcat.util.http.fileupload.impl.InvalidContentTypeException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +19,7 @@ import ru.nsu.fit.geodrilling.dto.curves.SaveCurveDataResponse;
 import ru.nsu.fit.geodrilling.entity.CurveEntity;
 import ru.nsu.fit.geodrilling.entity.ModelEntity;
 import ru.nsu.fit.geodrilling.entity.ProjectEntity;
+import ru.nsu.fit.geodrilling.entity.projectstate.TrackProperty;
 import ru.nsu.fit.geodrilling.repositories.CurveRepository;
 import ru.nsu.fit.geodrilling.repositories.ProjectRepository;
 
@@ -289,7 +291,22 @@ public class FileService {
             );
             newProject.getCurves().add(new CurveEntity(null, newProject, c.getName(), gson.toJson(data), "synthetic/", true));
         }
-
+//        newProject.getState().getTabletProperties().getProperties().addAll(project.getState().getTabletProperties().getProperties());
+        newProject.getState().getTrackProperties().addAll(
+                project.getState().getTrackProperties().stream()
+                        .map(c -> {
+                            TrackProperty copy = new TrackProperty();
+                            copy.setProperties(new ArrayList<>(c.getProperties()));
+                            copy.setCurves(new ArrayList<>(c.getCurves()));  // Создаем новую копию списка кривых
+                            return copy;  // Возвращаем копию объекта TrackProperty
+                        })
+                        .collect(Collectors.toList())
+        );
+        List<String> names = curvesService.getCurvesNames(newProject.getId()).getCurvesNames();
+        for (TrackProperty trackProperty : newProject.getState().getTrackProperties()){
+            trackProperty.setProperties(trackProperty.getProperties().stream().filter( c -> names.contains( c.getName())).collect(Collectors.toList()));
+        }
+        newProject.getState().setTrackProperties(newProject.getState().getTrackProperties().stream().filter(c -> ! c.getCurves().isEmpty()).collect(Collectors.toList()));
         projectRepository.save(newProject);
         return projectService.getProjectState(newProject.getId());
     }

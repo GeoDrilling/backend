@@ -310,6 +310,19 @@ public class SootService {
       sootEntity.setZeni("zeni");
       sootEntity.setZenip(2);
     }
+
+    if (curves.contains("tvd") && sootEntity.getTvdp() != 1) {
+      sootEntity.setTvd("tvd");
+      sootEntity.setTvdp(2);
+    }
+    if (curves.contains("x") && sootEntity.getXp() != 1) {
+      sootEntity.setX("x");
+      sootEntity.setXp(2);
+    }
+    if (curves.contains("ZENI") && sootEntity.getZenip() != 1) {
+      sootEntity.setZeni("ZENI");
+      sootEntity.setZenip(2);
+    }
     sootRepository.save(sootEntity);
   }
 
