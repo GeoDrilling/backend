@@ -300,11 +300,10 @@ public class FileService {
         newProject.getState().getTrackProperties().addAll(
                 project.getState().getTrackProperties().stream()
                         .map(c -> {
-
                             TrackProperty copy = new TrackProperty();
                             copy.setProperties(new ArrayList<>(c.getProperties()));
-                            copy.setCurves(new ArrayList<>(c.getCurves()));  // Создаем новую копию списка кривых
-                            return copy;  // Возвращаем копию объекта TrackProperty
+                            copy.setCurves(new ArrayList<>(c.getCurves()));
+                            return copy;
                         })
                         .collect(Collectors.toList())
         );
