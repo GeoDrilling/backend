@@ -313,7 +313,7 @@ public class FileService {
         newProject.getState().setTrackProperties(newProject.getState().getTrackProperties().stream().filter(c -> ! c.getCurves().isEmpty()).collect(Collectors.toList()));
         projectRepository.save(newProject);
 
-        sootService.sootOffer(new SaveCurveDataResponse(names), projectId);
+        sootService.sootOffer(new SaveCurveDataResponse(names), newProject.getId());
         return projectService.getProjectState(newProject.getId());
     }
 
